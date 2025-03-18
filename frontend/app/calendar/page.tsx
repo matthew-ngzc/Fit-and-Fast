@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar } from "@/components/ui/calendar"
@@ -17,30 +17,62 @@ import {
 } from "@/components/ui/dialog"
 import { EditIcon } from "lucide-react"
 import { CycleInfo } from "@/components/cycle-info"
+import { fetchData } from "@/lib/data-module"
+
+// Default cycle data to use as fallback
+const defaultCycleData = {
+  periodStart: new Date("2025-03-05"),
+  periodEnd: new Date("2025-03-10"),
+  nextPeriodStart: new Date("2025-04-02"),
+  cycleLength: 28,
+  periodLength: 5,
+}
 
 export default function CalendarPage() {
   const [date, setDate] = useState<Date | undefined>(new Date())
+  const [cycleData, setCycleData] = useState<any>(defaultCycleData)
+  const [streakDays, setStreakDays] = useState<Date[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Example cycle data - in a real app this would come from a database
-  const cycleData = {
-    periodStart: new Date(2025, 2, 5),
-    periodEnd: new Date(2025, 2, 10),
-    nextPeriodStart: new Date(2025, 3, 2),
-    cycleLength: 28,
-    periodLength: 5,
-  }
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await fetchData()
 
-  // Example streak data - in a real app this would come from a database
-  const streakDays = [
-    new Date(2025, 2, 1),
-    new Date(2025, 2, 2),
-    new Date(2025, 2, 3),
-    new Date(2025, 2, 4),
-    new Date(2025, 2, 5),
-  ]
+        // Parse date strings into Date objects if cycleData exists
+        if (data.cycleData) {
+          const parsedCycleData = {
+            ...data.cycleData,
+            periodStart: new Date(data.cycleData.periodStart),
+            periodEnd: new Date(data.cycleData.periodEnd),
+            nextPeriodStart: new Date(data.cycleData.nextPeriodStart),
+          }
+          setCycleData(parsedCycleData)
+        } else {
+          // Use default if cycleData is missing
+          setCycleData(defaultCycleData)
+        }
+
+        // Parse streak days if they exist
+        if (data.streakDays && Array.isArray(data.streakDays)) {
+          const parsedStreakDays = data.streakDays.map((dateStr: string) => new Date(dateStr))
+          setStreakDays(parsedStreakDays)
+        }
+      } catch (error) {
+        console.error("Failed to load calendar data:", error)
+        // Use defaults on error
+        setCycleData(defaultCycleData)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
 
   // Function to determine if a date is in the period
   const isInPeriod = (date: Date) => {
+    if (!cycleData) return false
     const d = new Date(date)
     return d >= cycleData.periodStart && d <= cycleData.periodEnd
   }
@@ -52,6 +84,14 @@ export default function CalendarPage() {
         streakDay.getDate() === date.getDate() &&
         streakDay.getMonth() === date.getMonth() &&
         streakDay.getFullYear() === date.getFullYear(),
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="container px-4 py-6 md:py-10 pb-20 max-w-5xl mx-auto flex items-center justify-center min-h-[50vh]">
+        <p>Loading calendar data...</p>
+      </div>
     )
   }
 
@@ -77,17 +117,21 @@ export default function CalendarPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="cycle-length">Cycle Length</Label>
-                      <Input id="cycle-length" defaultValue="28" />
+                      <Input id="cycle-length" defaultValue={cycleData.cycleLength.toString()} />
                     </div>
                     <div className="grid gap-2">
                       <Label htmlFor="period-length">Period Length</Label>
-                      <Input id="period-length" defaultValue="5" />
+                      <Input id="period-length" defaultValue={cycleData.periodLength.toString()} />
                     </div>
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="last-period">Last Period Start Date</Label>
                     <div className="flex gap-2">
-                      <Input id="last-period" defaultValue="2025-03-05" type="date" />
+                      <Input
+                        id="last-period"
+                        defaultValue={cycleData.periodStart.toISOString().split("T")[0]}
+                        type="date"
+                      />
                     </div>
                   </div>
                 </div>
@@ -133,7 +177,7 @@ export default function CalendarPage() {
             </Card>
 
             <div className="space-y-6">
-              <CycleInfo cycleData={cycleData} />
+              {cycleData && <CycleInfo cycleData={cycleData} />}
 
               <Card>
                 <CardHeader>

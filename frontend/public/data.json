@@ -1,0 +1,669 @@
+{
+  "user": {
+    "name": "Sarah Anderson",
+    "email": "sarah@example.com",
+    "height": "165",
+    "weight": "58",
+    "birthdate": "1990-05-15",
+    "goal": "Stay fit",
+    "workoutsPerWeek": "5 days",
+    "streak": 5,
+    "todayCalories": 120,
+    "todayMinutes": 7,
+    "cyclePhase": "Good"
+  },
+  "recommendations": {
+    "title": "Low-Impact Energy Boost",
+    "description": "Perfect for day 15 of your cycle",
+    "icon": "heart"
+  },
+  "workoutCategories": [
+    {
+      "id": "yoga",
+      "name": "Yoga",
+      "icon": "yoga"
+    },
+    {
+      "id": "hiit",
+      "name": "HIIT",
+      "icon": "zap"
+    },
+    {
+      "id": "strength",
+      "name": "Strength",
+      "icon": "dumbbell"
+    },
+    {
+      "id": "pre-pregnancy",
+      "name": "Pre-Preg",
+      "icon": "heart"
+    },
+    {
+      "id": "post-pregnancy",
+      "name": "Post-Preg",
+      "icon": "baby"
+    },
+    {
+      "id": "others",
+      "name": "Others",
+      "icon": "sparkles"
+    }
+  ],
+  "workouts": {
+    "yoga": [
+      {
+        "id": "morning-yoga",
+        "title": "Morning Yoga Flow",
+        "duration": "7 min",
+        "level": "Beginner",
+        "calories": "70",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "A gentle yoga flow to start your day with energy and focus",
+        "category": "Yoga",
+        "exercises": [
+          {
+            "name": "Sun Salutation",
+            "description": "A flowing sequence of movements coordinated with breath",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Move with your breath, inhale on upward movements, exhale on downward movements."
+          },
+          {
+            "name": "Warrior I",
+            "description": "A standing pose that strengthens the legs and opens the hips and chest",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your front knee aligned with your ankle, not beyond your toes."
+          },
+          {
+            "name": "Downward Dog",
+            "description": "An inversion pose that stretches the hamstrings and strengthens the arms",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Press your heels toward the floor and lift your hips high."
+          },
+          {
+            "name": "Child's Pose",
+            "description": "A resting pose that gently stretches the lower back and hips",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Breathe deeply and relax your shoulders away from your ears."
+          }
+        ]
+      },
+      {
+        "id": "relaxing-stretch",
+        "title": "Relaxing Stretch",
+        "duration": "7 min",
+        "level": "All Levels",
+        "calories": "60",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "A gentle stretching routine to release tension and improve flexibility",
+        "category": "Yoga",
+        "exercises": [
+          {
+            "name": "Seated Forward Bend",
+            "description": "A seated pose that stretches the hamstrings and lower back",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Bend from the hips, not the waist, and keep your spine long."
+          },
+          {
+            "name": "Butterfly Stretch",
+            "description": "A seated pose that opens the hips and stretches the inner thighs",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Gently press your knees down with your elbows, but don't force them."
+          },
+          {
+            "name": "Supine Twist",
+            "description": "A lying pose that twists the spine and releases tension",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep both shoulders on the ground as you twist."
+          },
+          {
+            "name": "Corpse Pose",
+            "description": "A relaxation pose that calms the mind and body",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Let your body be heavy and completely relax into the floor."
+          }
+        ]
+      }
+    ],
+    "hiit": [
+      {
+        "id": "quick-burn",
+        "title": "Quick Burn HIIT",
+        "duration": "7 min",
+        "level": "Intermediate",
+        "calories": "120",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "A high-intensity interval training workout to maximize calorie burn",
+        "category": "HIIT",
+        "exercises": [
+          {
+            "name": "Jumping Jacks",
+            "description": "Stand with your feet together and arms at your sides, then jump up with your feet apart and hands overhead.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your knees slightly bent to reduce impact."
+          },
+          {
+            "name": "Mountain Climbers",
+            "description": "Start in a plank position and alternate bringing each knee toward your chest in a running motion.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your hips level and move at a controlled pace."
+          },
+          {
+            "name": "Burpees",
+            "description": "Begin in a standing position, drop into a squat, kick your feet back into a plank, return to squat, and jump up.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Modify by stepping back instead of jumping if needed."
+          },
+          {
+            "name": "High Knees",
+            "description": "Run in place, lifting your knees as high as possible with each step.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Engage your core and pump your arms for added intensity."
+          }
+        ]
+      },
+      {
+        "id": "tabata",
+        "title": "Tabata Challenge",
+        "duration": "7 min",
+        "level": "Advanced",
+        "calories": "130",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "A Tabata-style workout with intense intervals for maximum results",
+        "category": "HIIT",
+        "exercises": [
+          {
+            "name": "Squat Jumps",
+            "description": "Perform a squat, then explosively jump up, landing softly back into the squat position.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Land with soft knees to protect your joints."
+          },
+          {
+            "name": "Push-up Jacks",
+            "description": "Perform a push-up, then jump your feet out and in like a jumping jack.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Modify on your knees if needed, but still perform the jack motion with your feet."
+          },
+          {
+            "name": "Plank Shoulder Taps",
+            "description": "In a plank position, alternately tap each shoulder with the opposite hand.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your hips stable and avoid rocking from side to side."
+          },
+          {
+            "name": "Speed Skaters",
+            "description": "Jump laterally from one foot to the other, mimicking a speed skating motion.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Reach your hand toward the opposite foot for added balance and stretch."
+          }
+        ]
+      }
+    ],
+    "strength": [
+      {
+        "id": "core-strength",
+        "title": "Core Strength",
+        "duration": "7 min",
+        "level": "Beginner",
+        "calories": "90",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "A focused workout to strengthen your core muscles",
+        "category": "Strength",
+        "exercises": [
+          {
+            "name": "Crunches",
+            "description": "Lie on your back with knees bent, hands behind your head, and lift your shoulders off the ground.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Focus on the contraction of your abs, not pulling on your neck."
+          },
+          {
+            "name": "Plank",
+            "description": "Hold a push-up position with your body in a straight line from head to heels.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Engage your core and keep your hips from sagging."
+          },
+          {
+            "name": "Russian Twists",
+            "description": "Sit with knees bent, feet lifted, and twist your torso from side to side.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your back straight and twist from your waist."
+          },
+          {
+            "name": "Leg Raises",
+            "description": "Lie on your back and lift your legs up and down without touching the floor.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Press your lower back into the floor to protect your spine."
+          }
+        ]
+      },
+      {
+        "id": "full-body",
+        "title": "Full Body Tone",
+        "duration": "7 min",
+        "level": "Intermediate",
+        "calories": "100",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "A comprehensive workout targeting all major muscle groups",
+        "category": "Strength",
+        "exercises": [
+          {
+            "name": "Squats",
+            "description": "Stand with feet shoulder-width apart, lower your body by bending your knees and pushing your hips back, then return to standing.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your weight in your heels and chest up."
+          },
+          {
+            "name": "Push-ups",
+            "description": "Start in a plank position with hands shoulder-width apart, lower your body until your chest nearly touches the floor, then push back up.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Modify by doing push-ups on your knees if needed."
+          },
+          {
+            "name": "Lunges",
+            "description": "Step forward with one leg, lowering your hips until both knees are bent at about a 90-degree angle.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your front knee aligned with your ankle, not beyond your toes."
+          },
+          {
+            "name": "Dumbbell Rows",
+            "description": "Bend at the waist with a flat back, holding a weight in one hand, and pull it up toward your hip.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your back flat and pull your elbow straight back."
+          }
+        ]
+      }
+    ],
+    "pre-pregnancy": [
+      {
+        "id": "pelvic-floor",
+        "title": "Pelvic Floor Strength",
+        "duration": "7 min",
+        "level": "All Levels",
+        "calories": "70",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "Exercises to strengthen your pelvic floor muscles",
+        "category": "Pre-Pregnancy",
+        "exercises": [
+          {
+            "name": "Kegels",
+            "description": "Contract your pelvic floor muscles, hold, and release.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Imagine stopping the flow of urine to identify the correct muscles."
+          },
+          {
+            "name": "Bridge",
+            "description": "Lie on your back with knees bent, lift your hips off the ground, and hold.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Squeeze your glutes at the top of the movement."
+          },
+          {
+            "name": "Squats",
+            "description": "Stand with feet shoulder-width apart, lower your body by bending your knees and pushing your hips back, then return to standing.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Focus on engaging your pelvic floor as you rise."
+          },
+          {
+            "name": "Bird Dog",
+            "description": "On hands and knees, extend opposite arm and leg while maintaining a stable core.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your back flat and hips level throughout the movement."
+          }
+        ]
+      },
+      {
+        "id": "gentle-cardio",
+        "title": "Gentle Cardio",
+        "duration": "7 min",
+        "level": "Beginner",
+        "calories": "80",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "Low-impact cardio exercises safe for pre-pregnancy",
+        "category": "Pre-Pregnancy",
+        "exercises": [
+          {
+            "name": "Marching in Place",
+            "description": "Lift your knees up and down while staying in place.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Maintain good posture and engage your core."
+          },
+          {
+            "name": "Side Steps",
+            "description": "Step side to side, tapping your toe between steps.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep a slight bend in your knees throughout."
+          },
+          {
+            "name": "Modified Jumping Jacks",
+            "description": "Step one foot out at a time while raising arms, instead of jumping.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Focus on the arm movement to increase heart rate."
+          },
+          {
+            "name": "Arm Circles",
+            "description": "Extend arms to the sides and make small, then large circles.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your shoulders relaxed away from your ears."
+          }
+        ]
+      }
+    ],
+    "post-pregnancy": [
+      {
+        "id": "postpartum-recovery",
+        "title": "Postpartum Recovery",
+        "duration": "7 min",
+        "level": "Beginner",
+        "calories": "60",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "Gentle exercises to help recover after pregnancy",
+        "category": "Post-Pregnancy",
+        "exercises": [
+          {
+            "name": "Pelvic Tilts",
+            "description": "Lie on your back with knees bent, tilt your pelvis to flatten your lower back against the floor.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Focus on engaging your deep abdominal muscles."
+          },
+          {
+            "name": "Heel Slides",
+            "description": "Lie on your back with knees bent, slide one heel away from you until leg is straight, then return.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your pelvis stable throughout the movement."
+          },
+          {
+            "name": "Modified Side Plank",
+            "description": "Lie on your side with knees bent, prop up on your elbow, and lift your hips.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Start with short holds and gradually increase duration."
+          },
+          {
+            "name": "Seated Twist",
+            "description": "Sit with legs crossed, place hands on knees, and gently twist from the waist.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Breathe deeply as you twist, exhaling into the rotation."
+          }
+        ]
+      },
+      {
+        "id": "mommy-baby",
+        "title": "Mommy & Baby",
+        "duration": "7 min",
+        "level": "All Levels",
+        "calories": "70",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "Exercises you can do with your baby",
+        "category": "Post-Pregnancy",
+        "exercises": [
+          {
+            "name": "Baby Lift",
+            "description": "Hold baby securely and lift them up and down like a weight.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your back straight and use your legs to support the movement."
+          },
+          {
+            "name": "Stroller Lunges",
+            "description": "Hold onto a stroller for support and perform lunges.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Ensure the stroller is locked or stable before beginning."
+          },
+          {
+            "name": "Baby-Weighted Squats",
+            "description": "Hold baby close to your chest and perform gentle squats.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Keep your weight in your heels and back straight."
+          },
+          {
+            "name": "Plank with Baby",
+            "description": "Get into a plank position with baby lying underneath you, making eye contact.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Sing or talk to baby to keep them engaged during the exercise."
+          }
+        ]
+      }
+    ],
+    "others": [
+      {
+        "id": "stress-relief",
+        "title": "Stress Relief",
+        "duration": "7 min",
+        "level": "All Levels",
+        "calories": "80",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "Exercises designed to reduce stress and promote relaxation",
+        "category": "Others",
+        "exercises": [
+          {
+            "name": "Deep Breathing",
+            "description": "Sit comfortably and take slow, deep breaths, focusing on your breath.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Inhale through your nose for 4 counts, hold for 2, exhale for 6."
+          },
+          {
+            "name": "Neck Rolls",
+            "description": "Gently roll your head in a circular motion to release tension.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Move slowly and stop if you feel any pain."
+          },
+          {
+            "name": "Child's Pose",
+            "description": "Kneel and sit back on your heels, extending arms forward and resting your forehead on the mat.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Breathe deeply and feel the stretch in your back."
+          },
+          {
+            "name": "Seated Forward Bend",
+            "description": "Sit with legs extended, hinge at the hips, and reach toward your feet.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Focus on lengthening your spine rather than touching your toes."
+          }
+        ]
+      },
+      {
+        "id": "office-break",
+        "title": "Office Break",
+        "duration": "7 min",
+        "level": "Beginner",
+        "calories": "70",
+        "image": "/placeholder.svg?height=200&width=400",
+        "description": "Quick exercises you can do at your desk or in an office",
+        "category": "Others",
+        "exercises": [
+          {
+            "name": "Seated Twist",
+            "description": "Sit tall in your chair, place one hand on the opposite knee, and twist gently.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Initiate the twist from your core, not your shoulders."
+          },
+          {
+            "name": "Desk Push-ups",
+            "description": "Place hands on the edge of your desk and perform push-ups at an angle.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Ensure your desk is stable before beginning."
+          },
+          {
+            "name": "Chair Squats",
+            "description": "Stand up from your chair and sit back down without fully resting.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Use a chair with no wheels and keep your weight in your heels."
+          },
+          {
+            "name": "Seated Leg Raises",
+            "description": "While seated, extend one leg until straight, hold, then lower.",
+            "duration": 40,
+            "rest": 20,
+            "image": "/placeholder.svg?height=200&width=300",
+            "tips": "Engage your core to support your lower back."
+          }
+        ]
+      }
+    ]
+  },
+  "activities": [
+    {
+      "id": 1,
+      "title": "Core Strength",
+      "date": "Today, 9:30 AM",
+      "duration": "7 min",
+      "calories": 90,
+      "type": "Strength"
+    },
+    {
+      "id": 2,
+      "title": "Full Body Tone",
+      "date": "Yesterday, 6:15 PM",
+      "duration": "7 min",
+      "calories": 120,
+      "type": "Cardio"
+    },
+    {
+      "id": 3,
+      "title": "Low Impact Cardio",
+      "date": "Mar 13, 8:00 AM",
+      "duration": "7 min",
+      "calories": 100,
+      "type": "Cardio"
+    },
+    {
+      "id": 4,
+      "title": "Stress Relief",
+      "date": "Mar 12, 7:45 PM",
+      "duration": "7 min",
+      "calories": 80,
+      "type": "Flexibility"
+    }
+  ],
+  "weeklyProgress": [
+    { "name": "Mon", "calories": 120 },
+    { "name": "Tue", "calories": 150 },
+    { "name": "Wed", "calories": 0 },
+    { "name": "Thu", "calories": 180 },
+    { "name": "Fri", "calories": 200 },
+    { "name": "Sat", "calories": 90 },
+    { "name": "Sun", "calories": 120 }
+  ],
+  "cycleData": {
+    "periodStart": "2025-03-05",
+    "periodEnd": "2025-03-10",
+    "nextPeriodStart": "2025-04-02",
+    "cycleLength": 28,
+    "periodLength": 5
+  },
+  "streakDays": ["2025-03-01", "2025-03-02", "2025-03-03", "2025-03-04", "2025-03-05"],
+  "achievements": [
+    {
+      "id": 1,
+      "title": "5-Day Streak",
+      "description": "Completed workouts 5 days in a row",
+      "icon": "trophy",
+      "completed": true
+    },
+    {
+      "id": 2,
+      "title": "First Milestone",
+      "description": "Completed 10 workouts",
+      "icon": "trophy",
+      "completed": true
+    },
+    {
+      "id": 3,
+      "title": "30-Day Streak",
+      "description": "Complete workouts for 30 days",
+      "icon": "trophy",
+      "completed": false
+    }
+  ]
+}
+

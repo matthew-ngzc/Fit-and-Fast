@@ -1,47 +1,37 @@
+"use client"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { CalendarIcon, ClockIcon, FlameIcon } from "lucide-react"
+import { useEffect, useState } from "react"
+import { fetchData } from "@/lib/data-module"
 
 export function ActivityLog() {
-  // Sample data - in a real app, this would come from an API or database
-  const activities = [
-    {
-      id: 1,
-      title: "Core Strength",
-      date: "Today, 9:30 AM",
-      duration: "7 min",
-      calories: 90,
-      type: "Strength",
-    },
-    {
-      id: 2,
-      title: "Full Body Tone",
-      date: "Yesterday, 6:15 PM",
-      duration: "7 min",
-      calories: 120,
-      type: "Cardio",
-    },
-    {
-      id: 3,
-      title: "Low Impact Cardio",
-      date: "Mar 13, 8:00 AM",
-      duration: "7 min",
-      calories: 100,
-      type: "Cardio",
-    },
-    {
-      id: 4,
-      title: "Stress Relief",
-      date: "Mar 12, 7:45 PM",
-      duration: "7 min",
-      calories: 80,
-      type: "Flexibility",
-    },
-  ]
+  const [activities, setActivities] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const data = await fetchData()
+        setActivities(data.activities)
+      } catch (error) {
+        console.error("Failed to load activities:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
+
+  if (loading) {
+    return <div className="py-4 text-center">Loading activities...</div>
+  }
 
   return (
     <div className="space-y-4">
-      {activities.map((activity) => (
+      {activities.map((activity: any) => (
         <div key={activity.id} className="flex items-start gap-4 p-4 border rounded-lg">
           <Avatar className="h-10 w-10">
             <AvatarImage src="/placeholder.svg?height=40&width=40" alt={activity.title} />

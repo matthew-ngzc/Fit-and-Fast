@@ -1,18 +1,31 @@
 "use client"
 
 import { Line, LineChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "@/components/ui/chart"
+import { useEffect, useState } from "react"
+import { fetchData } from "@/lib/data-module"
 
 export function ActivityLineChart() {
-  // Sample data - in a real app, this would come from an API or database
-  const data = [
-    { name: "Mon", calories: 120 },
-    { name: "Tue", calories: 150 },
-    { name: "Wed", calories: 0 },
-    { name: "Thu", calories: 180 },
-    { name: "Fri", calories: 200 },
-    { name: "Sat", calories: 90 },
-    { name: "Sun", calories: 120 },
-  ]
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const jsonData = await fetchData()
+        setData(jsonData.weeklyProgress)
+      } catch (error) {
+        console.error("Failed to load activity data:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
+
+  if (loading) {
+    return <div className="h-[300px] flex items-center justify-center">Loading data...</div>
+  }
 
   return (
     <div className="w-full h-[300px]">

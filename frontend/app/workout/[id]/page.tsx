@@ -1,15 +1,26 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Clock, Flame, Play, Pause, SkipForward, Heart, Award } from "lucide-react"
+import { ArrowLeft, Clock, Flame, Play, Pause, SkipForward, Heart, Award, XIcon } from "lucide-react"
 import { WorkoutCompletionScreen } from "@/components/workout-completion-screen"
 import { AIChatButton } from "@/components/ai-chat-button"
+import { fetchData } from "@/lib/data-module"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function WorkoutPage({ params }: { params: { id: string } }) {
   const [workoutState, setWorkoutState] = useState<"pre" | "active" | "completed">("pre")
@@ -17,64 +28,71 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [timeLeft, setTimeLeft] = useState(40) // Starting with exercise time
   const [isRest, setIsRest] = useState(false)
+  const [workout, setWorkout] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [showExitDialog, setShowExitDialog] = useState(false)
 
-  // Sample workout data - in a real app this would come from an API or database
-  const workout = {
-    id: params.id,
-    title: "Morning Energy Boost",
-    description: "A quick 7-minute workout to energize your morning",
-    level: "Beginner",
-    duration: "7 min",
-    calories: "90",
-    category: "HIIT",
-    image: "/placeholder.svg?height=300&width=600",
-    exercises: [
-      {
-        name: "Jumping Jacks",
-        description:
-          "Stand with your feet together and arms at your sides, then jump up with your feet apart and hands overhead.",
-        duration: 40,
-        rest: 20,
-        image: "/placeholder.svg?height=200&width=300",
-        tips: "Keep your knees slightly bent to reduce impact.",
-      },
-      {
-        name: "Push-ups",
-        description:
-          "Start in a plank position with hands shoulder-width apart, lower your body until your chest nearly touches the floor, then push back up.",
-        duration: 40,
-        rest: 20,
-        image: "/placeholder.svg?height=200&width=300",
-        tips: "Modify by doing push-ups on your knees if needed.",
-      },
-      {
-        name: "Squats",
-        description:
-          "Stand with feet shoulder-width apart, lower your body by bending your knees and pushing your hips back, then return to standing.",
-        duration: 40,
-        rest: 20,
-        image: "/placeholder.svg?height=200&width=300",
-        tips: "Keep your weight in your heels and chest up.",
-      },
-      {
-        name: "Plank",
-        description: "Hold a push-up position with your body in a straight line from head to heels.",
-        duration: 40,
-        rest: 20,
-        image: "/placeholder.svg?height=200&width=300",
-        tips: "Engage your core and keep your hips from sagging.",
-      },
-      {
-        name: "Mountain Climbers",
-        description:
-          "Start in a plank position and alternate bringing each knee toward your chest in a running motion.",
-        duration: 40,
-        rest: 20,
-        image: "/placeholder.svg?height=200&width=300",
-        tips: "Keep your hips level and move at a controlled pace.",
-      },
-    ],
-  }
+  useEffect(() => {
+    async function loadWorkout() {
+      try {
+        const data = await fetchData()
+
+        // Find the workout in all categories
+        let foundWorkout = null
+        for (const category in data.workouts) {
+          const found = data.workouts[category].find((w: any) => w.id === params.id)
+          if (found) {
+            foundWorkout = found
+            break
+          }
+        }
+
+        setWorkout(foundWorkout)
+      } catch (error) {
+        console.error("Failed to load workout:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadWorkout()
+  }, [params.id])
+
+  // Timer effect for workout
+  useEffect(() => {
+    if (!isPlaying || !workout) return
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          // Time's up, switch between exercise and rest
+          if (isRest) {
+            // Rest is over, move to next exercise
+            const nextExerciseIndex = currentExercise + 1
+            setCurrentExercise(nextExerciseIndex)
+            setIsRest(false)
+            return 40 // Exercise duration
+          } else {
+            // Exercise is over
+            // Check if this is the last exercise
+            if (currentExercise >= workout.exercises.length - 1) {
+              // Last exercise completed, end workout
+              clearInterval(timer)
+              setWorkoutState("completed")
+              return 0
+            } else {
+              // Not the last exercise, start rest period
+              setIsRest(true)
+              return 20 // Rest duration
+            }
+          }
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [isPlaying, isRest, currentExercise, workout])
 
   const startWorkout = () => {
     setWorkoutState("active")
@@ -86,19 +104,72 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
   }
 
   const skipExercise = () => {
-    if (currentExercise < workout.exercises.length - 1) {
-      setCurrentExercise(currentExercise + 1)
-      setTimeLeft(40)
+    if (!workout) return
+
+    if (isRest) {
+      // If in rest, skip to the next exercise
+      const nextExerciseIndex = currentExercise + 1
+      setCurrentExercise(nextExerciseIndex)
       setIsRest(false)
-    } else if (!isRest) {
+      setTimeLeft(40)
+    } else if (currentExercise < workout.exercises.length - 1) {
+      // If not the last exercise, skip to rest
       setIsRest(true)
       setTimeLeft(20)
     } else {
+      // If last exercise, complete workout
       setWorkoutState("completed")
     }
   }
 
+  const exitWorkout = () => {
+    setShowExitDialog(true)
+  }
+
+  const confirmExit = () => {
+    setShowExitDialog(false)
+    setWorkoutState("pre")
+    setCurrentExercise(0)
+    setIsRest(false)
+    setTimeLeft(40)
+    setIsPlaying(false)
+  }
+
+  const cancelExit = () => {
+    setShowExitDialog(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="container px-4 py-6 md:py-10 max-w-5xl mx-auto flex items-center justify-center min-h-[50vh]">
+        <p>Loading workout...</p>
+      </div>
+    )
+  }
+
+  if (!workout) {
+    return (
+      <div className="container px-4 py-6 md:py-10 max-w-5xl mx-auto">
+        <div className="flex items-center gap-2">
+          <Link href="/" className="text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <h1 className="text-2xl font-bold">Workout Not Found</h1>
+        </div>
+        <p className="mt-4">Sorry, we couldn't find the workout you're looking for.</p>
+      </div>
+    )
+  }
+
+  // Get current exercise data
   const currentExerciseData = workout.exercises[currentExercise]
+
+  // Get next exercise data (for rest periods)
+  const nextExerciseIndex = currentExercise + 1
+  const nextExerciseData = nextExerciseIndex < workout.exercises.length ? workout.exercises[nextExerciseIndex] : null
+
+  // Determine which exercise to display
+  const displayExerciseData = isRest && nextExerciseData ? nextExerciseData : currentExerciseData
 
   return (
     <div className="container px-4 py-6 md:py-10 max-w-5xl mx-auto">
@@ -166,14 +237,17 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
               <CardDescription>This workout includes {workout.exercises.length} exercises</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {workout.exercises.map((exercise, index) => (
+              {workout.exercises.map((exercise: any, index: number) => (
                 <div key={index} className="flex items-center gap-4 p-3 border rounded-lg">
                   <div className="bg-muted rounded-md h-12 w-12 flex items-center justify-center text-lg font-bold">
                     {index + 1}
                   </div>
                   <div className="flex-1">
                     <h3 className="font-medium">{exercise.name}</h3>
-                    <p className="text-sm text-muted-foreground">40s exercise • 20s rest</p>
+                    <p className="text-sm text-muted-foreground">
+                      {exercise.duration}s exercise
+                      {index < workout.exercises.length - 1 ? ` • ${exercise.rest}s rest` : ""}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -196,7 +270,14 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
               <ArrowLeft className="h-5 w-5" />
             </Link>
             <h1 className="text-xl font-bold">{workout.title}</h1>
-            <div className="w-5"></div> {/* Empty div for spacing */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-destructive"
+              onClick={exitWorkout}
+            >
+              <XIcon className="h-5 w-5" />
+            </Button>
           </div>
 
           <Card className="border-none bg-pink-100">
@@ -214,8 +295,8 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
 
           <div className="relative rounded-lg overflow-hidden h-64 md:h-80">
             <Image
-              src={currentExerciseData.image || "/placeholder.svg"}
-              alt={currentExerciseData.name}
+              src={displayExerciseData.image || "/placeholder.svg"}
+              alt={displayExerciseData.name}
               fill
               className="object-cover"
             />
@@ -223,11 +304,18 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
 
           <Card>
             <CardHeader>
-              <CardTitle>{currentExerciseData.name}</CardTitle>
-              <CardDescription>{isRest ? "Take a short break" : currentExerciseData.description}</CardDescription>
+              <CardTitle>{isRest ? `Coming up: ${nextExerciseData.name}` : currentExerciseData.name}</CardTitle>
+              <CardDescription>
+                {isRest ? nextExerciseData.description : currentExerciseData.description}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              {!isRest && (
+              {isRest ? (
+                <div className="bg-muted p-3 rounded-lg">
+                  <p className="text-sm font-medium">Get ready for next exercise:</p>
+                  <p className="text-sm">{nextExerciseData.tips}</p>
+                </div>
+              ) : (
                 <div className="bg-muted p-3 rounded-lg">
                   <p className="text-sm font-medium">Tip:</p>
                   <p className="text-sm">{currentExerciseData.tips}</p>
@@ -255,6 +343,23 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
           onFinish={() => (window.location.href = "/")}
         />
       )}
+
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Exit Workout?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to exit this workout? Your progress will not be saved.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelExit}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmExit} className="bg-destructive text-destructive-foreground">
+              Exit Workout
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

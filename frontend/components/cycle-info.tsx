@@ -14,8 +14,28 @@ interface CycleInfoProps {
 }
 
 export function CycleInfo({ cycleData }: CycleInfoProps) {
+  // Ensure cycleData exists before proceeding
+  if (!cycleData) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Cycle Information</CardTitle>
+          <CardDescription>No cycle data available</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Please add your cycle information to see predictions and recommendations.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   // Format date to display in a readable format
   const formatDate = (date: Date) => {
+    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+      return "Unknown date"
+    }
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
   }
 
@@ -69,13 +89,13 @@ export function CycleInfo({ cycleData }: CycleInfoProps) {
             <CalendarIcon className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Cycle Length:</span>
           </div>
-          <div>{cycleData.cycleLength} days</div>
+          <div>{cycleData.cycleLength || "Unknown"} days</div>
 
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Period Length:</span>
           </div>
-          <div>{cycleData.periodLength} days</div>
+          <div>{cycleData.periodLength || "Unknown"} days</div>
         </div>
       </CardContent>
     </Card>

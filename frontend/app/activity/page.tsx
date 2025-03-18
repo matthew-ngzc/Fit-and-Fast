@@ -2,8 +2,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { FlameIcon, TimerIcon } from "lucide-react"
 import { ActivityLineChart } from "@/components/activity-line-chart"
 import { ActivityLog } from "@/components/activity-log"
+import { getData } from "@/lib/data-module"
 
-export default function ActivityPage() {
+export default async function ActivityPage() {
+  const data = await getData()
+  const { user } = data
+
   return (
     <div className="container px-4 py-6 md:py-10 pb-20 max-w-5xl mx-auto">
       <div className="flex flex-col gap-6">
@@ -18,7 +22,7 @@ export default function ActivityPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Today's Calories</p>
-                  <p className="text-2xl font-bold">120</p>
+                  <p className="text-2xl font-bold">{user.todayCalories}</p>
                 </div>
               </CardContent>
             </Card>
@@ -29,7 +33,7 @@ export default function ActivityPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Today's Minutes</p>
-                  <p className="text-2xl font-bold">7</p>
+                  <p className="text-2xl font-bold">{user.todayMinutes}</p>
                 </div>
               </CardContent>
             </Card>
