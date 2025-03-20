@@ -1,0 +1,23 @@
+# Maven
+/backend/target/
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.logs
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE specific files (optional but recommended)
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+
+# Logs
+logs/
+*.log
