@@ -1,0 +1,185 @@
+{
+    "workouts": {
+      "plank": {
+        "id": "plank",
+        "name": "Plank",
+        "description": "Hold a plank position to strengthen your core.",
+        "tip": "Keep your back straight and engage your core.",
+        "image": "/images/plank.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "squat": {
+        "id": "squat",
+        "name": "Squats",
+        "description": "A great lower-body exercise for strength and endurance.",
+        "tip": "Keep your knees aligned with your toes.",
+        "image": "/images/squat.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "push_up": {
+        "id": "push_up",
+        "name": "Push-ups",
+        "description": "Strengthen your chest, shoulders, and triceps.",
+        "tip": "Keep your body in a straight line and lower yourself with control.",
+        "image": "/images/push_up.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "jumping_jacks": {
+        "id": "jumping_jacks",
+        "name": "Jumping Jacks",
+        "description": "A full-body cardiovascular exercise.",
+        "tip": "Keep a steady pace and land softly on your feet.",
+        "image": "/images/jumping_jacks.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "burpee": {
+        "id": "burpee",
+        "name": "Burpees",
+        "description": "A full-body explosive movement for endurance and strength.",
+        "tip": "Engage your core and land softly to protect your knees.",
+        "image": "/animations/burpees.gif",
+        "duration": 40,
+        "rest": 20
+      },
+      "lunge": {
+        "id": "lunge",
+        "name": "Lunges",
+        "description": "Strengthen and tone your legs and glutes.",
+        "tip": "Keep your chest lifted and ensure your knee doesn’t pass your toes.",
+        "image": "/images/lunge.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "mountain_climber": {
+        "id": "mountain_climber",
+        "name": "Mountain Climbers",
+        "description": "A core and cardio movement for endurance.",
+        "tip": "Keep your back straight and engage your abs.",
+        "image": "/images/mountain_climber.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "high_knees": {
+        "id": "high_knees",
+        "name": "High Knees",
+        "description": "Improve agility and cardio fitness.",
+        "tip": "Lift your knees high and keep a fast pace.",
+        "image": "/images/high_knees.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "bicycle_crunch": {
+        "id": "bicycle_crunch",
+        "name": "Bicycle Crunches",
+        "description": "A great core workout to strengthen your abs.",
+        "tip": "Twist your torso and engage your obliques.",
+        "image": "/images/bicycle_crunch.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "downward_dog": {
+        "id": "downward_dog",
+        "name": "Downward Dog",
+        "description": "An inversion pose that stretches the hamstrings and strengthens the arms.",
+        "tip": "Press your heels toward the floor and lift your hips high.",
+        "image": "/images/downward_dog.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "warrior_1": {
+        "id": "warrior_1",
+        "name": "Warrior I",
+        "description": "A standing pose that strengthens the legs and opens the hips and chest.",
+        "tip": "Keep your front knee aligned with your ankle.",
+        "image": "/images/warrior_1.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "childs_pose": {
+        "id": "childs_pose",
+        "name": "Child's Pose",
+        "description": "A resting pose that gently stretches the lower back and hips.",
+        "tip": "Breathe deeply and relax your shoulders away from your ears.",
+        "image": "/images/childs_pose.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "cat_cow": {
+        "id": "cat_cow",
+        "name": "Cat-Cow Stretch",
+        "description": "A gentle yoga stretch for spinal flexibility.",
+        "tip": "Move with your breath, inhale on the arch, exhale on the round.",
+        "image": "/images/cat_cow.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "glute_bridge": {
+        "id": "glute_bridge",
+        "name": "Glute Bridge",
+        "description": "Strengthen your glutes and lower back.",
+        "tip": "Squeeze your glutes at the top of the movement.",
+        "image": "/images/glute_bridge.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "leg_raise": {
+        "id": "leg_raise",
+        "name": "Leg Raises",
+        "description": "A great lower abs exercise.",
+        "tip": "Keep your lower back pressed against the floor.",
+        "image": "/images/leg_raise.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "arm_circles": {
+        "id": "arm_circles",
+        "name": "Arm Circles",
+        "description": "Strengthen your shoulders with this simple movement.",
+        "tip": "Keep your arms straight and make controlled circles.",
+        "image": "/images/arm_circles.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "seated_twist": {
+        "id": "seated_twist",
+        "name": "Seated Spinal Twist",
+        "description": "A yoga pose for spinal mobility and digestion.",
+        "tip": "Sit tall and twist gently without forcing the movement.",
+        "image": "/images/seated_twist.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "triceps_dip": {
+        "id": "triceps_dip",
+        "name": "Triceps Dips",
+        "description": "Strengthen your triceps with this bodyweight exercise.",
+        "tip": "Keep your elbows pointed straight back, not out to the sides.",
+        "image": "/images/triceps_dip.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "prenatal_pelvic_tilt": {
+        "id": "prenatal_pelvic_tilt",
+        "name": "Prenatal Pelvic Tilt",
+        "description": "A gentle exercise to strengthen the lower back and core for pregnancy.",
+        "tip": "Move with control and avoid excessive arching.",
+        "image": "/images/prenatal_pelvic_tilt.jpg",
+        "duration": 40,
+        "rest": 20
+      },
+      "postnatal_kegels": {
+        "id": "postnatal_kegels",
+        "name": "Postnatal Kegels",
+        "description": "Strengthen the pelvic floor postpartum.",
+        "tip": "Squeeze and hold, then relax slowly.",
+        "image": "/images/postnatal_kegels.jpg",
+        "duration": 40,
+        "rest": 20
+      }
+    }
+  }
+  

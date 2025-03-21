@@ -4,16 +4,31 @@ import { Button } from "@/components/ui/button"
 import { ClockIcon, FlameIcon } from "lucide-react"
 import Link from "next/link"
 
-interface WorkoutCardProps {
-  title: string
-  duration: string
-  level: string
-  calories: string
-  image: string
-  href?: string
+interface WorkoutData {
+  id: string;
+  title: string;
+  duration: string;
+  level: string;
+  calories: string;
+  image: string;
+  category: string;
+  description: string;
+  exercises: string[];
 }
 
-export function WorkoutCard({ title, duration, level, calories, image, href }: WorkoutCardProps) {
+interface WorkoutCardProps {
+  workoutData: WorkoutData;
+  href?: string;
+}
+
+export function WorkoutCard({ workoutData, href }: WorkoutCardProps) {
+  const { title, duration, level, calories, image } = workoutData;
+
+  const handleClick = () => {
+    // Store the full workout data in localStorage before navigating
+    localStorage.setItem('currentWorkout', JSON.stringify(workoutData));
+  };
+
   const content = (
     <Card className="overflow-hidden">
       <div className="relative h-48">
@@ -45,7 +60,7 @@ export function WorkoutCard({ title, duration, level, calories, image, href }: W
 
   if (href) {
     return (
-      <Link href={href} className="block">
+      <Link href={href} className="block" onClick={handleClick}>
         {content}
       </Link>
     )
