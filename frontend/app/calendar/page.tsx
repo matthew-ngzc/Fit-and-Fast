@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog"
 import { EditIcon } from "lucide-react"
 import { CycleInfo } from "@/components/cycle-info"
-import { fetchData } from "@/lib/data-module"
+import data from "./data.json" 
 
 // Default cycle data to use as fallback
 const defaultCycleData = {
@@ -34,12 +34,23 @@ export default function CalendarPage() {
   const [streakDays, setStreakDays] = useState<Date[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const data = await fetchData()
+  // api to get streak data 
+  // api to get cycleLength, periodLength, periodStart, periodEnd, nextPeriodStart as cycle data
+  // api to put cycleLength, periodLength, lastPeriodStartDate
 
-        // Parse date strings into Date objects if cycleData exists
+  useEffect(() => {
+    async function loadStreakData() {
+      try {
+        if (data.streakDays && Array.isArray(data.streakDays)) {
+          setStreakDays(data.streakDays.map((dateStr: string) => new Date(dateStr)))
+        }
+      } catch (error) {
+        console.error("Failed to load streak data:", error)
+      }
+    }
+  
+    async function loadCycleData() {
+      try {
         if (data.cycleData) {
           const parsedCycleData = {
             ...data.cycleData,
@@ -49,33 +60,80 @@ export default function CalendarPage() {
           }
           setCycleData(parsedCycleData)
         } else {
-          // Use default if cycleData is missing
           setCycleData(defaultCycleData)
         }
-
-        // Parse streak days if they exist
-        if (data.streakDays && Array.isArray(data.streakDays)) {
-          const parsedStreakDays = data.streakDays.map((dateStr: string) => new Date(dateStr))
-          setStreakDays(parsedStreakDays)
-        }
       } catch (error) {
-        console.error("Failed to load calendar data:", error)
-        // Use defaults on error
+        console.error("Failed to load cycle data:", error)
         setCycleData(defaultCycleData)
-      } finally {
-        setLoading(false)
       }
     }
-
+  
+    async function loadData() {
+      await loadStreakData()
+      await loadCycleData()
+      setLoading(false)
+    }
+  
     loadData()
   }, [])
 
-  // Function to determine if a date is in the period
-  const isInPeriod = (date: Date) => {
-    if (!cycleData) return false
-    const d = new Date(date)
-    return d >= cycleData.periodStart && d <= cycleData.periodEnd
-  }
+  {/* APIS to update */}
+  // useEffect(() => {
+  //   async function loadStreakData() {
+  //     try {
+  //       const response = await fetch("/data.json")
+  //       const data = await response.json()
+  //       if (data.streakDays && Array.isArray(data.streakDays)) {
+  //         setStreakDays(data.streakDays.map((dateStr: string) => new Date(dateStr)))
+  //       }
+  //     } catch (error) {
+  //       console.error("Failed to load streak data:", error)
+  //     }
+  //   }
+
+  //   // API to get cycle data (cycleLength, periodLength, periodStart, periodEnd, nextPeriodStart)
+  //   async function loadCycleData() {
+  //     try {
+  //       const response = await fetch("/api/cycle-data") // Placeholder API endpoint
+  //       const data = await response.json()
+  //       const parsedCycleData = {
+  //         ...data,
+  //         periodStart: new Date(data.periodStart),
+  //         periodEnd: new Date(data.periodEnd),
+  //         nextPeriodStart: new Date(data.nextPeriodStart),
+  //       }
+  //       setCycleData(parsedCycleData)
+  //     } catch (error) {
+  //       console.error("Failed to load cycle data:", error)
+  //     }
+  //   }
+
+  //   // API to update cycle data (cycleLength, periodLength, lastPeriodStartDate)
+  //   async function updateCycleData(updatedCycleData: any) {
+  //     try {
+  //       const response = await fetch("/api/update-cycle-data", {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(updatedCycleData),
+  //       })
+  //       if (!response.ok) {
+  //         throw new Error("Failed to update cycle data")
+  //       }
+  //     } catch (error) {
+  //       console.error("Error updating cycle data:", error)
+  //     }
+  //   }
+
+  //   async function loadData() {
+  //     await loadStreakData()
+  //     await loadCycleData()
+  //     setLoading(false)
+  //   }
+
+  //   loadData()
+  // }, [])
 
   // Function to determine if a date has a workout streak
   const hasStreak = (date: Date) => {
@@ -146,7 +204,7 @@ export default function CalendarPage() {
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>Your Calendar</CardTitle>
-                <CardDescription>Track your period and workout streaks</CardDescription>
+                <CardDescription>Track your workout streaks</CardDescription>
               </CardHeader>
               <CardContent>
                 <Calendar
@@ -155,23 +213,17 @@ export default function CalendarPage() {
                   onSelect={setDate}
                   className="rounded-md border"
                   modifiers={{
-                    period: (date) => isInPeriod(date),
                     streak: (date) => hasStreak(date),
                   }}
                   modifiersClassNames={{
-                    period: "bg-pink-100 text-primary rounded-md",
-                    streak: "border-2 border-green-600",
+                    streak: "border-2 border-pink-600",
                   }}
                 />
               </CardContent>
               <CardFooter className="flex justify-between text-sm text-muted-foreground">
                 <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full bg-primary mr-2"></div>
-                  <span>Period</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 rounded-full border-2 border-green-600 mr-2"></div>
-                  <span>Workout Streak</span>
+                  <div className="w-3 h-3 rounded-full border-2 border-pink-600 mr-2"></div>
+                  <span>Workout Days</span>
                 </div>
               </CardFooter>
             </Card>
@@ -179,6 +231,7 @@ export default function CalendarPage() {
             <div className="space-y-6">
               {cycleData && <CycleInfo cycleData={cycleData} />}
 
+              {/* To modify according to how the backend build it */}
               <Card>
                 <CardHeader>
                   <CardTitle>Workout Recommendations</CardTitle>
