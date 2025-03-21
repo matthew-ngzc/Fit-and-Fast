@@ -9,4 +9,5 @@ public class RoutineDTO {
     private Long routineId;
     private String name;
     private List<WorkoutDTO> workoutOrder;
+    private Integer totalCalories;
 }

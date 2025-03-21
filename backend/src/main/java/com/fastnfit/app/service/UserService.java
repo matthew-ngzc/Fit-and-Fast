@@ -9,25 +9,63 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fastnfit.app.dto.UserDTO;
 import com.fastnfit.app.dto.UserDetailsDTO;
 import com.fastnfit.app.dto.UserRegistrationDTO;
+import com.fastnfit.app.dto.LoginRequestDTO;
+import com.fastnfit.app.dto.ProfileDTO;
+import com.fastnfit.app.dto.StreakDTO;
+import com.fastnfit.app.dto.GoalsDTO;
+import com.fastnfit.app.dto.AvatarDTO;
+import com.fastnfit.app.dto.WeeklyWorkoutsDTO;
 import com.fastnfit.app.model.User;
 import com.fastnfit.app.model.UserDetails;
 import com.fastnfit.app.repository.UserDetailsRepository;
 import com.fastnfit.app.repository.UserRepository;
+import com.fastnfit.app.repository.HistoryRepository;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Date;
+import java.util.Optional;
+import java.util.List;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
     private final UserDetailsRepository userDetailsRepository;
+    private final HistoryRepository historyRepository;
+    private final UserAchievementService userAchievementService;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserService(UserRepository userRepository, 
                     UserDetailsRepository userDetailsRepository,
+                    HistoryRepository historyRepository,
+                    UserAchievementService userAchievementService,
                     PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userDetailsRepository = userDetailsRepository;
+        this.historyRepository = historyRepository;
+        this.userAchievementService=userAchievementService;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public UserDTO login(LoginRequestDTO loginRequest) {
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+            .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+        
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+        
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUserId(user.getUserId());
+        userDTO.setEmail(user.getEmail());
+        
+        return userDTO;
     }
 
     @Transactional
@@ -42,17 +80,13 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
         userRepository.save(user);
 
-        // Create and save user details
-        UserDetails userDetails = new UserDetails();
-        userDetails.setUser(user);
-        userDetails.setUsername(registrationDTO.getUsername());
-        userDetails.setDob(registrationDTO.getDob());
-        userDetails.setHeight(registrationDTO.getHeight());
-        userDetails.setWeight(registrationDTO.getWeight());
-        userDetails.setIsPregnant(registrationDTO.getIsPregnant());
-        userDetails.setWorkoutGoal(registrationDTO.getWorkoutGoal());
-        userDetails.setWorkoutDays(registrationDTO.getWorkoutDays());
-        userDetailsRepository.save(userDetails);
+        // Create basic user details if username is provided
+        if (registrationDTO.getUsername() != null && !registrationDTO.getUsername().isEmpty()) {
+            UserDetails userDetails = new UserDetails();
+            userDetails.setUser(user);
+            userDetails.setUsername(registrationDTO.getUsername());
+            userDetailsRepository.save(userDetails);
+        }
 
         // Return DTO
         UserDTO userDTO = new UserDTO();
@@ -62,8 +96,45 @@ public class UserService {
         return userDTO;
     }
 
+    @Transactional
+    public UserDetailsDTO completeUserQuestionnaire(Long userId, UserDetailsDTO detailsDTO) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+            
+        // Check if user details already exist
+        Optional<UserDetails> existingDetails = userDetailsRepository.findByUser(user);
+        UserDetails userDetails;
+        
+        if (existingDetails.isPresent()) {
+            userDetails = existingDetails.get();
+        } else {
+            userDetails = new UserDetails();
+            userDetails.setUser(user);
+        }
+
+        // Update user details with questionnaire data
+        userDetails.setUsername(detailsDTO.getUsername());
+        userDetails.setDob(detailsDTO.getDob());
+        userDetails.setHeight(detailsDTO.getHeight());
+        userDetails.setWeight(detailsDTO.getWeight());
+        userDetails.setPregnancyStatus(detailsDTO.getPregnancyStatus());
+        userDetails.setWorkoutGoal(detailsDTO.getWorkoutGoal());
+        userDetails.setWorkoutDays(detailsDTO.getWorkoutDays());
+        userDetails.setFitnessLevel(detailsDTO.getFitnessLevel());
+        userDetails.setMenstrualCramps(detailsDTO.getMenstrualCramps());
+        userDetails.setCycleBasedRecommendations(detailsDTO.getCycleBasedRecommendations());
+        userDetails.setWorkoutType(detailsDTO.getWorkoutType());
+
+        userDetailsRepository.save(userDetails);
+
+        return detailsDTO;
+    }
+
     public UserDetailsDTO getUserDetails(Long userId) {
-        UserDetails userDetails = userDetailsRepository.findById(userId)
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+            
+        UserDetails userDetails = userDetailsRepository.findByUser(user)
             .orElseThrow(() -> new RuntimeException("User details not found"));
 
         UserDetailsDTO dto = new UserDetailsDTO();
@@ -72,9 +143,13 @@ public class UserService {
         dto.setDob(userDetails.getDob());
         dto.setHeight(userDetails.getHeight());
         dto.setWeight(userDetails.getWeight());
-        dto.setIsPregnant(userDetails.getIsPregnant());
+        dto.setPregnancyStatus(userDetails.getPregnancyStatus());
         dto.setWorkoutGoal(userDetails.getWorkoutGoal());
         dto.setWorkoutDays(userDetails.getWorkoutDays());
+        dto.setFitnessLevel(userDetails.getFitnessLevel());
+        dto.setMenstrualCramps(userDetails.getMenstrualCramps());
+        dto.setCycleBasedRecommendations(userDetails.getCycleBasedRecommendations());
+        dto.setWorkoutType(userDetails.getWorkoutType());
 
         return dto;
     }
@@ -88,12 +163,239 @@ public class UserService {
         userDetails.setDob(detailsDTO.getDob());
         userDetails.setHeight(detailsDTO.getHeight());
         userDetails.setWeight(detailsDTO.getWeight());
-        userDetails.setIsPregnant(detailsDTO.getIsPregnant());
+        userDetails.setPregnancyStatus(detailsDTO.getPregnancyStatus());
         userDetails.setWorkoutGoal(detailsDTO.getWorkoutGoal());
         userDetails.setWorkoutDays(detailsDTO.getWorkoutDays());
+        userDetails.setFitnessLevel(detailsDTO.getFitnessLevel());
+        userDetails.setMenstrualCramps(detailsDTO.getMenstrualCramps());
+        userDetails.setCycleBasedRecommendations(detailsDTO.getCycleBasedRecommendations());
+        userDetails.setWorkoutType(detailsDTO.getWorkoutType());
 
         userDetailsRepository.save(userDetails);
 
         return detailsDTO;
+    }
+
+    // New methods for the additional APIs
+
+    public ProfileDTO getUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        UserDetails userDetails = userDetailsRepository.findByUser(user)
+            .orElseThrow(() -> new RuntimeException("User details not found"));
+        
+        ProfileDTO profileDTO = new ProfileDTO();
+        profileDTO.setUsername(userDetails.getUsername());
+        profileDTO.setEmail(user.getEmail());
+        profileDTO.setHeight(userDetails.getHeight());
+        profileDTO.setWeight(userDetails.getWeight());
+        profileDTO.setDob(userDetails.getDob());
+        profileDTO.setPrimaryGoal(userDetails.getWorkoutGoal());
+        profileDTO.setWorkoutDaysPerWeekGoal(userDetails.getWorkoutDays());
+        profileDTO.setAvatar(userDetails.getAvatar());
+        
+        return profileDTO;
+    }
+    
+    @Transactional
+    public ProfileDTO updateBasicProfile(Long userId, ProfileDTO profileDTO) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        UserDetails userDetails = userDetailsRepository.findByUser(user)
+            .orElseThrow(() -> new RuntimeException("User details not found"));
+        
+        // Update basic profile information
+        userDetails.setUsername(profileDTO.getUsername());
+        user.setEmail(profileDTO.getEmail());
+        userDetails.setHeight(profileDTO.getHeight());
+        userDetails.setWeight(profileDTO.getWeight());
+        userDetails.setDob(profileDTO.getDob());
+        
+        userRepository.save(user);
+        userDetailsRepository.save(userDetails);
+        
+        return profileDTO;
+    }
+    
+    @Transactional
+    public GoalsDTO updateUserGoals(Long userId, GoalsDTO goalsDTO) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        UserDetails userDetails = userDetailsRepository.findByUser(user)
+            .orElseThrow(() -> new RuntimeException("User details not found"));
+        
+        // Update user goals
+        userDetails.setWorkoutGoal(goalsDTO.getPrimaryGoal());
+        userDetails.setWorkoutDays(goalsDTO.getWorkoutDaysPerWeekGoal());
+        
+        userDetailsRepository.save(userDetails);
+        
+        return goalsDTO;
+    }
+    
+    @Transactional
+    public AvatarDTO updateUserAvatar(Long userId, AvatarDTO avatarDTO) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        UserDetails userDetails = userDetailsRepository.findByUser(user)
+            .orElseThrow(() -> new RuntimeException("User details not found"));
+        
+        // Update avatar link
+        userDetails.setAvatar(avatarDTO.getAvatarLink());
+        
+        userDetailsRepository.save(userDetails);
+        
+        return avatarDTO;
+    }
+    
+    public WeeklyWorkoutsDTO getWeeklyWorkouts(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        // Calculate the start and end dates for the current week (Monday to Friday)
+        LocalDate today = LocalDate.now();
+        LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
+        
+        Date startDate = Date.from(startOfWeek.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date endDate = Date.from(endOfWeek.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        
+        // Get the count of workouts completed between Monday and Friday
+        int workoutCount = historyRepository.countByUserAndRoutineDateBetween(user, startDate, endDate);
+        
+        WeeklyWorkoutsDTO weeklyWorkoutsDTO = new WeeklyWorkoutsDTO();
+        weeklyWorkoutsDTO.setTotalWorkouts(workoutCount);
+        
+        return weeklyWorkoutsDTO;
+    }
+
+    // /
+    //  * Get all users
+    //  */
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+    
+    // /
+    //  * Get user by ID
+    //  */
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+    
+    // /
+    //  * Get user by email
+    //  */
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+    
+    // /
+    //  * Get user by username
+    //  */
+    public Optional<User> getUserByUsername(String username) {
+        Optional<UserDetails> userDetails=userDetailsRepository.findByUsername(username);
+        if (userDetails.isPresent()){
+            return userRepository.findById(userDetails.get().getUserId());
+        }
+        return null;
+    }
+    
+    // /
+    //  * Create a new user
+    //  */
+    @Transactional
+    public User createUser(User user) {
+        // Initialize UserDetails if not already set
+        if (user.getUserDetails() == null) {
+            UserDetails userDetails = new UserDetails();
+            userDetails.setUser(user);
+            userDetails.setCurrentStreak(0);
+            userDetails.setLongestStreak(0);
+            user.setUserDetails(userDetails);
+        }
+        
+        // Save the user
+        User savedUser = userRepository.save(user);
+        
+        // Initialize achievements for the new user
+        userAchievementService.initializeUserAchievements(savedUser);
+        
+        return savedUser;
+    }
+    
+    // /
+    //  * Update an existing user
+    //  */
+    public User updateUser(User user) {
+        return userRepository.save(user);
+    }
+    
+    // /
+    //  * Delete a user
+    //  */
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+    
+    // /
+    //  * Update user details
+    //  */
+    @Transactional
+    public User updateUserDetails(Long userId, UserDetails userDetails) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            UserDetails existingDetails = user.getUserDetails();
+            
+            if (existingDetails != null) {
+                // Update fields that are not null in the new userDetails
+                if (userDetails.getUsername() != null) {
+                    existingDetails.setUsername(userDetails.getUsername());
+                }
+                if (userDetails.getDob() != null) {
+                    existingDetails.setDob(userDetails.getDob());
+                }
+                if (userDetails.getHeight() != null) {
+                    existingDetails.setHeight(userDetails.getHeight());
+                }
+                if (userDetails.getWeight() != null) {
+                    existingDetails.setWeight(userDetails.getWeight());
+                }
+                if (userDetails.getPregnancyStatus() != null) {
+                    existingDetails.setPregnancyStatus(userDetails.getPregnancyStatus());
+                }
+                if (userDetails.getWorkoutGoal() != null) {
+                    existingDetails.setWorkoutGoal(userDetails.getWorkoutGoal());
+                }
+                if (userDetails.getWorkoutDays() != null) {
+                    existingDetails.setWorkoutDays(userDetails.getWorkoutDays());
+                }
+                if (userDetails.getFitnessLevel() != null) {
+                    existingDetails.setFitnessLevel(userDetails.getFitnessLevel());
+                }
+                if (userDetails.getWorkoutType() != null) {
+                    existingDetails.setWorkoutType(userDetails.getWorkoutType());
+                }
+                if (userDetails.getAvatar() != null) {
+                    existingDetails.setAvatar(userDetails.getAvatar());
+                }
+            } else {
+                // Create new UserDetails if it doesn't exist
+                userDetails.setUser(user);
+                userDetails.setCurrentStreak(0);
+                userDetails.setLongestStreak(0);
+                user.setUserDetails(userDetails);
+            }
+            
+            return userRepository.save(user);
+        }
+        
+        return null;
     }
 }

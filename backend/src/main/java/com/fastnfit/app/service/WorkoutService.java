@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fastnfit.app.dto.WorkoutDTO;
+import com.fastnfit.app.enums.WorkoutLevel;
 import com.fastnfit.app.model.Workout;
 import com.fastnfit.app.repository.WorkoutRepository;
 
@@ -39,7 +40,7 @@ public class WorkoutService {
             .collect(Collectors.toList());
     }
 
-    public List<WorkoutDTO> getWorkoutsByLevel(Integer level) {
+    public List<WorkoutDTO> getWorkoutsByLevel(WorkoutLevel level) {
         return workoutRepository.findByLevel(level).stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());

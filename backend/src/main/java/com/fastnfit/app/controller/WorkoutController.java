@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.fastnfit.app.dto.WorkoutDTO;
+import com.fastnfit.app.enums.WorkoutLevel;
 import com.fastnfit.app.service.WorkoutService;
 
 import java.util.List;
@@ -41,8 +42,8 @@ public class WorkoutController {
     }
 
     @GetMapping("/level/{level}")
-    public ResponseEntity<List<WorkoutDTO>> getWorkoutsByLevel(@PathVariable Integer level) {
-        List<WorkoutDTO> workouts = workoutService.getWorkoutsByLevel(level);
+    public ResponseEntity<List<WorkoutDTO>> getWorkoutsByLevel(@PathVariable String level) {
+        List<WorkoutDTO> workouts = workoutService.getWorkoutsByLevel(WorkoutLevel.valueOf(level));
         return ResponseEntity.ok(workouts);
     }
 }

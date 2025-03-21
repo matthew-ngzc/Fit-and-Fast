@@ -3,15 +3,38 @@ package com.fastnfit.app.dto;
 
 import lombok.Data;
 import java.util.Date;
+import com.fastnfit.app.enums.*;
 
 @Data
 public class UserDetailsDTO {
     private Long userId;
     private String username;
     private Date dob;
-    private Integer height;
-    private Integer weight;
-    private Boolean isPregnant;
-    private String workoutGoal;
+    private Double height;
+    private Double weight;
+    private PregnancyStatus pregnancyStatus;
+    private WorkoutGoal workoutGoal;
     private Integer workoutDays;
+    private FitnessLevel fitnessLevel;
+    private boolean menstrualCramps;
+    private boolean cycleBasedRecommendations;
+    private WorkoutType workoutType;
+    private Integer currentStreak;
+    private Integer longestStreak;
+
+    public boolean getMenstrualCramps(){
+        return this.menstrualCramps;
+    }
+
+    public void setMenstrualCramps(boolean menstrualCramps){
+        this.menstrualCramps=menstrualCramps;
+    }
+
+    public boolean getCycleBasedRecommendations(){
+        return this.cycleBasedRecommendations;
+    }
+
+    public void setCycleBasedRecommendations(boolean cycleBasedRecommendations){
+        this.cycleBasedRecommendations=cycleBasedRecommendations;
+    }
 }

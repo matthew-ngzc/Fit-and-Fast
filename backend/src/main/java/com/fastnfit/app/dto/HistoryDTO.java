@@ -12,5 +12,5 @@ public class HistoryDTO {
     private Date routineTime;
     private String name;
     private List<WorkoutDTO> workoutList;
-    private List<WorkoutDTO> workoutDid;
+    private Integer caloriesBurned;
 }

@@ -31,15 +31,10 @@ public class History {
     )
     private List<Workout> workoutList;
     
-    @ManyToMany
-    @JoinTable(
-        name = "history_workout_did",
-        joinColumns = @JoinColumn(name = "history_id"),
-        inverseJoinColumns = @JoinColumn(name = "workout_id")
-    )
-    private List<Workout> workoutDid;
-    
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+    
+    // Added fields for tracking calories and completion
+    private Integer caloriesBurned;
 }

@@ -4,6 +4,7 @@ package com.fastnfit.app.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
+import com.fastnfit.app.enums.WorkoutLevel;
 
 @Data
 @Entity
@@ -23,7 +24,12 @@ public class Workout {
     @Column(length = 1000)
     private String description;
     
-    private Integer level;
+    private String workoutTips;
+
+    private Integer workoutDuration;//In minutes
+
+    @Enumerated(EnumType.STRING)
+    private WorkoutLevel level;
     
     private Integer calories;
     
@@ -32,7 +38,4 @@ public class Workout {
     
     @ManyToMany(mappedBy = "workoutList")
     private List<History> historyWorkoutList;
-    
-    @ManyToMany(mappedBy = "workoutDid")
-    private List<History> historyWorkoutDid;
 }

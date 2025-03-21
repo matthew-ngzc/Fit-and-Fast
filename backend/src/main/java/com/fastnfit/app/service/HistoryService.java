@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fastnfit.app.dto.HistoryDTO;
+import com.fastnfit.app.dto.RoutineDTO;
 import com.fastnfit.app.dto.WorkoutDTO;
 import com.fastnfit.app.model.History;
 import com.fastnfit.app.model.User;
@@ -28,8 +29,8 @@ public class HistoryService {
 
     @Autowired
     public HistoryService(HistoryRepository historyRepository,
-                         UserRepository userRepository,
-                         WorkoutRepository workoutRepository) {
+                        UserRepository userRepository,
+                        WorkoutRepository workoutRepository) {
         this.historyRepository = historyRepository;
         this.userRepository = userRepository;
         this.workoutRepository = workoutRepository;
@@ -73,17 +74,13 @@ public class HistoryService {
         }
         history.setWorkoutList(workoutList);
         
-        List<Workout> workoutDid = new ArrayList<>();
-        if (historyDTO.getWorkoutDid() != null) {
-            workoutDid = historyDTO.getWorkoutDid().stream()
-                .map(dto -> workoutRepository.findById(dto.getWorkoutId())
-                    .orElseThrow(() -> new RuntimeException("Workout not found")))
-                .collect(Collectors.toList());
-        }
-        history.setWorkoutDid(workoutDid);
-        
         History savedHistory = historyRepository.save(history);
         return convertToDTO(savedHistory);
+    }
+
+    @Transactional
+    public HistoryDTO recordRoutineCompletion(int userId,RoutineDTO routineCompletion){
+        return null;
     }
 
     private HistoryDTO convertToDTO(History history) {
@@ -106,21 +103,7 @@ public class HistoryService {
             })
             .collect(Collectors.toList());
         
-        List<WorkoutDTO> workoutDidDTOs = history.getWorkoutDid().stream()
-            .map(workout -> {
-                WorkoutDTO workoutDTO = new WorkoutDTO();
-                workoutDTO.setWorkoutId(workout.getWorkoutId());
-                workoutDTO.setCategory(workout.getCategory());
-                workoutDTO.setName(workout.getName());
-                workoutDTO.setDescription(workout.getDescription());
-                workoutDTO.setLevel(workout.getLevel());
-                workoutDTO.setCalories(workout.getCalories());
-                return workoutDTO;
-            })
-            .collect(Collectors.toList());
-        
         dto.setWorkoutList(workoutListDTOs);
-        dto.setWorkoutDid(workoutDidDTOs);
         return dto;
     }
 }
