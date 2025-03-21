@@ -26,10 +26,4 @@ public class WorkoutApplication {
             }
         };
     }
-
-    // Since we're skipping security for now, we still need a password encoder for user registration
-    @Bean
-    public org.springframework.security.crypto.password.PasswordEncoder passwordEncoder() {
-        return new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-    }
 }

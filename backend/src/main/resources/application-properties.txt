@@ -20,7 +20,7 @@ jwt.expiration=86400000
 
 # Logging
 logging.level.org.springframework=INFO
-logging.level.com.workout.app=DEBUG
+logging.level.com.fastnfit.app=DEBUG
 
 # AWS Configuration
 aws.region=${AWS_REGION:us-east-1}
