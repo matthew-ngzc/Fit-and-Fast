@@ -1,9 +1,7 @@
 "use client";
 
 import type React from "react";
-
 import Link from "next/link";
-import { DumbbellIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 export function MainNav() {
@@ -18,11 +16,11 @@ export function MainNav() {
   ) {
     return null;
   }
-  
+
   return (
     <div className="mr-4 hidden md:flex">
       <Link href="/" className="mr-6 flex items-center space-x-2">
-        <DumbbellIcon className="h-6 w-6 text-primary" />
+        <img src="/icon.png" alt="Fit&Fast" className="h-6 w-6" />
         <span className="hidden font-bold sm:inline-block">Fit&Fast</span>
       </Link>
       <nav className="flex items-center space-x-6 text-sm font-medium">

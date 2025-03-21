@@ -6,12 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DumbbellIcon } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  
+
   const handleLogin = async () => {
     try {
       const response = await fetch("https://your-api-url.com/login", {
@@ -49,7 +48,7 @@ export default function LoginPage() {
         <div className="flex flex-col space-y-2 text-center">
           <div className="flex justify-center">
             <div className="bg-pink-100 p-2 rounded-full">
-              <DumbbellIcon className="h-10 w-10 text-primary" />
+              <img src="/icon.png" alt="Fit&Fast" className="h-7 w-7" />
             </div>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">
@@ -94,8 +93,9 @@ export default function LoginPage() {
               <Button
                 className="w-full"
                 type="submit"
-                onClick={() => (window.location.href = "/")
-                // onClick={handleLogin}
+                onClick={
+                  () => (window.location.href = "/")
+                  // onClick={handleLogin}
                 }
               >
                 Sign In

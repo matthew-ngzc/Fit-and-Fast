@@ -21,8 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { DumbbellIcon, ArrowLeft, ArrowRight } from "lucide-react";
-import { ChangeEvent } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 export default function QuestionnairePage() {
   const [step, setStep] = useState(1);
@@ -108,7 +107,7 @@ export default function QuestionnairePage() {
         <div className="flex flex-col space-y-2 text-center">
           <div className="flex justify-center">
             <div className="bg-pink-100 p-2 rounded-full">
-              <DumbbellIcon className="h-10 w-10 text-primary" />
+              <img src="/icon.png" alt="Fit&Fast" className="h-7 w-7" />
             </div>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">
