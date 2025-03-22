@@ -1,21 +1,5 @@
 package com.fastnfit.app.UnitTests;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.fastnfit.app.dto.HistoryDTO;
 import com.fastnfit.app.dto.WorkoutDTO;
 import com.fastnfit.app.model.History;
@@ -28,8 +12,22 @@ import com.fastnfit.app.service.HistoryService;
 import com.fastnfit.app.service.UserStreakService;
 import com.fastnfit.app.service.WorkoutService;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.sql.Timestamp;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
-public class HistoryServiceTest {
+class HistoryServiceTest {
 
     @Mock
     private HistoryRepository historyRepository;
@@ -45,160 +43,187 @@ public class HistoryServiceTest {
     
     @Mock
     private UserStreakService userStreakService;
-    
-    @InjectMocks
+
     private HistoryService historyService;
     
     private User testUser;
     private Workout testWorkout;
     private History testHistory;
     private WorkoutDTO testWorkoutDTO;
+    private HistoryDTO testHistoryDTO;
     
     @BeforeEach
     void setUp() {
-        // Create test user
+        historyService = new HistoryService(
+            historyRepository,
+            userRepository,
+            workoutRepository,
+            workoutService,
+            userStreakService
+        );
+        
+        // Setup test data
         testUser = new User();
         testUser.setUserId(1L);
-        testUser.setEmail("test@example.com");
         
-        // Create test workout
         testWorkout = new Workout();
         testWorkout.setWorkoutId(1L);
         testWorkout.setName("Test Workout");
+        testWorkout.setDurationInMinutes(30);
         testWorkout.setCalories(150);
         
-        // Create test workout DTO
         testWorkoutDTO = new WorkoutDTO();
         testWorkoutDTO.setWorkoutId(1L);
         testWorkoutDTO.setName("Test Workout");
+        testWorkoutDTO.setDurationInMinutes(30);
         testWorkoutDTO.setCalories(150);
         
-        // Create test history
         testHistory = new History();
         testHistory.setHistoryId(1L);
         testHistory.setUser(testUser);
         testHistory.setWorkout(testWorkout);
-        testHistory.setWorkoutDate(new Date());
+        testHistory.setWorkoutName("Test Workout");
         testHistory.setCaloriesBurned(150);
-    }
-    
-    @Test
-    void testGetUserHistory() {
-        // Setup
-        List<History> histories = new ArrayList<>();
-        histories.add(testHistory);
+        testHistory.setDurationInMinutes(30);
+        testHistory.setWorkoutDateTime(new Timestamp(System.currentTimeMillis()));
         
+        testHistoryDTO = new HistoryDTO();
+        testHistoryDTO.setHistoryId(1L);
+        testHistoryDTO.setName("Test Workout");
+        testHistoryDTO.setCaloriesBurned(150);
+        testHistoryDTO.setDurationInMinutes(30);
+        testHistoryDTO.setWorkout(testWorkoutDTO);
+        testHistoryDTO.setWorkoutDateTime(new Timestamp(System.currentTimeMillis()));
+    }
+
+    @Test
+    void getUserHistory_shouldReturnUserHistory() {
+        // Given
+        List<History> histories = Collections.singletonList(testHistory);
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(historyRepository.findByUser(testUser)).thenReturn(histories);
         when(workoutService.convertToDTO(testWorkout)).thenReturn(testWorkoutDTO);
         
-        // Execute
+        // When
         List<HistoryDTO> result = historyService.getUserHistory(1L);
         
-        // Verify
-        assertNotNull(result);
+        // Then
         assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).getHistoryId());
-        
+        assertEquals(testHistory.getHistoryId(), result.get(0).getHistoryId());
         verify(userRepository).findById(1L);
         verify(historyRepository).findByUser(testUser);
-        verify(workoutService).convertToDTO(testWorkout);
     }
-    
+
     @Test
-    void testGetUserHistoryBetweenDates() {
-        // Setup
-        List<History> histories = new ArrayList<>();
-        histories.add(testHistory);
+    void getUserHistory_shouldThrowExceptionWhenUserNotFound() {
+        // Given
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
         
-        Date startDate = new Date();
-        Date endDate = new Date();
+        // When & Then
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            historyService.getUserHistory(1L);
+        });
+        
+        assertEquals("User not found", exception.getMessage());
+        verify(userRepository).findById(1L);
+        verify(historyRepository, never()).findByUser(any(User.class));
+    }
+
+    @Test
+    void getUserHistoryBetweenDates_shouldReturnHistoryBetweenDates() {
+        // Given
+        List<History> histories = Collections.singletonList(testHistory);
+        Date startDate = new Date(System.currentTimeMillis() - 86400000); // Yesterday
+        Date endDate = new Date(System.currentTimeMillis() + 86400000);   // Tomorrow
         
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
-        when(historyRepository.findByUserAndWorkoutDateBetween(testUser, startDate, endDate)).thenReturn(histories);
+        when(historyRepository.findByUserAndWorkoutDateTimeBetween(
+                eq(testUser), 
+                any(Timestamp.class), 
+                any(Timestamp.class)
+        )).thenReturn(histories);
         when(workoutService.convertToDTO(testWorkout)).thenReturn(testWorkoutDTO);
         
-        // Execute
+        // When
         List<HistoryDTO> result = historyService.getUserHistoryBetweenDates(1L, startDate, endDate);
         
-        // Verify
-        assertNotNull(result);
+        // Then
         assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).getHistoryId());
-        
+        assertEquals(testHistory.getHistoryId(), result.get(0).getHistoryId());
         verify(userRepository).findById(1L);
-        verify(historyRepository).findByUserAndWorkoutDateBetween(testUser, startDate, endDate);
-        verify(workoutService).convertToDTO(testWorkout);
+        verify(historyRepository).findByUserAndWorkoutDateTimeBetween(
+                eq(testUser), 
+                any(Timestamp.class), 
+                any(Timestamp.class)
+        );
     }
-    
+
     @Test
-    void testCreateHistory() {
-        // Setup
-        HistoryDTO historyDTO = new HistoryDTO();
-        historyDTO.setWorkoutDate(new Date());
-        historyDTO.setName("Test History");
-        historyDTO.setWorkout(testWorkoutDTO);
-        historyDTO.setCaloriesBurned(150);
-        
+    void createHistory_shouldCreateAndReturnHistory() {
+        // Given
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(workoutRepository.findById(1L)).thenReturn(Optional.of(testWorkout));
         when(historyRepository.save(any(History.class))).thenReturn(testHistory);
         when(workoutService.convertToDTO(testWorkout)).thenReturn(testWorkoutDTO);
         
-        // Execute
-        HistoryDTO result = historyService.createHistory(1L, historyDTO);
+        // When
+        HistoryDTO result = historyService.createHistory(1L, testHistoryDTO);
         
-        // Verify
+        // Then
         assertNotNull(result);
-        verify(userRepository).findById(1L);
-        verify(workoutRepository).findById(1L);
-        verify(historyRepository).save(any(History.class));
-        verify(workoutService).convertToDTO(testWorkout);
+        assertEquals(testHistory.getHistoryId(), result.getHistoryId());
+        
+        // Verify the history was created correctly
+        ArgumentCaptor<History> historyCaptor = ArgumentCaptor.forClass(History.class);
+        verify(historyRepository).save(historyCaptor.capture());
+        
+        History capturedHistory = historyCaptor.getValue();
+        assertEquals(testUser, capturedHistory.getUser());
+        assertEquals(testWorkout, capturedHistory.getWorkout());
+        assertEquals(testHistoryDTO.getName(), capturedHistory.getWorkoutName());
+        assertEquals(testHistoryDTO.getCaloriesBurned(), capturedHistory.getCaloriesBurned());
+        assertEquals(testHistoryDTO.getDurationInMinutes(), capturedHistory.getDurationInMinutes());
     }
-    
+
     @Test
-    void testRecordWorkoutCompletion() {
-        // Setup
-        WorkoutDTO workoutDTO = new WorkoutDTO();
-        workoutDTO.setWorkoutId(1L);
-        workoutDTO.setName("Test Workout");
-        workoutDTO.setCalories(150);
-        
-        HistoryDTO historyDTO = new HistoryDTO();
-        historyDTO.setWorkoutDate(new Date());
-        historyDTO.setWorkout(workoutDTO);
-        historyDTO.setCaloriesBurned(150);
-        
+    void recordWorkoutCompletion_shouldCreateHistoryAndUpdateStreak() {
+        // Given
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(workoutRepository.findById(1L)).thenReturn(Optional.of(testWorkout));
         when(historyRepository.save(any(History.class))).thenReturn(testHistory);
-        when(workoutService.convertToDTO(testWorkout)).thenReturn(testWorkoutDTO);
+        when(workoutService.convertToDTO(any(Workout.class))).thenReturn(testWorkoutDTO);
         
-        // Execute
-        HistoryDTO result = historyService.recordWorkoutCompletion(1L, workoutDTO);
+        // When
+        HistoryDTO result = historyService.recordWorkoutCompletion(1L, testWorkoutDTO);
         
-        // Verify
+        // Then
         assertNotNull(result);
-        verify(userRepository).findById(1L);
-        verify(historyRepository).save(any(History.class));
-        verify(workoutService).convertToDTO(testWorkout);
         verify(userStreakService).updateStreak(1L);
+        
+        // Verify the history was created with correct data
+        ArgumentCaptor<History> historyCaptor = ArgumentCaptor.forClass(History.class);
+        verify(historyRepository).save(historyCaptor.capture());
+        
+        History capturedHistory = historyCaptor.getValue();
+        assertEquals(testUser, capturedHistory.getUser());
+        assertEquals(testWorkoutDTO.getCalories(), capturedHistory.getCaloriesBurned());
+        assertEquals(testWorkoutDTO.getDurationInMinutes(), capturedHistory.getDurationInMinutes());
     }
-    
+
     @Test
-    void testConvertToDTO() {
-        // Setup
+    void convertToDTO_shouldCorrectlyConvertEntityToDTO() {
+        // Given
         when(workoutService.convertToDTO(testWorkout)).thenReturn(testWorkoutDTO);
         
-        // Execute
+        // When
         HistoryDTO result = historyService.convertToDTO(testHistory);
         
-        // Verify
+        // Then
         assertNotNull(result);
-        assertEquals(1L, result.getHistoryId());
-        assertEquals(testHistory.getWorkoutDate(), result.getWorkoutDate());
+        assertEquals(testHistory.getHistoryId(), result.getHistoryId());
+        assertEquals(testHistory.getWorkoutName(), result.getName());
+        assertEquals(testHistory.getCaloriesBurned(), result.getCaloriesBurned());
+        assertEquals(testHistory.getDurationInMinutes(), result.getDurationInMinutes());
         assertEquals(testWorkoutDTO, result.getWorkout());
-        
-        verify(workoutService).convertToDTO(testWorkout);
     }
 }

@@ -12,6 +12,7 @@ import com.fastnfit.app.dto.UserRegistrationDTO;
 import com.fastnfit.app.dto.LoginRequestDTO;
 import com.fastnfit.app.dto.ProfileDTO;
 import com.fastnfit.app.dto.GoalsDTO;
+import com.fastnfit.app.dto.AuthResponseDTO;
 import com.fastnfit.app.dto.AvatarDTO;
 import com.fastnfit.app.dto.WeeklyWorkoutsDTO;
 import com.fastnfit.app.model.User;
@@ -20,11 +21,11 @@ import com.fastnfit.app.repository.UserDetailsRepository;
 import com.fastnfit.app.repository.UserRepository;
 import com.fastnfit.app.repository.HistoryRepository;
 
+import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Date;
 import java.util.Optional;
 import java.util.List;
 
@@ -36,62 +37,65 @@ public class UserService {
     private final HistoryRepository historyRepository;
     private final UserAchievementService userAchievementService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Autowired
     public UserService(UserRepository userRepository, 
                     UserDetailsRepository userDetailsRepository,
                     HistoryRepository historyRepository,
                     UserAchievementService userAchievementService,
-                    PasswordEncoder passwordEncoder) {
+                    PasswordEncoder passwordEncoder,
+                    JwtService jwtService) {
         this.userRepository = userRepository;
         this.userDetailsRepository = userDetailsRepository;
         this.historyRepository = historyRepository;
         this.userAchievementService=userAchievementService;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService=jwtService;
     }
 
-    public UserDTO login(LoginRequestDTO loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail())
-            .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+    // public UserDTO login(LoginRequestDTO loginRequest) {
+    //     User user = userRepository.findByEmail(loginRequest.getEmail())
+    //         .orElseThrow(() -> new RuntimeException("Invalid email or password"));
         
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
-        }
+    //     if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+    //         throw new RuntimeException("Invalid email or password");
+    //     }
         
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUserId(user.getUserId());
-        userDTO.setEmail(user.getEmail());
+    //     UserDTO userDTO = new UserDTO();
+    //     userDTO.setUserId(user.getUserId());
+    //     userDTO.setEmail(user.getEmail());
         
-        return userDTO;
-    }
+    //     return userDTO;
+    // }
 
-    @Transactional
-    public UserDTO registerUser(UserRegistrationDTO registrationDTO) {
-        if (userRepository.existsByEmail(registrationDTO.getEmail())) {
-            throw new RuntimeException("Email already in use");
-        }
+    // @Transactional
+    // public UserDTO registerUser(UserRegistrationDTO registrationDTO) {
+    //     if (userRepository.existsByEmail(registrationDTO.getEmail())) {
+    //         throw new RuntimeException("Email already in use");
+    //     }
 
-        // Create and save user
-        User user = new User();
-        user.setEmail(registrationDTO.getEmail());
-        user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-        User savedUser=userRepository.save(user);
+    //     // Create and save user
+    //     User user = new User();
+    //     user.setEmail(registrationDTO.getEmail());
+    //     user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
+    //     User savedUser=userRepository.save(user);
 
-        // Create basic user details if username is provided
-        if (registrationDTO.getUsername() != null && !registrationDTO.getUsername().isEmpty()) {
-            UserDetails userDetails = new UserDetails();
-            userDetails.setUser(savedUser);
-            userDetails.setUsername(registrationDTO.getUsername());
-            userDetailsRepository.save(userDetails);
-        }
+    //     // Create basic user details if username is provided
+    //     if (registrationDTO.getUsername() != null && !registrationDTO.getUsername().isEmpty()) {
+    //         UserDetails userDetails = new UserDetails();
+    //         userDetails.setUser(savedUser);
+    //         userDetails.setUsername(registrationDTO.getUsername());
+    //         userDetailsRepository.save(userDetails);
+    //     }
 
-        // Return DTO
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUserId(savedUser.getUserId());
-        userDTO.setEmail(savedUser.getEmail());
+    //     // Return DTO
+    //     UserDTO userDTO = new UserDTO();
+    //     userDTO.setUserId(savedUser.getUserId());
+    //     userDTO.setEmail(savedUser.getEmail());
 
-        return userDTO;
-    }
+    //     return userDTO;
+    // }
 
     @Transactional
     public UserDetailsDTO completeUserQuestionnaire(Long userId, UserDetailsDTO detailsDTO) {
@@ -258,11 +262,16 @@ public class UserService {
         LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
         
-        Date startDate = Date.from(startOfWeek.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date endDate = Date.from(endOfWeek.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        // Convert to LocalDateTime to include time component
+        LocalDateTime startDateTime = startOfWeek.atStartOfDay();
+        LocalDateTime endDateTime = endOfWeek.plusDays(1).atStartOfDay();
+        
+        // Convert LocalDateTime to Timestamp
+        Timestamp startTimestamp = Timestamp.valueOf(startDateTime);
+        Timestamp endTimestamp = Timestamp.valueOf(endDateTime);
         
         // Get the count of workouts completed between Monday and Friday
-        int workoutCount = historyRepository.countByUserAndWorkoutDateBetween(user, startDate, endDate);
+        int workoutCount = historyRepository.countByUserAndWorkoutDateTimeBetween(user, startTimestamp, endTimestamp);
         
         WeeklyWorkoutsDTO weeklyWorkoutsDTO = new WeeklyWorkoutsDTO();
         weeklyWorkoutsDTO.setTotalWorkouts(workoutCount);
@@ -395,4 +404,57 @@ public class UserService {
         
         return null;
     }
+
+    public UserDTO convertToDTO(User user){
+        UserDTO dto=new UserDTO();
+        dto.setEmail(user.getEmail());
+        dto.setUserId(user.getUserId());
+        return dto;
+    }
+
+    public AuthResponseDTO login(LoginRequestDTO loginRequest) {
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+        
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+        
+        UserDTO userDTO = convertToDTO(user);
+        String token = jwtService.generateToken(user.getUserId());
+        
+        return AuthResponseDTO.builder()
+                .user(userDTO)
+                .token(token)
+                .build();
+    }
+
+    public AuthResponseDTO registerUser(UserRegistrationDTO registrationDTO) {
+        if (userRepository.existsByEmail(registrationDTO.getEmail())) {
+            throw new RuntimeException("Email is already in use");
+        }
+        
+        User user = new User();
+        user.setEmail(registrationDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
+        User savedUser=userRepository.save(user);
+
+        //Create basic user details if username is provided
+        if (registrationDTO.getUsername() != null && !registrationDTO.getUsername().isEmpty()) {
+            UserDetails userDetails = new UserDetails();
+            userDetails.setUser(savedUser);
+            userDetails.setUsername(registrationDTO.getUsername());
+            userDetailsRepository.save(userDetails);
+        }
+        
+        UserDTO userDTO = convertToDTO(savedUser);
+        String token = jwtService.generateToken(savedUser.getUserId());
+        
+        return AuthResponseDTO.builder()
+                .user(userDTO)
+                .token(token)
+                .build();
+    }
+
+
 }

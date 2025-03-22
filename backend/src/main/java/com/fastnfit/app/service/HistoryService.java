@@ -14,6 +14,7 @@ import com.fastnfit.app.repository.HistoryRepository;
 import com.fastnfit.app.repository.UserRepository;
 import com.fastnfit.app.repository.WorkoutRepository;
 
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -38,8 +39,8 @@ public class HistoryService {
         this.historyRepository = historyRepository;
         this.userRepository = userRepository;
         this.workoutRepository = workoutRepository;
-        this.workoutService=workoutService;
-        this.userStreakService=userStreakService;
+        this.workoutService = workoutService;
+        this.userStreakService = userStreakService;
     }
 
     public List<HistoryDTO> getUserHistory(Long userId) {
@@ -55,7 +56,10 @@ public class HistoryService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
         
-        return historyRepository.findByUserAndWorkoutDateBetween(user, startDate, endDate).stream()
+        Timestamp startTimestamp = new Timestamp(startDate.getTime());
+        Timestamp endTimestamp = new Timestamp(endDate.getTime());
+        
+        return historyRepository.findByUserAndWorkoutDateTimeBetween(user, startTimestamp, endTimestamp).stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
     }
@@ -67,10 +71,15 @@ public class HistoryService {
         
         History history = new History();
         history.setUser(user);
-        history.setWorkoutDate(historyDTO.getWorkoutDate());
-        history.setName(historyDTO.getName());
         
-        Optional<Workout> workout=workoutRepository.findById(historyDTO.getWorkout().getWorkoutId());
+        // Convert Date to Timestamp if needed
+        if (historyDTO.getWorkoutDateTime() != null) {
+            history.setWorkoutDateTime(new Timestamp(historyDTO.getWorkoutDateTime().getTime()));
+        }
+        
+        history.setWorkoutName(historyDTO.getName());
+        
+        Optional<Workout> workout = workoutRepository.findById(historyDTO.getWorkout().getWorkoutId());
         if (workout.isPresent()) {
             history.setWorkout(workout.get());
         }
@@ -82,15 +91,15 @@ public class HistoryService {
         return convertToDTO(savedHistory);
     }
 
-    public HistoryDTO recordWorkoutCompletion(Long userId,WorkoutDTO workout){
+    public HistoryDTO recordWorkoutCompletion(Long userId, WorkoutDTO workout) {
         Calendar currentUtilCalendar = Calendar.getInstance();
         HistoryDTO dto = new HistoryDTO();
         dto.setCaloriesBurned(workout.getCalories());
         dto.setWorkout(workout);
-        dto.setWorkoutDate(currentUtilCalendar.getTime());
+        dto.setWorkoutDateTime(new Timestamp(currentUtilCalendar.getTimeInMillis()));
         dto.setDurationInMinutes(workout.getDurationInMinutes());
         
-        HistoryDTO result=createHistory(userId, dto);
+        HistoryDTO result = createHistory(userId, dto);
         userStreakService.updateStreak(userId);
         return result;
     }
@@ -98,12 +107,11 @@ public class HistoryService {
     public HistoryDTO convertToDTO(History history) {
         HistoryDTO dto = new HistoryDTO();
         dto.setHistoryId(history.getHistoryId());
-        dto.setWorkoutDate(history.getWorkoutDate());
-        dto.setName(history.getName());
+        dto.setName(history.getWorkoutName());
         dto.setCaloriesBurned(history.getCaloriesBurned());
         dto.setDurationInMinutes(history.getDurationInMinutes());
         
-        WorkoutDTO workoutDTO=workoutService.convertToDTO(history.getWorkout());
+        WorkoutDTO workoutDTO = workoutService.convertToDTO(history.getWorkout());
         
         dto.setWorkout(workoutDTO);
         return dto;

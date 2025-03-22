@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -98,9 +98,16 @@ public class UserStreakService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User details not found"));
         
-        Date startDate = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date endDate = Date.from(date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-        List<History> workouts = historyRepository.findByUserAndWorkoutDateBetween(user, startDate, endDate);
+        // Convert LocalDate to LocalDateTime for start and end of day
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+        
+        // Convert LocalDateTime to Timestamp
+        Timestamp startTimestamp = Timestamp.valueOf(startOfDay);
+        Timestamp endTimestamp = Timestamp.valueOf(endOfDay);
+        
+        // Use the updated repository method with Timestamp parameters
+        List<History> workouts = historyRepository.findByUserAndWorkoutDateTimeBetween(user, startTimestamp, endTimestamp);
         return !workouts.isEmpty();
     }
 

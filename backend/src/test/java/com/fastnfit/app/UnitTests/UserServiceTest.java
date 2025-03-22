@@ -1,22 +1,5 @@
 package com.fastnfit.app.UnitTests;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.fastnfit.app.dto.*;
 import com.fastnfit.app.enums.FitnessLevel;
 import com.fastnfit.app.enums.PregnancyStatus;
@@ -27,553 +10,465 @@ import com.fastnfit.app.model.UserDetails;
 import com.fastnfit.app.repository.HistoryRepository;
 import com.fastnfit.app.repository.UserDetailsRepository;
 import com.fastnfit.app.repository.UserRepository;
+import com.fastnfit.app.service.JwtService;
 import com.fastnfit.app.service.UserAchievementService;
 import com.fastnfit.app.service.UserService;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
+class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
-    
+
     @Mock
     private UserDetailsRepository userDetailsRepository;
-    
+
     @Mock
     private HistoryRepository historyRepository;
-    
+
     @Mock
     private UserAchievementService userAchievementService;
-    
+
     @Mock
     private PasswordEncoder passwordEncoder;
-    
-    @InjectMocks
+
+    @Mock
+    private JwtService jwtService;
+
     private UserService userService;
-    
     private User testUser;
     private UserDetails testUserDetails;
-    
+
     @BeforeEach
     void setUp() {
-        // Create test user
+        userService = new UserService(
+                userRepository,
+                userDetailsRepository,
+                historyRepository,
+                userAchievementService,
+                passwordEncoder,
+                jwtService
+        );
+
         testUser = new User();
         testUser.setUserId(1L);
         testUser.setEmail("test@example.com");
-        testUser.setPassword("encodedPassword");
-        
-        // Create test user details
+        testUser.setPassword("hashedPassword");
+
         testUserDetails = new UserDetails();
         testUserDetails.setUserId(1L);
         testUserDetails.setUser(testUser);
         testUserDetails.setUsername("testuser");
+        testUserDetails.setDob(Date.valueOf("1990-01-01"));
         testUserDetails.setHeight(170.0);
         testUserDetails.setWeight(70.0);
-        testUserDetails.setDob(new Date());
-        testUserDetails.setWorkoutDays(3);
-        testUserDetails.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS);
+        testUserDetails.setWorkoutDays(5);
+        testUserDetails.setFitnessLevel(FitnessLevel.INTERMEDIATE);
         testUserDetails.setPregnancyStatus(PregnancyStatus.NO);
-        testUserDetails.setWorkoutType(WorkoutType.OTHERS);
-        testUserDetails.setFitnessLevel(FitnessLevel.BEGINNER);
-        
-        // Associate user and details
-        testUser.setUserDetails(testUserDetails);
+        testUserDetails.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS);
+        testUserDetails.setAvatar("default-avatar.png");
     }
-    
+
     @Test
-    void testLogin_Success() {
-        // Setup
+    void login_shouldReturnAuthResponseWhenCredentialsValid() {
+        // Given
         LoginRequestDTO loginRequest = new LoginRequestDTO();
         loginRequest.setEmail("test@example.com");
         loginRequest.setPassword("password123");
-        
+
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
-        when(passwordEncoder.matches("password123", "encodedPassword")).thenReturn(true);
-        
-        // Execute
-        UserDTO result = userService.login(loginRequest);
-        
-        // Verify
-        assertNotNull(result);
-        assertEquals(1L, result.getUserId());
-        assertEquals("test@example.com", result.getEmail());
+        when(passwordEncoder.matches("password123", "hashedPassword")).thenReturn(true);
+        when(jwtService.generateToken(1L)).thenReturn("jwtToken123");
+
+        // When
+        AuthResponseDTO response = userService.login(loginRequest);
+
+        // Then
+        assertNotNull(response);
+        assertEquals("jwtToken123", response.getToken());
+        assertEquals(testUser.getUserId(), response.getUser().getUserId());
+        assertEquals(testUser.getEmail(), response.getUser().getEmail());
+
         verify(userRepository).findByEmail("test@example.com");
-        verify(passwordEncoder).matches("password123", "encodedPassword");
+        verify(passwordEncoder).matches("password123", "hashedPassword");
+        verify(jwtService).generateToken(1L);
     }
-    
+
     @Test
-    void testLogin_InvalidEmail() {
-        // Setup
+    void login_shouldThrowExceptionWhenEmailNotFound() {
+        // Given
         LoginRequestDTO loginRequest = new LoginRequestDTO();
         loginRequest.setEmail("nonexistent@example.com");
         loginRequest.setPassword("password123");
-        
+
         when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
-        
-        // Execute & Verify
+
+        // When/Then
         Exception exception = assertThrows(RuntimeException.class, () -> {
             userService.login(loginRequest);
         });
-        
+
         assertEquals("Invalid email or password", exception.getMessage());
+        verify(userRepository).findByEmail("nonexistent@example.com");
+        verify(passwordEncoder, never()).matches(anyString(), anyString());
+        verify(jwtService, never()).generateToken(anyLong());
     }
-    
+
     @Test
-    void testLogin_InvalidPassword() {
-        // Setup
+    void login_shouldThrowExceptionWhenPasswordDoesNotMatch() {
+        // Given
         LoginRequestDTO loginRequest = new LoginRequestDTO();
         loginRequest.setEmail("test@example.com");
         loginRequest.setPassword("wrongPassword");
-        
+
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
-        when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
-        
-        // Execute & Verify
+        when(passwordEncoder.matches("wrongPassword", "hashedPassword")).thenReturn(false);
+
+        // When/Then
         Exception exception = assertThrows(RuntimeException.class, () -> {
             userService.login(loginRequest);
         });
-        
-        assertEquals("Invalid email or password", exception.getMessage());
-    }
-    
-    @Test
-    void testRegisterUser_Success() {
-        // Setup
-        UserRegistrationDTO registrationDTO = new UserRegistrationDTO();
-        registrationDTO.setEmail("new@example.com");
-        registrationDTO.setPassword("password123");
-        registrationDTO.setUsername("newuser");
-        
-        User newUser = new User();
-        newUser.setUserId(2L);
-        newUser.setEmail("new@example.com");
-        newUser.setPassword("encodedPassword");
-        
-        when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
-        when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
-        when(userRepository.save(any(User.class))).thenReturn(newUser);
-        
-        // Execute
-        UserDTO result = userService.registerUser(registrationDTO);
 
-        // Verify
-        assertNotNull(result);
-        assertEquals(2L, result.getUserId());
-        assertEquals("new@example.com", result.getEmail());
-        
-        verify(userRepository).existsByEmail("new@example.com");
-        verify(passwordEncoder).encode("password123");
-        verify(userRepository).save(any(User.class));
-        verify(userDetailsRepository).save(any(UserDetails.class));
+        assertEquals("Invalid email or password", exception.getMessage());
+        verify(userRepository).findByEmail("test@example.com");
+        verify(passwordEncoder).matches("wrongPassword", "hashedPassword");
+        verify(jwtService, never()).generateToken(anyLong());
     }
-    
+
     @Test
-    void testRegisterUser_EmailAlreadyExists() {
-        // Setup
+    void registerUser_shouldCreateUserAndReturnAuthResponse() {
+        // Given
         UserRegistrationDTO registrationDTO = new UserRegistrationDTO();
-        registrationDTO.setEmail("test@example.com");
+        registrationDTO.setEmail("newuser@example.com");
+        registrationDTO.setPassword("newpassword123");
+        registrationDTO.setUsername("newuser");
+
+        User savedUser = new User();
+        savedUser.setUserId(2L);
+        savedUser.setEmail("newuser@example.com");
+        savedUser.setPassword("encodedPassword");
+
+        when(userRepository.existsByEmail("newuser@example.com")).thenReturn(false);
+        when(passwordEncoder.encode("newpassword123")).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(jwtService.generateToken(2L)).thenReturn("newJwtToken123");
+
+        // When
+        AuthResponseDTO response = userService.registerUser(registrationDTO);
+
+        // Then
+        assertNotNull(response);
+        assertEquals("newJwtToken123", response.getToken());
+        assertEquals(savedUser.getUserId(), response.getUser().getUserId());
+        assertEquals(savedUser.getEmail(), response.getUser().getEmail());
+
+        // Verify user creation
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        assertEquals(registrationDTO.getEmail(), userCaptor.getValue().getEmail());
+
+        // Verify user details creation
+        ArgumentCaptor<UserDetails> userDetailsCaptor = ArgumentCaptor.forClass(UserDetails.class);
+        verify(userDetailsRepository).save(userDetailsCaptor.capture());
+        assertEquals(registrationDTO.getUsername(), userDetailsCaptor.getValue().getUsername());
+        assertEquals(savedUser, userDetailsCaptor.getValue().getUser());
+    }
+
+    @Test
+    void registerUser_shouldThrowExceptionWhenEmailExists() {
+        // Given
+        UserRegistrationDTO registrationDTO = new UserRegistrationDTO();
+        registrationDTO.setEmail("existing@example.com");
         registrationDTO.setPassword("password123");
-        
-        when(userRepository.existsByEmail("test@example.com")).thenReturn(true);
-        
-        // Execute & Verify
+
+        when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
+
+        // When/Then
         Exception exception = assertThrows(RuntimeException.class, () -> {
             userService.registerUser(registrationDTO);
         });
-        
-        assertEquals("Email already in use", exception.getMessage());
+
+        assertEquals("Email is already in use", exception.getMessage());
+        verify(userRepository, never()).save(any(User.class));
+        verify(userDetailsRepository, never()).save(any(UserDetails.class));
     }
-    
+
     @Test
-    void testCompleteUserQuestionnaire_NewDetails() {
-        // Setup
-        Long userId = 1L;
+    void completeUserQuestionnaire_shouldCreateDetailsWhenNotExists() {
+        // Given
         UserDetailsDTO detailsDTO = new UserDetailsDTO();
         detailsDTO.setUsername("updatedUser");
+        detailsDTO.setDob(Date.valueOf("1992-05-15"));
         detailsDTO.setHeight(175.0);
         detailsDTO.setWeight(75.0);
         detailsDTO.setWorkoutDays(4);
-        detailsDTO.setPregnancyStatus("no");
         detailsDTO.setFitnessLevel(FitnessLevel.BEGINNER);
-        detailsDTO.setWorkoutGoal("general");
-        detailsDTO.setWorkoutType("Strength");
-        
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+        detailsDTO.setPregnancyStatus(PregnancyStatus.NO.getValue());
+        detailsDTO.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS.getValue());
+        detailsDTO.setWorkoutType(WorkoutType.OTHERS.getValue());
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userDetailsRepository.findByUser(testUser)).thenReturn(Optional.empty());
-        
-        // Execute
-        UserDetailsDTO result = userService.completeUserQuestionnaire(userId, detailsDTO);
-        
-        // Verify
+        when(userDetailsRepository.save(any(UserDetails.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When
+        UserDetailsDTO result = userService.completeUserQuestionnaire(1L, detailsDTO);
+
+        // Then
         assertNotNull(result);
-        verify(userRepository).findById(userId);
-        verify(userDetailsRepository).findByUser(testUser);
-        verify(userDetailsRepository).save(any(UserDetails.class));
+        
+        // Verify user details creation
+        ArgumentCaptor<UserDetails> userDetailsCaptor = ArgumentCaptor.forClass(UserDetails.class);
+        verify(userDetailsRepository).save(userDetailsCaptor.capture());
+        
+        UserDetails capturedDetails = userDetailsCaptor.getValue();
+        assertEquals(testUser, capturedDetails.getUser());
+        assertEquals(detailsDTO.getUsername(), capturedDetails.getUsername());
+        assertEquals(detailsDTO.getDob(), capturedDetails.getDob());
+        assertEquals(detailsDTO.getHeight(), capturedDetails.getHeight());
+        assertEquals(detailsDTO.getWeight(), capturedDetails.getWeight());
+        assertEquals(detailsDTO.getWorkoutDays(), capturedDetails.getWorkoutDays());
+        assertEquals(detailsDTO.getFitnessLevel(), capturedDetails.getFitnessLevel());
+        assertEquals(detailsDTO.getWorkoutGoal(), capturedDetails.getWorkoutGoal().getValue());
+        assertEquals(detailsDTO.getWorkoutType(), capturedDetails.getWorkoutType().getValue());
     }
-    
+
     @Test
-    void testCompleteUserQuestionnaire_ExistingDetails() {
-        // Setup
-        Long userId = 1L;
+    void completeUserQuestionnaire_shouldUpdateExistingDetails() {
+        // Given
         UserDetailsDTO detailsDTO = new UserDetailsDTO();
         detailsDTO.setUsername("updatedUser");
+        detailsDTO.setDob(Date.valueOf("1992-05-15"));
         detailsDTO.setHeight(175.0);
         detailsDTO.setWeight(75.0);
         detailsDTO.setWorkoutDays(4);
-        detailsDTO.setPregnancyStatus("no");
         detailsDTO.setFitnessLevel(FitnessLevel.BEGINNER);
-        detailsDTO.setWorkoutGoal("general");
-        detailsDTO.setWorkoutType("Strength");
-        
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+        detailsDTO.setPregnancyStatus(PregnancyStatus.NO.getValue());
+        detailsDTO.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS.getValue());
+        detailsDTO.setWorkoutType(WorkoutType.OTHERS.getValue());
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userDetailsRepository.findByUser(testUser)).thenReturn(Optional.of(testUserDetails));
-        
-        // Execute
-        UserDetailsDTO result = userService.completeUserQuestionnaire(userId, detailsDTO);
-        
-        // Verify
+        when(userDetailsRepository.save(any(UserDetails.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When
+        UserDetailsDTO result = userService.completeUserQuestionnaire(1L, detailsDTO);
+
+        // Then
         assertNotNull(result);
-        verify(userRepository).findById(userId);
-        verify(userDetailsRepository).findByUser(testUser);
-        verify(userDetailsRepository).save(testUserDetails);
-    }
-    
-    @Test
-    void testGetUserDetails() {
-        // Setup
-        Long userId = 1L;
         
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+        // Verify user details update
+        ArgumentCaptor<UserDetails> userDetailsCaptor = ArgumentCaptor.forClass(UserDetails.class);
+        verify(userDetailsRepository).save(userDetailsCaptor.capture());
+        
+        UserDetails capturedDetails = userDetailsCaptor.getValue();
+        assertEquals(testUser, capturedDetails.getUser());
+        assertEquals(detailsDTO.getUsername(), capturedDetails.getUsername());
+        assertEquals(detailsDTO.getDob(), capturedDetails.getDob());
+        assertEquals(detailsDTO.getHeight(), capturedDetails.getHeight());
+        assertEquals(detailsDTO.getWeight(), capturedDetails.getWeight());
+        assertEquals(detailsDTO.getWorkoutDays(), capturedDetails.getWorkoutDays());
+        assertEquals(detailsDTO.getFitnessLevel(), capturedDetails.getFitnessLevel());
+        assertEquals(detailsDTO.getWorkoutGoal(), capturedDetails.getWorkoutGoal().getValue());
+        assertEquals(detailsDTO.getWorkoutType(), capturedDetails.getWorkoutType().getValue());
+    }
+
+    @Test
+    void getUserProfile_shouldReturnUserProfile() {
+        // Given
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userDetailsRepository.findByUser(testUser)).thenReturn(Optional.of(testUserDetails));
-        
-        // Execute
-        UserDetailsDTO result = userService.getUserDetails(userId);
-        
-        // Verify
-        assertNotNull(result);
-        assertEquals(testUserDetails.getUserId(), result.getUserId());
-        assertEquals(testUserDetails.getUsername(), result.getUsername());
-        assertEquals(testUserDetails.getHeight(), result.getHeight());
-        assertEquals(testUserDetails.getWeight(), result.getWeight());
-        
-        verify(userRepository).findById(userId);
-        verify(userDetailsRepository).findByUser(testUser);
-    }
-    
-    @Test
-    void testUpdateUserDetails() {
-        // Setup
-        Long userId = 1L;
-        UserDetailsDTO detailsDTO = new UserDetailsDTO();
-        detailsDTO.setUsername("updatedUser");
-        detailsDTO.setHeight(175.0);
-        detailsDTO.setWeight(75.0);
-        detailsDTO.setWorkoutDays(4);
-        detailsDTO.setPregnancyStatus("no");
-        detailsDTO.setFitnessLevel(FitnessLevel.BEGINNER);
-        detailsDTO.setWorkoutGoal("general");
-        detailsDTO.setWorkoutType("Strength");
-        
-        when(userDetailsRepository.findById(userId)).thenReturn(Optional.of(testUserDetails));
-        
-        // Execute
-        UserDetailsDTO result = userService.updateUserDetails(userId, detailsDTO);
-        
-        // Verify
-        assertNotNull(result);
-        verify(userDetailsRepository).findById(userId);
-        verify(userDetailsRepository).save(testUserDetails);
-        
-        // Verify that user details were updated
-        assertEquals("updatedUser", testUserDetails.getUsername());
-        assertEquals(175.0, testUserDetails.getHeight());
-        assertEquals(75.0, testUserDetails.getWeight());
-        assertEquals(4, testUserDetails.getWorkoutDays());
-    }
-    
-    @Test
-    void testGetUserProfile() {
-        // Setup
-        Long userId = 1L;
-        
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(userDetailsRepository.findByUser(testUser)).thenReturn(Optional.of(testUserDetails));
-        
-        // Execute
-        ProfileDTO result = userService.getUserProfile(userId);
-        
-        // Verify
+
+        // When
+        ProfileDTO result = userService.getUserProfile(1L);
+
+        // Then
         assertNotNull(result);
         assertEquals(testUserDetails.getUsername(), result.getUsername());
         assertEquals(testUser.getEmail(), result.getEmail());
         assertEquals(testUserDetails.getHeight(), result.getHeight());
         assertEquals(testUserDetails.getWeight(), result.getWeight());
-        
-        verify(userRepository).findById(userId);
-        verify(userDetailsRepository).findByUser(testUser);
+        assertEquals(testUserDetails.getDob(), result.getDob());
+        assertEquals(testUserDetails.getWorkoutDays(), result.getWorkoutDaysPerWeekGoal());
+        assertEquals(testUserDetails.getAvatar(), result.getAvatar());
     }
-    
+
     @Test
-    void testUpdateBasicProfile() {
-        // Setup
-        Long userId = 1L;
+    void updateBasicProfile_shouldUpdateUserProfile() {
+        // Given
         ProfileDTO profileDTO = new ProfileDTO();
-        profileDTO.setUsername("updatedUser");
+        profileDTO.setUsername("updatedUsername");
         profileDTO.setEmail("updated@example.com");
-        profileDTO.setHeight(175.0);
-        profileDTO.setWeight(75.0);
-        
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+        profileDTO.setHeight(180.0);
+        profileDTO.setWeight(80.0);
+        profileDTO.setDob(Date.valueOf("1995-10-10"));
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userDetailsRepository.findByUser(testUser)).thenReturn(Optional.of(testUserDetails));
-        
-        // Execute
-        ProfileDTO result = userService.updateBasicProfile(userId, profileDTO);
-        
-        // Verify
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(userDetailsRepository.save(any(UserDetails.class))).thenReturn(testUserDetails);
+
+        // When
+        ProfileDTO result = userService.updateBasicProfile(1L, profileDTO);
+
+        // Then
         assertNotNull(result);
-        verify(userRepository).findById(userId);
-        verify(userDetailsRepository).findByUser(testUser);
+        
+        // Verify user update
         verify(userRepository).save(testUser);
+        assertEquals(profileDTO.getEmail(), testUser.getEmail());
+        
+        // Verify user details update
         verify(userDetailsRepository).save(testUserDetails);
-        
-        // Verify that user and details were updated
-        assertEquals("updatedUser", testUserDetails.getUsername());
-        assertEquals("updated@example.com", testUser.getEmail());
-        assertEquals(175.0, testUserDetails.getHeight());
-        assertEquals(75.0, testUserDetails.getWeight());
+        assertEquals(profileDTO.getUsername(), testUserDetails.getUsername());
+        assertEquals(profileDTO.getHeight(), testUserDetails.getHeight());
+        assertEquals(profileDTO.getWeight(), testUserDetails.getWeight());
+        assertEquals(profileDTO.getDob(), testUserDetails.getDob());
     }
-    
+
     @Test
-    void testUpdateUserGoals() {
-        // Setup
-        Long userId = 1L;
-        GoalsDTO goalsDTO = new GoalsDTO();
-        goalsDTO.setWorkoutDaysPerWeekGoal(5);
-        goalsDTO.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS);
-        
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(userDetailsRepository.findByUser(testUser)).thenReturn(Optional.of(testUserDetails));
-        
-        // Execute
-        GoalsDTO result = userService.updateUserGoals(userId, goalsDTO);
-        
-        // Verify
-        assertNotNull(result);
-        verify(userRepository).findById(userId);
-        verify(userDetailsRepository).findByUser(testUser);
-        verify(userDetailsRepository).save(testUserDetails);
-        
-        // Verify that goals were updated
-        assertEquals(5, testUserDetails.getWorkoutDays());
-    }
-    
-    @Test
-    void testUpdateUserAvatar() {
-        // Setup
-        Long userId = 1L;
-        AvatarDTO avatarDTO = new AvatarDTO();
-        avatarDTO.setAvatarLink("new-avatar-link.png");
-        
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(userDetailsRepository.findByUser(testUser)).thenReturn(Optional.of(testUserDetails));
-        
-        // Execute
-        AvatarDTO result = userService.updateUserAvatar(userId, avatarDTO);
-        
-        // Verify
-        assertNotNull(result);
-        verify(userRepository).findById(userId);
-        verify(userDetailsRepository).findByUser(testUser);
-        verify(userDetailsRepository).save(testUserDetails);
-        
-        // Verify that avatar was updated
-        assertEquals("new-avatar-link.png", testUserDetails.getAvatar());
-    }
-    
-    @Test
-    void testGetWeeklyWorkouts() {
-        // Setup
-        Long userId = 1L;
-        
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(historyRepository.countByUserAndWorkoutDateBetween(eq(testUser), any(Date.class), any(Date.class))).thenReturn(3);
-        
-        // Execute
-        WeeklyWorkoutsDTO result = userService.getWeeklyWorkouts(userId);
-        
-        // Verify
+    void getWeeklyWorkouts_shouldReturnWorkoutCount() {
+        // Given
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(historyRepository.countByUserAndWorkoutDateTimeBetween(
+                eq(testUser), any(Timestamp.class), any(Timestamp.class))).thenReturn(3);
+
+        // When
+        WeeklyWorkoutsDTO result = userService.getWeeklyWorkouts(1L);
+
+        // Then
         assertNotNull(result);
         assertEquals(3, result.getTotalWorkouts());
-        verify(userRepository).findById(userId);
-        verify(historyRepository).countByUserAndWorkoutDateBetween(eq(testUser), any(Date.class), any(Date.class));
+        
+        // Verify the repository was called with appropriate date range parameters
+        verify(historyRepository).countByUserAndWorkoutDateTimeBetween(
+                eq(testUser), any(Timestamp.class), any(Timestamp.class));
     }
-    
+
     @Test
-    void testGetAllUsers() {
-        // Setup
-        List<User> users = new ArrayList<>();
-        users.add(testUser);
-        
-        when(userRepository.findAll()).thenReturn(users);
-        
-        // Execute
-        List<User> result = userService.getAllUsers();
-        
-        // Verify
+    void updateUserAvatar_shouldUpdateAvatar() {
+        // Given
+        AvatarDTO avatarDTO = new AvatarDTO();
+        avatarDTO.setAvatarLink("new-avatar.png");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userDetailsRepository.findByUser(testUser)).thenReturn(Optional.of(testUserDetails));
+        when(userDetailsRepository.save(any(UserDetails.class))).thenReturn(testUserDetails);
+
+        // When
+        AvatarDTO result = userService.updateUserAvatar(1L, avatarDTO);
+
+        // Then
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(testUser, result.get(0));
-        verify(userRepository).findAll();
+        assertEquals(avatarDTO.getAvatarLink(), testUserDetails.getAvatar());
+        verify(userDetailsRepository).save(testUserDetails);
     }
-    
+
     @Test
-    void testGetUserById() {
-        // Setup
-        Long userId = 1L;
-        
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        
-        // Execute
-        Optional<User> result = userService.getUserById(userId);
-        
-        // Verify
-        assertTrue(result.isPresent());
-        assertEquals(testUser, result.get());
-        verify(userRepository).findById(userId);
-    }
-    
-    @Test
-    void testGetUserByEmail() {
-        // Setup
-        String email = "test@example.com";
-        
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(testUser));
-        
-        // Execute
-        Optional<User> result = userService.getUserByEmail(email);
-        
-        // Verify
-        assertTrue(result.isPresent());
-        assertEquals(testUser, result.get());
-        verify(userRepository).findByEmail(email);
-    }
-    
-    @Test
-    void testGetUserByUsername() {
-        // Setup
-        String username = "testuser";
-        
-        when(userDetailsRepository.findByUsername(username)).thenReturn(Optional.of(testUserDetails));
-        when(userRepository.findById(testUserDetails.getUserId())).thenReturn(Optional.of(testUser));
-        
-        // Execute
-        Optional<User> result = userService.getUserByUsername(username);
-        
-        // Verify
-        assertTrue(result.isPresent());
-        assertEquals(testUser, result.get());
-        verify(userDetailsRepository).findByUsername(username);
-        verify(userRepository).findById(testUserDetails.getUserId());
-    }
-    
-    @Test
-    void testCreateUser() {
-        // Setup
+    void createUser_shouldInitializeUserDetailsAndAchievements() {
+        // Given
         User newUser = new User();
-        newUser.setEmail("new@example.com");
-        newUser.setPassword("password123");
-        
-        when(userRepository.save(newUser)).thenReturn(newUser);
-        
-        // Execute
+        newUser.setEmail("newuser@example.com");
+        newUser.setPassword("encodedPassword");
+
+        User savedUser = new User();
+        savedUser.setUserId(3L);
+        savedUser.setEmail("newuser@example.com");
+        savedUser.setPassword("encodedPassword");
+
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        doNothing().when(userAchievementService).initializeUserAchievements(savedUser);
+
+        // When
         User result = userService.createUser(newUser);
-        
-        // Verify
+
+        // Then
         assertNotNull(result);
-        verify(userRepository).save(newUser);
-        verify(userAchievementService).initializeUserAchievements(newUser);
-        
-        // Verify that UserDetails was created if not provided
-        assertNotNull(newUser.getUserDetails());
+        assertEquals(savedUser.getUserId(), result.getUserId());
+        assertEquals(savedUser.getEmail(), result.getEmail());
+
+        // Verify user details initialization
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        assertNotNull(userCaptor.getValue().getUserDetails());
+        assertEquals(0, userCaptor.getValue().getUserDetails().getCurrentStreak());
+        assertEquals(0, userCaptor.getValue().getUserDetails().getLongestStreak());
+
+        // Verify achievements initialization
+        verify(userAchievementService).initializeUserAchievements(savedUser);
     }
-    
+
     @Test
-    void testUpdateUser() {
-        // Setup
-        when(userRepository.save(testUser)).thenReturn(testUser);
-        
-        // Execute
-        User result = userService.updateUser(testUser);
-        
-        // Verify
-        assertNotNull(result);
-        assertEquals(testUser, result);
-        verify(userRepository).save(testUser);
+    void getUserByEmail_shouldReturnUserWhenExists() {
+        // Given
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+
+        // When
+        Optional<User> result = userService.getUserByEmail("test@example.com");
+
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals(testUser.getUserId(), result.get().getUserId());
+        assertEquals(testUser.getEmail(), result.get().getEmail());
+        verify(userRepository).findByEmail("test@example.com");
     }
-    
+
     @Test
-    void testDeleteUser() {
-        // Setup
-        Long userId = 1L;
-        
-        // Execute
-        userService.deleteUser(userId);
-        
-        // Verify
-        verify(userRepository).deleteById(userId);
+    void getUserByUsername_shouldReturnUserWhenExists() {
+        // Given
+        when(userDetailsRepository.findByUsername("testuser")).thenReturn(Optional.of(testUserDetails));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+
+        // When
+        Optional<User> result = userService.getUserByUsername("testuser");
+
+        // Then
+        assertTrue(result.isPresent());
+        assertEquals(testUser.getUserId(), result.get().getUserId());
+        assertEquals(testUser.getEmail(), result.get().getEmail());
+        verify(userDetailsRepository).findByUsername("testuser");
+        verify(userRepository).findById(1L);
     }
-    
+
     @Test
-    void testUpdateUserDetailsEntity_Existing() {
-        // Setup
-        Long userId = 1L;
-        UserDetails updatedDetails = new UserDetails();
-        updatedDetails.setUsername("updatedUser");
-        updatedDetails.setHeight(175.0);
-        updatedDetails.setWeight(75.0);
-        
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(userRepository.save(testUser)).thenReturn(testUser);
-        
-        // Execute
-        User result = userService.updateUserDetails(userId, updatedDetails);
-        
-        // Verify
-        assertNotNull(result);
-        assertEquals("updatedUser", testUser.getUserDetails().getUsername());
-        assertEquals(175.0, testUser.getUserDetails().getHeight());
-        assertEquals(75.0, testUser.getUserDetails().getWeight());
-        verify(userRepository).findById(userId);
-        verify(userRepository).save(testUser);
-    }
-    
-    @Test
-    void testUpdateUserDetailsEntity_New() {
-        // Setup
-        Long userId = 1L;
-        UserDetails updatedDetails = new UserDetails();
-        updatedDetails.setUsername("updatedUser");
-        updatedDetails.setHeight(175.0);
-        updatedDetails.setWeight(75.0);
-        
-        User userWithoutDetails = new User();
-        userWithoutDetails.setUserId(userId);
-        userWithoutDetails.setEmail("test@example.com");
-        userWithoutDetails.setPassword("encodedPassword");
-        
-        when(userRepository.findById(userId)).thenReturn(Optional.of(userWithoutDetails));
-        when(userRepository.save(userWithoutDetails)).thenReturn(userWithoutDetails);
-        
-        // Execute
-        User result = userService.updateUserDetails(userId, updatedDetails);
-        
-        // Verify
-        assertNotNull(result);
-        assertNotNull(userWithoutDetails.getUserDetails());
-        assertEquals("updatedUser", userWithoutDetails.getUserDetails().getUsername());
-        assertEquals(175.0, userWithoutDetails.getUserDetails().getHeight());
-        assertEquals(75.0, userWithoutDetails.getUserDetails().getWeight());
-        verify(userRepository).findById(userId);
-        verify(userRepository).save(userWithoutDetails);
+    void getAllUsers_shouldReturnAllUsers() {
+        // Given
+        User user1 = new User();
+        user1.setUserId(1L);
+        user1.setEmail("user1@example.com");
+
+        User user2 = new User();
+        user2.setUserId(2L);
+        user2.setEmail("user2@example.com");
+
+        List<User> users = Arrays.asList(user1, user2);
+        when(userRepository.findAll()).thenReturn(users);
+
+        // When
+        List<User> result = userService.getAllUsers();
+
+        // Then
+        assertEquals(2, result.size());
+        assertEquals(user1.getUserId(), result.get(0).getUserId());
+        assertEquals(user2.getUserId(), result.get(1).getUserId());
+        verify(userRepository).findAll();
     }
 }

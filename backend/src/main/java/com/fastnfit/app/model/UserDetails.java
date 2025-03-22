@@ -16,6 +16,7 @@ public class UserDetails {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    
     private String username;
     private Date dob;
     private Double height;

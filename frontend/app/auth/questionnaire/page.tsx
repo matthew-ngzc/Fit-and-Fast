@@ -77,26 +77,48 @@ export default function QuestionnairePage() {
   };
 
   const handleSubmit = async () => {
-    // Here, you can send the data to your API
     try {
-      const response = await fetch("/api/submit", {
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        alert("You need to be logged in to submit the questionnaire");
+        window.location.href = "/auth/login";
+        return;
+      }
+      
+      // Format the data to match the DTO structure
+      const requestData = {
+        username: formData.username,
+        height: parseFloat(formData.height), // Convert to Double
+        weight: parseFloat(formData.weight), // Convert to Double
+        dob: formData.birthdate, // Send as string, backend can parse
+        fitnessLevel: formData.fitnessLevel.toUpperCase(), // Convert to enum format
+        menstrualCramps: formData.menstrualCramps === "yes",
+        pregnancyStatus: formData.pregnancyStatus,
+        cycleBasedRecommendations: formData.cycleBasedRecommendations === "yes",
+        workoutType: formData.workoutType,
+        workoutDays: parseInt(formData.workoutDays), // Match the DTO field name
+        workoutGoal: formData.fitnessGoal // Match the DTO field name
+      };
+      
+      const response = await fetch("http://localhost:8080/api/users/questionnaire", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(requestData),
       });
-
+  
       if (!response.ok) {
-        throw new Error("Failed to submit form");
+        throw new Error("Failed to submit questionnaire");
       }
-
+  
       // Handle success
-      alert("Form submitted successfully!");
+      alert("Questionnaire submitted successfully!");
       window.location.href = "/";
     } catch (error) {
-      // Handle error
-      console.error(error);
+      console.error("Error submitting questionnaire:", error);
       alert("Error submitting form. Please try again.");
     }
   };
@@ -426,18 +448,18 @@ export default function QuestionnairePage() {
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
               </Button>
-              {/* <Button
+              <Button
                 className="flex-1 bg-primary hover:bg-primary/90"
                 onClick={handleSubmit}
               >
                 Complete
-              </Button> */}
-              <Button
+              </Button>
+              {/* <Button
                 className="flex-1 bg-primary hover:bg-primary/90"
                 onClick={() => (window.location.href = "/")}
               >
                 Complete
-              </Button>
+              </Button> */}
             </CardFooter>
           </Card>
         )}

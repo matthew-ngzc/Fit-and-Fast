@@ -3,7 +3,7 @@ package com.fastnfit.app.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import java.util.Date;
+import java.sql.Timestamp;
 
 @Data
 @Entity
@@ -14,9 +14,9 @@ public class History {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long historyId;
 
-    @Temporal(TemporalType.DATE)
-    private Date workoutDate;
-    private String name;
+    @Column(name = "workout_date_time")
+    private Timestamp workoutDateTime;
+    private String workoutName;
 
     @ManyToOne
     @JoinColumn(name = "workout_id")

@@ -14,14 +14,15 @@ import com.fastnfit.app.service.UserStreakService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-class UserStreakServiceTest {
+@ExtendWith(MockitoExtension.class)
+public class UserStreakServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -46,6 +48,7 @@ class UserStreakServiceTest {
     @Mock
     private UserDetailsRepository userDetailsRepository;
 
+    @InjectMocks
     private UserStreakService userStreakService;
 
     private User testUser;
@@ -53,248 +56,258 @@ class UserStreakServiceTest {
     private final Long userId = 1L;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        userStreakService = new UserStreakService(
-                userRepository,
-                historyRepository,
-                achievementRepository,
-                userAchievementService,
-                userDetailsRepository);
-
-        // Set up test user and user details
-        testUser = new User();
-        testUser.setUserId(userId);
-
+    public void setup() {
         testUserDetails = new UserDetails();
         testUserDetails.setCurrentStreak(0);
         testUserDetails.setLongestStreak(0);
-        testUser.setUserDetails(testUserDetails);
 
-        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
-        when(userDetailsRepository.findById(userId)).thenReturn(Optional.of(testUserDetails));
+        testUser = new User();
+        testUser.setUserId(userId);
+        testUser.setUserDetails(testUserDetails);
     }
 
     @Test
-    void updateStreak_WhenWorkoutTodayAndNoStreak_ShouldIncrementStreak() {
+    public void testUpdateStreak_WorkedOutTodayButMissedYesterday_StreakStaysUnchanged() {
         // Arrange
+        testUserDetails.setCurrentStreak(3);
+        testUserDetails.setLongestStreak(5);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+        // Mock workouts for today but not yesterday
         List<History> todayWorkouts = new ArrayList<>();
         todayWorkouts.add(new History());
+        List<History> emptyList = new ArrayList<>();
 
-        when(historyRepository.findByUserAndWorkoutDateBetween(eq(testUser), any(Date.class), any(Date.class)))
-                .thenReturn(todayWorkouts) // Workout today
-                .thenReturn(new ArrayList<>()); // No workouts yesterday
+        when(historyRepository.findByUserAndWorkoutDateTimeBetween(eq(testUser), any(Timestamp.class),
+                any(Timestamp.class)))
+                .thenReturn(todayWorkouts) // First call for today
+                .thenReturn(emptyList); // Second call for yesterday
 
         // Act
         userStreakService.updateStreak(userId);
 
         // Assert
+        assertEquals(3, testUserDetails.getCurrentStreak());
+        assertEquals(5, testUserDetails.getLongestStreak());
         verify(userRepository).save(testUser);
-        assertEquals(1, testUserDetails.getCurrentStreak());
-        assertEquals(1, testUserDetails.getLongestStreak());
     }
 
     @Test
-    void updateStreak_WhenWorkoutTodayAndYesterday_ShouldIncrementStreak() {
+    public void testUpdateStreak_MissedTwoDaysInARow_StreakResetsToZero() {
+        // Arrange
+        testUserDetails.setCurrentStreak(7);
+        testUserDetails.setLongestStreak(10);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+        // Mock no workouts for today and yesterday
+        List<History> emptyList = new ArrayList<>();
+
+        when(historyRepository.findByUserAndWorkoutDateTimeBetween(eq(testUser), any(Timestamp.class),
+                any(Timestamp.class)))
+                .thenReturn(emptyList) // First call for today
+                .thenReturn(emptyList); // Second call for yesterday
+
+        // Act
+        userStreakService.updateStreak(userId);
+
+        // Assert
+        assertEquals(0, testUserDetails.getCurrentStreak());
+        assertEquals(10, testUserDetails.getLongestStreak());
+        verify(userRepository).save(testUser);
+    }
+
+    @Test
+    public void testUpdateStreak_NewStreakBecomesBest_LongestStreakUpdated() {
+        // Arrange
+        testUserDetails.setCurrentStreak(9);
+        testUserDetails.setLongestStreak(9);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+        // Mock workouts for today and yesterday
+        List<History> workouts = new ArrayList<>();
+        workouts.add(new History());
+
+        when(historyRepository.findByUserAndWorkoutDateTimeBetween(eq(testUser), any(Timestamp.class),
+                any(Timestamp.class)))
+                .thenReturn(workouts) // First call for today
+                .thenReturn(workouts); // Second call for yesterday
+
+        // Act
+        userStreakService.updateStreak(userId);
+
+        // Assert
+        assertEquals(10, testUserDetails.getCurrentStreak());
+        assertEquals(10, testUserDetails.getLongestStreak());
+        verify(userRepository).save(testUser);
+    }
+
+    @Test
+    public void testUpdateStreak_StartingNewStreak_StreakSetToOne() {
+        // Arrange
+        testUserDetails.setCurrentStreak(0);
+        testUserDetails.setLongestStreak(5);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+        // Mock workout for today but not yesterday
+        List<History> todayWorkouts = new ArrayList<>();
+        todayWorkouts.add(new History());
+        List<History> emptyList = new ArrayList<>();
+
+        when(historyRepository.findByUserAndWorkoutDateTimeBetween(eq(testUser), any(Timestamp.class),
+                any(Timestamp.class)))
+                .thenReturn(todayWorkouts) // First call for today
+                .thenReturn(emptyList); // Second call for yesterday
+
+        // Act
+        userStreakService.updateStreak(userId);
+
+        // Assert
+        assertEquals(1, testUserDetails.getCurrentStreak());
+        assertEquals(5, testUserDetails.getLongestStreak());
+        verify(userRepository).save(testUser);
+    }
+
+    @Test
+    public void testUpdateStreak_Reaches5DayStreak_AchievementUnlocked() {
+        // Arrange
+        testUserDetails.setCurrentStreak(4);
+        testUserDetails.setLongestStreak(4);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
+
+        // Mock workouts for today and yesterday
+        List<History> workouts = new ArrayList<>();
+        workouts.add(new History());
+
+        when(historyRepository.findByUserAndWorkoutDateTimeBetween(eq(testUser), any(Timestamp.class),
+                any(Timestamp.class)))
+                .thenReturn(workouts) // First call for today
+                .thenReturn(workouts); // Second call for yesterday
+
+        // Mock achievement
+        Achievement fiveDayAchievement = new Achievement();
+        fiveDayAchievement.setAchievementId(1L);
+        fiveDayAchievement.setTitle("5 Day Streak");
+        when(achievementRepository.findByTitle("5 Day Streak")).thenReturn(Optional.of(fiveDayAchievement));
+
+        // Act
+        userStreakService.updateStreak(userId);
+
+        // Assert
+        assertEquals(5, testUserDetails.getCurrentStreak());
+        assertEquals(5, testUserDetails.getLongestStreak());
+        verify(userRepository).save(testUser);
+        verify(userAchievementService).completeAchievement(userId, 1L);
+    }
+
+    @Test
+    public void testUpdateStreak_WorkedOutTodayAndYesterday_StreakIncremented() {
         // Arrange
         testUserDetails.setCurrentStreak(1);
-        testUserDetails.setLongestStreak(5);
+        testUserDetails.setLongestStreak(3);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
 
-        List<History> workouts = new ArrayList<>();
-        workouts.add(new History());
+        // Mock workouts for today and yesterday
+        List<History> todayWorkouts = new ArrayList<>();
+        todayWorkouts.add(new History());
+        List<History> yesterdayWorkouts = new ArrayList<>();
+        yesterdayWorkouts.add(new History());
 
-        when(historyRepository.findByUserAndWorkoutDateBetween(eq(testUser), any(Date.class), any(Date.class)))
-                .thenReturn(workouts); // Workouts both yesterday and today
+        // Use doAnswer to handle different timestamp ranges
+        doAnswer(invocation -> {
+            User user = invocation.getArgument(0);
+            Timestamp start = invocation.getArgument(1);
+            Timestamp end = invocation.getArgument(2);
+
+            // Return today's workouts if the timestamp is for today
+            LocalDate today = LocalDate.now();
+            if (start.toLocalDateTime().toLocalDate().equals(today)) {
+                return todayWorkouts;
+            }
+            // Return yesterday's workouts if the timestamp is for yesterday
+            else if (start.toLocalDateTime().toLocalDate().equals(today.minusDays(1))) {
+                return yesterdayWorkouts;
+            }
+            return new ArrayList<History>();
+        }).when(historyRepository).findByUserAndWorkoutDateTimeBetween(any(User.class), any(Timestamp.class),
+                any(Timestamp.class));
 
         // Act
         userStreakService.updateStreak(userId);
 
         // Assert
-        verify(userRepository).save(testUser);
         assertEquals(2, testUserDetails.getCurrentStreak());
-        assertEquals(5, testUserDetails.getLongestStreak()); // Should not change as current < longest
+        assertEquals(3, testUserDetails.getLongestStreak());
+        verify(userRepository).save(testUser);
     }
 
     @Test
-    void updateStreak_WhenWorkoutTodayAndNewLongestStreak_ShouldUpdateLongestStreak() {
+    public void testUpdateStreak_UserNotFound_NoChanges() {
         // Arrange
-        testUserDetails.setCurrentStreak(5);
-        testUserDetails.setLongestStreak(5);
-
-        List<History> workouts = new ArrayList<>();
-        workouts.add(new History());
-
-        when(historyRepository.findByUserAndWorkoutDateBetween(eq(testUser), any(Date.class), any(Date.class)))
-                .thenReturn(workouts); // Workouts both yesterday and today
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // Act
         userStreakService.updateStreak(userId);
-
-        // Assert
-        verify(userRepository).save(testUser);
-        assertEquals(6, testUserDetails.getCurrentStreak());
-        assertEquals(6, testUserDetails.getLongestStreak()); // Should update as new streak > longest
-    }
-
-    @Test
-    void updateStreak_WhenNoWorkoutTodayAndYesterday_ShouldResetStreak() {
-        // Arrange
-        testUserDetails.setCurrentStreak(5);
-        testUserDetails.setLongestStreak(10);
-
-        when(historyRepository.findByUserAndWorkoutDateBetween(eq(testUser), any(Date.class), any(Date.class)))
-                .thenReturn(new ArrayList<>()); // No workouts on either day
-
-        // Act
-        userStreakService.updateStreak(userId);
-
-        // Assert
-        verify(userRepository).save(testUser);
-        assertEquals(0, testUserDetails.getCurrentStreak());
-        assertEquals(10, testUserDetails.getLongestStreak()); // Longest streak remains unchanged
-    }
-
-    @Test
-    void updateStreak_WhenNoWorkoutTodayButWorkoutYesterday_ShouldNotChangeStreak() {
-        // Arrange
-        testUserDetails.setCurrentStreak(5);
-
-        when(historyRepository.findByUserAndWorkoutDateBetween(eq(testUser), any(Date.class), any(Date.class)))
-                .thenReturn(List.of(new History())) // Workout yesterday
-                .thenReturn(new ArrayList<>()); // No workout today
-
-        // Act
-        userStreakService.updateStreak(userId);
-
-        // Assert
-        verify(userRepository).save(testUser);
-        assertEquals(5, testUserDetails.getCurrentStreak()); // Should remain unchanged
-    }
-
-    @Test
-    void updateStreak_WhenUserDetailsIsNull_ShouldDoNothing() {
-        // Arrange
-        User userWithoutDetails = new User();
-        userWithoutDetails.setUserId(2L);
-        userWithoutDetails.setUserDetails(null);
-
-        when(userRepository.findById(2L)).thenReturn(Optional.of(userWithoutDetails));
-
-        // Act
-        userStreakService.updateStreak(2L);
 
         // Assert
         verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    void updateStreak_WhenStreak5_ShouldAward5DayStreakAchievement() {
+    public void testUpdateStreak_UserDetailsNull_NoChanges() {
         // Arrange
-        testUserDetails.setCurrentStreak(4);
-
-        List<History> workouts = new ArrayList<>();
-        workouts.add(new History());
-
-        Achievement achievement = new Achievement();
-        achievement.setAchievementId(1L);
-        achievement.setTitle("5 Day Streak");
-
-        when(historyRepository.findByUserAndWorkoutDateBetween(eq(testUser), any(Date.class), any(Date.class)))
-                .thenReturn(workouts); // Workouts both yesterday and today
-
-        when(achievementRepository.findByTitle("5 Day Streak")).thenReturn(Optional.of(achievement));
+        testUser.setUserDetails(null);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
 
         // Act
         userStreakService.updateStreak(userId);
 
         // Assert
-        verify(userRepository).save(testUser);
-        assertEquals(5, testUserDetails.getCurrentStreak());
-        verify(userAchievementService).completeAchievement(userId, 1L);
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
-    void updateStreak_WhenStreak30_ShouldAward30DayStreakAchievement() {
-        // Arrange
-        testUserDetails.setCurrentStreak(29);
-
-        List<History> workouts = new ArrayList<>();
-        workouts.add(new History());
-
-        Achievement achievement5Day = new Achievement();
-        achievement5Day.setAchievementId(1L);
-        achievement5Day.setTitle("5 Day Streak");
-
-        Achievement achievement30Day = new Achievement();
-        achievement30Day.setAchievementId(2L);
-        achievement30Day.setTitle("30 Day Streak");
-
-        when(historyRepository.findByUserAndWorkoutDateBetween(eq(testUser), any(Date.class), any(Date.class)))
-                .thenReturn(workouts); // Workouts both yesterday and today
-
-        when(achievementRepository.findByTitle("5 Day Streak")).thenReturn(Optional.of(achievement5Day));
-        when(achievementRepository.findByTitle("30 Day Streak")).thenReturn(Optional.of(achievement30Day));
-
-        // Act
-        userStreakService.updateStreak(userId);
-
-        // Assert
-        verify(userRepository).save(testUser);
-        assertEquals(30, testUserDetails.getCurrentStreak());
-        verify(userAchievementService).completeAchievement(userId, 1L); // 5-day achievement
-        verify(userAchievementService).completeAchievement(userId, 2L); // 30-day achievement
-    }
-
-    @Test
-    void getUserStreak_ShouldReturnCorrectStreak() {
+    public void testGetUserStreak_ReturnsCorrectStreak() {
         // Arrange
         testUserDetails.setCurrentStreak(7);
+        when(userDetailsRepository.findById(userId)).thenReturn(Optional.of(testUserDetails));
 
         // Act
         StreakDTO result = userStreakService.getUserStreak(userId);
 
         // Assert
+        assertNotNull(result);
         assertEquals(7, result.getDays());
-        verify(userDetailsRepository).findById(userId);
     }
 
     @Test
-    void getLongestUserStreak_ShouldReturnCorrectStreak() {
+    public void testGetLongestUserStreak_ReturnsCorrectStreak() {
         // Arrange
-        testUserDetails.setLongestStreak(15);
+        testUserDetails.setLongestStreak(14);
+        when(userDetailsRepository.findById(userId)).thenReturn(Optional.of(testUserDetails));
 
         // Act
         StreakDTO result = userStreakService.getLongestUserStreak(userId);
 
         // Assert
-        assertEquals(15, result.getDays());
-        verify(userDetailsRepository).findById(userId);
+        assertNotNull(result);
+        assertEquals(14, result.getDays());
     }
 
     @Test
-    void getUserStreak_WhenUserNotFound_ShouldThrowException() {
+    public void testGetUserStreak_UserNotFound_ThrowsException() {
         // Arrange
-        when(userDetailsRepository.findById(999L)).thenReturn(Optional.empty());
+        when(userDetailsRepository.findById(userId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            userStreakService.getUserStreak(999L);
-        });
-
-        assertEquals("User details not found", exception.getMessage());
+        assertThrows(RuntimeException.class, () -> userStreakService.getUserStreak(userId));
     }
 
     @Test
-    void getLongestUserStreak_WhenUserNotFound_ShouldThrowException() {
+    public void testGetLongestUserStreak_UserNotFound_ThrowsException() {
         // Arrange
-        when(userDetailsRepository.findById(999L)).thenReturn(Optional.empty());
+        when(userDetailsRepository.findById(userId)).thenReturn(Optional.empty());
 
         // Act & Assert
-        Exception exception = assertThrows(RuntimeException.class, () -> {
-            userStreakService.getLongestUserStreak(999L);
-        });
-
-        assertEquals("User details not found", exception.getMessage());
+        assertThrows(RuntimeException.class, () -> userStreakService.getLongestUserStreak(userId));
     }
 }

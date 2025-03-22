@@ -84,8 +84,24 @@ public class WorkoutTrackerService {
     //  * Get recent workouts for a user
     //  */
     public List<History> getRecentWorkouts(Long userId, int limit) {
-        return historyRepository.findByUserIdOrderByWorkoutDateDesc(userId, limit);
+        return historyRepository.findByUserIdOrderByWorkoutDateTimeDesc(userId, limit);
     }
+
+    // public List<History> getRecentWorkouts(Long userId, int days) {
+    //     User user = userRepository.findById(userId)
+    //         .orElseThrow(() -> new RuntimeException("User not found"));
+        
+    //     // Calculate the date 'days' days ago
+    //     LocalDate today = LocalDate.now();
+    //     LocalDate startDate = today.minusDays(days);
+        
+    //     // Convert to Timestamp for database query
+    //     Timestamp startTimestamp = Timestamp.valueOf(startDate.atStartOfDay());
+    //     Timestamp currentTimestamp = new Timestamp(System.currentTimeMillis());
+        
+    //     // Get workouts between the calculated start date and now
+    //     return historyRepository.findByUserAndWorkoutDateTimeBetween(user, startTimestamp, currentTimestamp);
+    // }
     
     /**
      * Get total calories burned by a user

@@ -1,5 +1,6 @@
 package com.fastnfit.app.config;
 
+import com.fastnfit.app.config.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -9,6 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -19,6 +21,12 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -27,17 +35,15 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
                 // Public endpoints
-                .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/workouts/").permitAll()
                 
                 // Protected endpoints
                 .requestMatchers("/api/users/").authenticated()
-                .requestMatchers("/api/routines/").authenticated()
                 .requestMatchers("/api/history/").authenticated()
                 .anyRequest().authenticated()
-            );
-        
-        // Add JWT token filter here if implementing JWT authentication
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
     }

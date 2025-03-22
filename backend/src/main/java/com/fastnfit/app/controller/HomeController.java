@@ -25,23 +25,24 @@ public class HomeController {
     private final RecommendationService recommendationService;
     private final UserStreakService userStreakService;
     private final WorkoutService workoutService;
+    private final AuthUtils authUtils;
 
     @Autowired
-    public HomeController(RecommendationService recommendationService, UserStreakService userStreakService, WorkoutService workoutService) {
+    public HomeController(RecommendationService recommendationService, UserStreakService userStreakService, WorkoutService workoutService,
+                            AuthUtils authUtils) {
         this.recommendationService = recommendationService;
         this.userStreakService = userStreakService;
         this.workoutService = workoutService;
+        this.authUtils=authUtils;
     }
 
     /**
      * Get daily workout recommendation for the user
      */
     @GetMapping("/recommendation")
-    public ResponseEntity<RecommendationDTO> getDailyRecommendation(
-            @RequestParam(required = false) Long userId) {
-        // Default to user ID 1 if not provided (for demo purposes)
-        Long effectiveUserId = (userId != null) ? userId : 1L;
-        RecommendationDTO recommendation = recommendationService.getDailyRecommendation(effectiveUserId);
+    public ResponseEntity<RecommendationDTO> getDailyRecommendation() {
+        Long userId = authUtils.getCurrentUserId();
+        RecommendationDTO recommendation = recommendationService.getDailyRecommendation(userId);
         return ResponseEntity.ok(recommendation);
     }
 
@@ -49,11 +50,9 @@ public class HomeController {
      * Get user's current streak
      */
     @GetMapping("/streak")
-    public ResponseEntity<StreakDTO> getUserStreak(
-            @RequestParam(required = false) Long userId) {
-        // Default to user ID 1 if not provided (for demo purposes)
-        Long effectiveUserId = (userId != null) ? userId : 1L;
-        StreakDTO streak = userStreakService.getUserStreak(effectiveUserId);
+    public ResponseEntity<StreakDTO> getUserStreak() {
+        Long userId = authUtils.getCurrentUserId();
+        StreakDTO streak = userStreakService.getUserStreak(userId);
         return ResponseEntity.ok(streak);
     }
 

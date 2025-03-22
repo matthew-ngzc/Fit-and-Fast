@@ -25,15 +25,19 @@ public class WorkoutProgressController {
     private final WorkoutService workoutService;
     private final HistoryService historyService;
     private final WorkoutTrackerService workoutTrackerService;
+    private final AuthUtils authUtils;
 
     @Autowired
     public WorkoutProgressController(
             WorkoutService workoutService,
             HistoryService historyService,
-            WorkoutTrackerService workoutTrackerService) {
+            WorkoutTrackerService workoutTrackerService,
+            AuthUtils authUtils
+            ) {
         this.workoutService = workoutService;
         this.historyService = historyService;
         this.workoutTrackerService = workoutTrackerService;
+        this.authUtils=authUtils;
     }
 
     /**
@@ -59,9 +63,9 @@ public class WorkoutProgressController {
      */
     @PostMapping("/complete/{userId}")
     public ResponseEntity<WorkoutCompletionResponse> completeWorkout(
-            @PathVariable Long userId,
             @RequestBody WorkoutCompletionRequest request) {
         
+        Long userId = authUtils.getCurrentUserId();
         // Get the workout details
         WorkoutDTO workout = workoutService.getWorkoutById(request.getWorkoutId());
         

@@ -7,10 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.fastnfit.app.dto.UserDetailsDTO;
-import com.fastnfit.app.dto.ProfileDTO;
-import com.fastnfit.app.dto.GoalsDTO;
-import com.fastnfit.app.dto.AvatarDTO;
-import com.fastnfit.app.dto.WeeklyWorkoutsDTO;
 import com.fastnfit.app.service.UserService;
 
 @RestController
@@ -19,15 +15,18 @@ import com.fastnfit.app.service.UserService;
 public class UserController {
 
     private final UserService userService;
+    private final AuthUtils authUtils;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService,AuthUtils authUtils) {
         this.userService = userService;
+        this.authUtils=authUtils;
     }
 
-    @GetMapping("/{userId}/details")
-    public ResponseEntity<UserDetailsDTO> getUserDetails(@PathVariable Long userId) {
+    @GetMapping("/details")
+    public ResponseEntity<UserDetailsDTO> getUserDetails() {
         try {
+            Long userId = authUtils.getCurrentUserId();
             UserDetailsDTO userDetailsDTO = userService.getUserDetails(userId);
             return ResponseEntity.ok(userDetailsDTO);
         } catch (RuntimeException e) {
@@ -35,11 +34,11 @@ public class UserController {
         }
     }
 
-    @PostMapping("/{userId}/questionnaire")
+    @PostMapping("/questionnaire")
     public ResponseEntity<UserDetailsDTO> completeQuestionnaire(
-            @PathVariable Long userId,
             @RequestBody UserDetailsDTO questionnaireData) {
         try {
+            Long userId = authUtils.getCurrentUserId();
             UserDetailsDTO userDetailsDTO = userService.completeUserQuestionnaire(userId, questionnaireData);
             return ResponseEntity.status(HttpStatus.CREATED).body(userDetailsDTO);
         } catch (RuntimeException e) {
@@ -47,69 +46,13 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{userId}/details")
+    @PutMapping("/details")
     public ResponseEntity<UserDetailsDTO> updateUserDetails(
-            @PathVariable Long userId,
             @RequestBody UserDetailsDTO userDetailsDTO) {
         try {
+            Long userId = authUtils.getCurrentUserId();
             UserDetailsDTO updatedDetails = userService.updateUserDetails(userId, userDetailsDTO);
             return ResponseEntity.ok(updatedDetails);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-    
-    @GetMapping("/{userId}/profile")
-    public ResponseEntity<ProfileDTO> getUserProfile(@PathVariable Long userId) {
-        try {
-            ProfileDTO profileDTO = userService.getUserProfile(userId);
-            return ResponseEntity.ok(profileDTO);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-    
-    @PutMapping("/{userId}/profile")
-    public ResponseEntity<ProfileDTO> updateBasicProfile(
-            @PathVariable Long userId,
-            @RequestBody ProfileDTO profileDTO) {
-        try {
-            ProfileDTO updatedProfile = userService.updateBasicProfile(userId, profileDTO);
-            return ResponseEntity.ok(updatedProfile);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-    
-    @PutMapping("/{userId}/goals")
-    public ResponseEntity<GoalsDTO> updateUserGoals(
-            @PathVariable Long userId,
-            @RequestBody GoalsDTO goalsDTO) {
-        try {
-            GoalsDTO updatedGoals = userService.updateUserGoals(userId, goalsDTO);
-            return ResponseEntity.ok(updatedGoals);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-    
-    @PutMapping("/{userId}/avatar")
-    public ResponseEntity<AvatarDTO> updateUserAvatar(
-            @PathVariable Long userId,
-            @RequestBody AvatarDTO avatarDTO) {
-        try {
-            AvatarDTO updatedAvatar = userService.updateUserAvatar(userId, avatarDTO);
-            return ResponseEntity.ok(updatedAvatar);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-    }
-    
-    @GetMapping("/{userId}/weekly-workouts")
-    public ResponseEntity<WeeklyWorkoutsDTO> getWeeklyWorkouts(@PathVariable Long userId) {
-        try {
-            WeeklyWorkoutsDTO weeklyWorkouts = userService.getWeeklyWorkouts(userId);
-            return ResponseEntity.ok(weeklyWorkouts);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

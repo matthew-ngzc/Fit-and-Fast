@@ -34,7 +34,7 @@ export default function SignupPage() {
     }
 
     try {
-      const response = await fetch("https://your-api-url.com/signup", {
+      const response = await fetch("http://localhost:8080/api/auth/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,7 +50,13 @@ export default function SignupPage() {
 
       if (response.ok) {
         // Redirect to a different page after successful signup
-        window.location.href = "/auth/login";
+        //window.location.href = "/auth/login";
+        // Store token if returned
+        if (data.token) {
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("userId", data.userId);
+        }
+        window.location.href = "/auth/questionnaire";
       } else {
         setError(data.message || "Signup failed. Please try again.");
       }

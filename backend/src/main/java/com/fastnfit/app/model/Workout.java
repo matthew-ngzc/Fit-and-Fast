@@ -33,11 +33,9 @@ public class Workout {
     private Integer calories;
     private Integer durationInMinutes;
     
-    @ManyToMany(mappedBy = "workoutOrder")
-    private List<Routine> routines;
-    
     @OneToMany(mappedBy = "workout")
     private List<History> historyWorkoutList;
 
-    private List<String> exercises;
+    @OneToMany(mappedBy = "workout", fetch = FetchType.LAZY)
+    private List<Exercise> exercises;
 }
