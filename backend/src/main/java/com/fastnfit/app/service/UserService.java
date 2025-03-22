@@ -193,7 +193,7 @@ public class UserService {
         profileDTO.setWeight(userDetails.getWeight());
         profileDTO.setDob(userDetails.getDob());
         profileDTO.setWorkoutGoal(userDetails.getWorkoutGoal().getValue());
-        profileDTO.setWorkoutDaysPerWeekGoal(userDetails.getWorkoutDays());
+        profileDTO.setWorkoutDays(userDetails.getWorkoutDays());
         profileDTO.setAvatar(userDetails.getAvatar());
         
         return profileDTO;

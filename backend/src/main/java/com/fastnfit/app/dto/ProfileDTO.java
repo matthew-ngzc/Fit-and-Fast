@@ -14,7 +14,7 @@ public class ProfileDTO {
     private Double weight;
     private Date dob;
     private String workoutGoal;
-    private Integer workoutDaysPerWeekGoal;
+    private Integer workoutDays;
     private String avatar;
 }
 

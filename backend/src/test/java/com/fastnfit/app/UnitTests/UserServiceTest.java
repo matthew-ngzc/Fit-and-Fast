@@ -307,7 +307,7 @@ class UserServiceTest {
         assertEquals(testUserDetails.getHeight(), result.getHeight());
         assertEquals(testUserDetails.getWeight(), result.getWeight());
         assertEquals(testUserDetails.getDob(), result.getDob());
-        assertEquals(testUserDetails.getWorkoutDays(), result.getWorkoutDaysPerWeekGoal());
+        assertEquals(testUserDetails.getWorkoutDays(), result.getWorkoutDays());
         assertEquals(testUserDetails.getAvatar(), result.getAvatar());
     }
 
