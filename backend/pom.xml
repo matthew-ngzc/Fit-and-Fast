@@ -42,7 +42,12 @@
             <artifactId>json</artifactId>
             <version>20240303</version>
         </dependency>
-
+        <!-- For mocking testing -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!-- Database -->
         <dependency>
             <groupId>mysql</groupId>
