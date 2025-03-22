@@ -9,7 +9,7 @@
         <relativePath/>
     </parent>
     <groupId>main.java.com.fastnfit</groupId>
-    <artifactId>workout-app</artifactId>
+    <artifactId>fastnfit-app</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>Fast-and-Fit</name>
     <description>Fast-and-Fit Application Backend</description>
