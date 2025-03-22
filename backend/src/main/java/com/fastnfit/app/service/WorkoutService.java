@@ -9,6 +9,7 @@ import com.fastnfit.app.enums.WorkoutLevel;
 import com.fastnfit.app.enums.WorkoutType;
 import com.fastnfit.app.model.Workout;
 import com.fastnfit.app.repository.WorkoutRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,5 +58,20 @@ public class WorkoutService {
         dto.setCalories(workout.getCalories());
         dto.setDurationInMinutes(workout.getDurationInMinutes());
         return dto;
+    }
+
+    @Transactional
+    public WorkoutDTO saveCustomWorkoutForUser(Long userId, WorkoutDTO workoutDTO) {
+        Workout workout = new Workout();
+        workout.setName(workoutDTO.getName());
+        workout.setDescription(workoutDTO.getDescription());
+        workout.setDurationInMinutes(workoutDTO.getDurationInMinutes());
+        workout.setCalories(workoutDTO.getCalories());
+        workout.setLevel(workoutDTO.getLevel());
+        workout.setCategory(WorkoutType.fromString(workoutDTO.getCategory()));
+        // Optional: tag it or link to user if your model supports it
+
+        Workout saved = workoutRepository.save(workout);
+        return convertToDTO(saved);
     }
 }
