@@ -31,6 +31,7 @@ public class Workout {
     private WorkoutLevel level;
     
     private Integer calories;
+    private Integer durationInMinutes;
     
     @ManyToMany(mappedBy = "workoutOrder")
     private List<Routine> routines;

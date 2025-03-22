@@ -11,4 +11,5 @@ public class WorkoutCompletionResponse {
     private int caloriesBurned;
     private int totalWorkouts;
     private int totalCaloriesBurned;
+    private int totalDurationInMinutes;
 }

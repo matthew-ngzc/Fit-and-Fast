@@ -113,6 +113,7 @@ public class RoutineService {
                 workoutDTO.setDescription(workout.getDescription());
                 workoutDTO.setLevel(workout.getLevel());
                 workoutDTO.setCalories(workout.getCalories());
+                workoutDTO.setDurationInMinutes(workout.getDurationInMinutes());
                 return workoutDTO;
             })
             .collect(Collectors.toList());

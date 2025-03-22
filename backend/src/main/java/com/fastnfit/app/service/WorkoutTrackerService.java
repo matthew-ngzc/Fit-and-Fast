@@ -93,4 +93,11 @@ public class WorkoutTrackerService {
     public int getTotalCaloriesBurned(Long userId) {
         return historyRepository.sumCaloriesBurnedByUserId(userId);
     }
+
+    /**
+     * Get total minutes spent by a user
+     */
+    public int getTotalDuration(Long userId) {
+        return historyRepository.sumTimeExercisedByUserId(userId);
+    }
 }

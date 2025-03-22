@@ -55,6 +55,7 @@ public class WorkoutService {
         dto.setDescription(workout.getDescription());
         dto.setLevel(workout.getLevel());
         dto.setCalories(workout.getCalories());
+        dto.setDurationInMinutes(workout.getDurationInMinutes());
         return dto;
     }
 }

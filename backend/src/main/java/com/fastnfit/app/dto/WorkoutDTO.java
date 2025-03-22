@@ -15,5 +15,6 @@ public class WorkoutDTO {
     private String description;
     private WorkoutLevel level;
     private Integer calories;
+    private Integer durationInMinutes;
     private List<String> exercises;
 }

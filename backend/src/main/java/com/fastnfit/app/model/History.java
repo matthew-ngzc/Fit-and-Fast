@@ -28,4 +28,6 @@ public class History {
 
     // Added fields for tracking calories and completion
     private Integer caloriesBurned;
+
+    private Integer durationInMinutes;
 }

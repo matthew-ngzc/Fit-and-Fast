@@ -11,4 +11,5 @@ public class HistoryDTO {
     private String name;
     private WorkoutDTO workout;
     private Integer caloriesBurned;
+    private Integer durationInMinutes;
 }

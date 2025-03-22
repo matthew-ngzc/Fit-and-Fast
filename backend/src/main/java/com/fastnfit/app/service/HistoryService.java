@@ -76,6 +76,7 @@ public class HistoryService {
         }
 
         history.setCaloriesBurned(historyDTO.getCaloriesBurned());
+        history.setDurationInMinutes(historyDTO.getDurationInMinutes());
         
         History savedHistory = historyRepository.save(history);
         return convertToDTO(savedHistory);
@@ -87,6 +88,7 @@ public class HistoryService {
         dto.setCaloriesBurned(workout.getCalories());
         dto.setWorkout(workout);
         dto.setWorkoutDate(currentUtilCalendar.getTime());
+        dto.setDurationInMinutes(workout.getDurationInMinutes());
         
         HistoryDTO result=createHistory(userId, dto);
         userStreakService.updateStreak(userId);
@@ -98,6 +100,8 @@ public class HistoryService {
         dto.setHistoryId(history.getHistoryId());
         dto.setWorkoutDate(history.getWorkoutDate());
         dto.setName(history.getName());
+        dto.setCaloriesBurned(history.getCaloriesBurned());
+        dto.setDurationInMinutes(history.getDurationInMinutes());
         
         WorkoutDTO workoutDTO=workoutService.convertToDTO(history.getWorkout());
         

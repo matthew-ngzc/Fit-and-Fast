@@ -42,4 +42,10 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
     // */
     @Query("SELECT COALESCE(SUM(h.caloriesBurned), 0) FROM History h WHERE h.user.userId = :userId")
     int sumCaloriesBurnedByUserId(@Param("userId") Long userId);
+
+    // /
+    // * Sum total time in minutes exercised by a user
+    // */
+    @Query("SELECT COALESCE(SUM(h.durationInMinutes), 0) FROM History h WHERE h.user.userId = :userId")
+    int sumTimeExercisedByUserId(@Param("userId") Long userId);
 }

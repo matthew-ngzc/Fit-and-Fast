@@ -71,6 +71,7 @@ public class WorkoutProgressController {
         // Get updated stats for the response
         int totalWorkouts = workoutTrackerService.getTotalWorkoutCount(userId);
         int totalCaloriesBurned = workoutTrackerService.getTotalCaloriesBurned(userId);
+        int totalDurationInMinutes=workoutTrackerService.getTotalDuration(userId);
         
         // Create response with updated user stats
         WorkoutCompletionResponse response = new WorkoutCompletionResponse();
@@ -81,6 +82,7 @@ public class WorkoutProgressController {
         response.setCaloriesBurned(workout.getCalories());
         response.setTotalWorkouts(totalWorkouts);
         response.setTotalCaloriesBurned(totalCaloriesBurned);
+        response.setTotalDurationInMinutes(totalDurationInMinutes);
         
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
