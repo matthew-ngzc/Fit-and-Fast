@@ -48,6 +48,14 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- For .env -->
+        <dependency>
+        <groupId>io.github.cdimascio</groupId>
+        <artifactId>dotenv-java</artifactId>
+        <version>3.0.0</version>
+        </dependency>
+
+
         <!-- Database -->
         <dependency>
             <groupId>mysql</groupId>

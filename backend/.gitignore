@@ -22,5 +22,5 @@ target/
 logs/
 *.log
 
-#openai api key is here
-src/main/resources/application-dev.properties
+#.env
+.env
