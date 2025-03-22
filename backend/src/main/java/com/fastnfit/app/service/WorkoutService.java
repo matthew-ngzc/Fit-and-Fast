@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.fastnfit.app.dto.WorkoutDTO;
 import com.fastnfit.app.enums.WorkoutLevel;
+import com.fastnfit.app.enums.WorkoutType;
 import com.fastnfit.app.model.Workout;
 import com.fastnfit.app.repository.WorkoutRepository;
 
@@ -34,7 +35,7 @@ public class WorkoutService {
         return convertToDTO(workout);
     }
 
-    public List<WorkoutDTO> getWorkoutsByCategory(String category) {
+    public List<WorkoutDTO> getWorkoutsByCategory(WorkoutType category) {
         return workoutRepository.findByCategory(category).stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
@@ -46,10 +47,10 @@ public class WorkoutService {
             .collect(Collectors.toList());
     }
 
-    private WorkoutDTO convertToDTO(Workout workout) {
+    public WorkoutDTO convertToDTO(Workout workout) {
         WorkoutDTO dto = new WorkoutDTO();
         dto.setWorkoutId(workout.getWorkoutId());
-        dto.setCategory(workout.getCategory());
+        dto.setCategory(workout.getCategory().getValue());
         dto.setName(workout.getName());
         dto.setDescription(workout.getDescription());
         dto.setLevel(workout.getLevel());

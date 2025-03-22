@@ -29,6 +29,8 @@ public class Routine {
     // Sum of all calories from all workouts
     private Integer totalCalories = 0;
 
+    private String image;
+
     @PrePersist
     @PreUpdate
     private void calculateTotalCalories() {

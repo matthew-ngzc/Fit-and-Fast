@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.fastnfit.app.dto.WorkoutDTO;
 import com.fastnfit.app.enums.WorkoutLevel;
+import com.fastnfit.app.enums.WorkoutType;
 import com.fastnfit.app.service.WorkoutService;
 
 import java.util.List;
@@ -37,7 +38,8 @@ public class WorkoutController {
 
     @GetMapping("/category/{category}")
     public ResponseEntity<List<WorkoutDTO>> getWorkoutsByCategory(@PathVariable String category) {
-        List<WorkoutDTO> workouts = workoutService.getWorkoutsByCategory(category);
+        WorkoutType type=WorkoutType.fromString(category);
+        List<WorkoutDTO> workouts = workoutService.getWorkoutsByCategory(type);
         return ResponseEntity.ok(workouts);
     }
 

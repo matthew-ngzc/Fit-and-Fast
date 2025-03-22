@@ -17,13 +17,13 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
 
     List<History> findByUser(User user);
 
-    List<History> findByUserAndRoutineDateBetween(User user, Date startDate, Date endDate);
+    List<History> findByUserAndWorkoutDateBetween(User user, Date startDate, Date endDate);
 
-    Integer countByUserAndRoutineDateBetween(User user, Date startDate, Date endDate);
+    Integer countByUserAndWorkoutDateBetween(User user, Date startDate, Date endDate);
 
-    Boolean existsByUserAndRoutineDateGreaterThanEqual(User user, Date startDate);
+    Boolean existsByUserAndWorkoutDateGreaterThanEqual(User user, Date startDate);
 
-    Integer countWorkoutsByUserAndRoutineDate(User user, Date date);
+    Integer countWorkoutsByUserAndWorkoutDate(User user, Date date);
 
     // /
     // * Count all workouts for a user
@@ -33,8 +33,8 @@ public interface HistoryRepository extends JpaRepository<History, Long> {
     // /
     // * Find recent workouts for a user
     // */
-    @Query("SELECT h FROM History h WHERE h.user.userId = :userId ORDER BY h.routineDate DESC, h.routineTime DESC LIMIT :limit")
-    List<History> findByUserIdOrderByRoutineDateDescRoutineTimeDesc(@Param("userId") Long userId,
+    @Query("SELECT h FROM History h WHERE h.user.userId = :userId ORDER BY h.workoutDate DESC LIMIT :limit")
+    List<History> findByUserIdOrderByWorkoutDateDesc(@Param("userId") Long userId,
             @Param("limit") int limit);
 
     // /

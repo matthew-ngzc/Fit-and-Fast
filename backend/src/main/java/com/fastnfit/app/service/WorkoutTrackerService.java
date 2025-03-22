@@ -84,7 +84,7 @@ public class WorkoutTrackerService {
     //  * Get recent workouts for a user
     //  */
     public List<History> getRecentWorkouts(Long userId, int limit) {
-        return historyRepository.findByUserIdOrderByRoutineDateDescRoutineTimeDesc(userId, limit);
+        return historyRepository.findByUserIdOrderByWorkoutDateDesc(userId, limit);
     }
     
     /**

@@ -1,5 +1,5 @@
 package com.fastnfit.app.enums;
 
 public enum WorkoutLevel{
-    BEGINNER,INTERMEDIATE,ADVANCED,ALL_LEVELS
+    Beginner,Intermediate,Advanced,All_Levels;
 }

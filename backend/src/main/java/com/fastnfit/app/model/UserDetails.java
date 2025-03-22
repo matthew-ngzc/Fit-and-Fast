@@ -109,12 +109,20 @@ public class UserDetails {
         return pregnancyStatus;
     }
 
+    public void setPregnancyStatus(String inputString) {
+        this.pregnancyStatus = PregnancyStatus.fromValue(inputString);
+    }
+
     public void setPregnancyStatus(PregnancyStatus pregnancyStatus) {
         this.pregnancyStatus = pregnancyStatus;
     }
 
     public WorkoutGoal getWorkoutGoal() {
         return workoutGoal;
+    }
+
+    public void setWorkoutGoal(String inputString) {
+        this.workoutGoal = WorkoutGoal.fromString(inputString);
     }
 
     public void setWorkoutGoal(WorkoutGoal workoutGoal) {
@@ -155,6 +163,10 @@ public class UserDetails {
 
     public WorkoutType getWorkoutType() {
         return workoutType;
+    }
+
+    public void setWorkoutType(String inputString) {
+        this.workoutType = WorkoutType.fromString(inputString);
     }
 
     public void setWorkoutType(WorkoutType workoutType) {

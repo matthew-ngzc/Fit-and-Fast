@@ -13,11 +13,11 @@ public class UserRegistrationDTO {
     private Date dob;
     private Double height;
     private Double weight;
-    private PregnancyStatus pregnancyStatus;
-    private WorkoutGoal workoutGoal;
+    private String pregnancyStatus;
+    private String workoutGoal;
     private Integer workoutDays;
-    private FitnessLevel fitnessLevel;
+    private String fitnessLevel;
     private boolean menstrualCramps;
     private boolean cycleBasedRecommendations;
-    private WorkoutType workoutType;
+    private String workoutType;
 }

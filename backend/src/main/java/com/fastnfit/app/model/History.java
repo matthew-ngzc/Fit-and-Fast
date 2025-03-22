@@ -4,37 +4,28 @@ package com.fastnfit.app.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.Date;
-import java.util.List;
 
 @Data
 @Entity
 @Table(name = "history")
 public class History {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long historyId;
-    
+
     @Temporal(TemporalType.DATE)
-    private Date routineDate;
-    
-    @Temporal(TemporalType.TIME)
-    private Date routineTime;
-    
+    private Date workoutDate;
     private String name;
-    
-    @ManyToMany
-    @JoinTable(
-        name = "history_workout_list",
-        joinColumns = @JoinColumn(name = "history_id"),
-        inverseJoinColumns = @JoinColumn(name = "workout_id")
-    )
-    private List<Workout> workoutList;
-    
+
+    @ManyToOne
+    @JoinColumn(name = "workout_id")
+    private Workout workout;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    
+
     // Added fields for tracking calories and completion
     private Integer caloriesBurned;
 }

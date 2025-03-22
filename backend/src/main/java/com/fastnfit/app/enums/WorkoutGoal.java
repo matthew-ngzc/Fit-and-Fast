@@ -1,6 +1,7 @@
 package com.fastnfit.app.enums;
 
 public enum WorkoutGoal {
+    GENERAL("general"),
     GENERAL_FITNESS("General Fitness"),
     WEIGHT_LOSS("Weight Loss"),
     STRENGTH_BUILDING("Strength Building"),
@@ -17,5 +18,14 @@ public enum WorkoutGoal {
 
     public String getValue() {
         return value;
+    }
+
+    public static WorkoutGoal fromString(String value){
+        for (WorkoutGoal goal:WorkoutGoal.values()){
+            if (goal.getValue().equalsIgnoreCase(value)){
+                return goal;
+            }
+        }
+        throw new IllegalArgumentException("Unexpected value:"+value);
     }
 }

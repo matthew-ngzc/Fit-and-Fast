@@ -100,7 +100,7 @@ public class UserStreakService {
         
         Date startDate = Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date endDate = Date.from(date.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
-        List<History> workouts = historyRepository.findByUserAndRoutineDateBetween(user, startDate, endDate);
+        List<History> workouts = historyRepository.findByUserAndWorkoutDateBetween(user, startDate, endDate);
         return !workouts.isEmpty();
     }
 

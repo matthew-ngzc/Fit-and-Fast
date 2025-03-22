@@ -108,7 +108,7 @@ public class RoutineService {
             .map(workout -> {
                 WorkoutDTO workoutDTO = new WorkoutDTO();
                 workoutDTO.setWorkoutId(workout.getWorkoutId());
-                workoutDTO.setCategory(workout.getCategory());
+                workoutDTO.setCategory(workout.getCategory().getValue());
                 workoutDTO.setName(workout.getName());
                 workoutDTO.setDescription(workout.getDescription());
                 workoutDTO.setLevel(workout.getLevel());

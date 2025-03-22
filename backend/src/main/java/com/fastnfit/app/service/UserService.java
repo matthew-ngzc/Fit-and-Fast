@@ -11,7 +11,6 @@ import com.fastnfit.app.dto.UserDetailsDTO;
 import com.fastnfit.app.dto.UserRegistrationDTO;
 import com.fastnfit.app.dto.LoginRequestDTO;
 import com.fastnfit.app.dto.ProfileDTO;
-import com.fastnfit.app.dto.StreakDTO;
 import com.fastnfit.app.dto.GoalsDTO;
 import com.fastnfit.app.dto.AvatarDTO;
 import com.fastnfit.app.dto.WeeklyWorkoutsDTO;
@@ -23,8 +22,6 @@ import com.fastnfit.app.repository.HistoryRepository;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Date;
@@ -78,20 +75,20 @@ public class UserService {
         User user = new User();
         user.setEmail(registrationDTO.getEmail());
         user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-        userRepository.save(user);
+        User savedUser=userRepository.save(user);
 
         // Create basic user details if username is provided
         if (registrationDTO.getUsername() != null && !registrationDTO.getUsername().isEmpty()) {
             UserDetails userDetails = new UserDetails();
-            userDetails.setUser(user);
+            userDetails.setUser(savedUser);
             userDetails.setUsername(registrationDTO.getUsername());
             userDetailsRepository.save(userDetails);
         }
 
         // Return DTO
         UserDTO userDTO = new UserDTO();
-        userDTO.setUserId(user.getUserId());
-        userDTO.setEmail(user.getEmail());
+        userDTO.setUserId(savedUser.getUserId());
+        userDTO.setEmail(savedUser.getEmail());
 
         return userDTO;
     }
@@ -143,13 +140,13 @@ public class UserService {
         dto.setDob(userDetails.getDob());
         dto.setHeight(userDetails.getHeight());
         dto.setWeight(userDetails.getWeight());
-        dto.setPregnancyStatus(userDetails.getPregnancyStatus());
-        dto.setWorkoutGoal(userDetails.getWorkoutGoal());
+        dto.setPregnancyStatus(userDetails.getPregnancyStatus().getValue());
+        dto.setWorkoutGoal(userDetails.getWorkoutGoal().getValue());
         dto.setWorkoutDays(userDetails.getWorkoutDays());
         dto.setFitnessLevel(userDetails.getFitnessLevel());
         dto.setMenstrualCramps(userDetails.getMenstrualCramps());
         dto.setCycleBasedRecommendations(userDetails.getCycleBasedRecommendations());
-        dto.setWorkoutType(userDetails.getWorkoutType());
+        dto.setWorkoutType(userDetails.getWorkoutType().getValue());
 
         return dto;
     }
@@ -191,7 +188,7 @@ public class UserService {
         profileDTO.setHeight(userDetails.getHeight());
         profileDTO.setWeight(userDetails.getWeight());
         profileDTO.setDob(userDetails.getDob());
-        profileDTO.setPrimaryGoal(userDetails.getWorkoutGoal());
+        profileDTO.setWorkoutGoal(userDetails.getWorkoutGoal().getValue());
         profileDTO.setWorkoutDaysPerWeekGoal(userDetails.getWorkoutDays());
         profileDTO.setAvatar(userDetails.getAvatar());
         
@@ -228,7 +225,7 @@ public class UserService {
             .orElseThrow(() -> new RuntimeException("User details not found"));
         
         // Update user goals
-        userDetails.setWorkoutGoal(goalsDTO.getPrimaryGoal());
+        userDetails.setWorkoutGoal(goalsDTO.getWorkoutGoal());
         userDetails.setWorkoutDays(goalsDTO.getWorkoutDaysPerWeekGoal());
         
         userDetailsRepository.save(userDetails);
@@ -265,7 +262,7 @@ public class UserService {
         Date endDate = Date.from(endOfWeek.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
         
         // Get the count of workouts completed between Monday and Friday
-        int workoutCount = historyRepository.countByUserAndRoutineDateBetween(user, startDate, endDate);
+        int workoutCount = historyRepository.countByUserAndWorkoutDateBetween(user, startDate, endDate);
         
         WeeklyWorkoutsDTO weeklyWorkoutsDTO = new WeeklyWorkoutsDTO();
         weeklyWorkoutsDTO.setTotalWorkouts(workoutCount);

@@ -2,6 +2,9 @@
 package com.fastnfit.app.dto;
 
 import lombok.Data;
+
+import java.util.List;
+
 import com.fastnfit.app.enums.WorkoutLevel;
 
 @Data
@@ -12,4 +15,5 @@ public class WorkoutDTO {
     private String description;
     private WorkoutLevel level;
     private Integer calories;
+    private List<String> exercises;
 }

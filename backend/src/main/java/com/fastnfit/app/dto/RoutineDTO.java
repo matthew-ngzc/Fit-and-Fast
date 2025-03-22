@@ -10,4 +10,5 @@ public class RoutineDTO {
     private String name;
     private List<WorkoutDTO> workoutOrder;
     private Integer totalCalories;
+    private String image;
 }

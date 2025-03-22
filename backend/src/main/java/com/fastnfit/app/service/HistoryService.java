@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fastnfit.app.dto.HistoryDTO;
-import com.fastnfit.app.dto.RoutineDTO;
 import com.fastnfit.app.dto.WorkoutDTO;
 import com.fastnfit.app.model.History;
 import com.fastnfit.app.model.User;
@@ -15,9 +14,10 @@ import com.fastnfit.app.repository.HistoryRepository;
 import com.fastnfit.app.repository.UserRepository;
 import com.fastnfit.app.repository.WorkoutRepository;
 
-import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,14 +26,20 @@ public class HistoryService {
     private final HistoryRepository historyRepository;
     private final UserRepository userRepository;
     private final WorkoutRepository workoutRepository;
+    private final WorkoutService workoutService;
+    private final UserStreakService userStreakService;
 
     @Autowired
     public HistoryService(HistoryRepository historyRepository,
                         UserRepository userRepository,
-                        WorkoutRepository workoutRepository) {
+                        WorkoutRepository workoutRepository,
+                        WorkoutService workoutService,
+                        UserStreakService userStreakService) {
         this.historyRepository = historyRepository;
         this.userRepository = userRepository;
         this.workoutRepository = workoutRepository;
+        this.workoutService=workoutService;
+        this.userStreakService=userStreakService;
     }
 
     public List<HistoryDTO> getUserHistory(Long userId) {
@@ -49,7 +55,7 @@ public class HistoryService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
         
-        return historyRepository.findByUserAndRoutineDateBetween(user, startDate, endDate).stream()
+        return historyRepository.findByUserAndWorkoutDateBetween(user, startDate, endDate).stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
     }
@@ -61,49 +67,41 @@ public class HistoryService {
         
         History history = new History();
         history.setUser(user);
-        history.setRoutineDate(historyDTO.getRoutineDate());
-        history.setRoutineTime(historyDTO.getRoutineTime());
+        history.setWorkoutDate(historyDTO.getWorkoutDate());
         history.setName(historyDTO.getName());
         
-        List<Workout> workoutList = new ArrayList<>();
-        if (historyDTO.getWorkoutList() != null) {
-            workoutList = historyDTO.getWorkoutList().stream()
-                .map(dto -> workoutRepository.findById(dto.getWorkoutId())
-                    .orElseThrow(() -> new RuntimeException("Workout not found")))
-                .collect(Collectors.toList());
+        Optional<Workout> workout=workoutRepository.findById(historyDTO.getWorkout().getWorkoutId());
+        if (workout.isPresent()) {
+            history.setWorkout(workout.get());
         }
-        history.setWorkoutList(workoutList);
+
+        history.setCaloriesBurned(historyDTO.getCaloriesBurned());
         
         History savedHistory = historyRepository.save(history);
         return convertToDTO(savedHistory);
     }
 
-    @Transactional
-    public HistoryDTO recordRoutineCompletion(int userId,RoutineDTO routineCompletion){
-        return null;
+    public HistoryDTO recordWorkoutCompletion(Long userId,WorkoutDTO workout){
+        Calendar currentUtilCalendar = Calendar.getInstance();
+        HistoryDTO dto = new HistoryDTO();
+        dto.setCaloriesBurned(workout.getCalories());
+        dto.setWorkout(workout);
+        dto.setWorkoutDate(currentUtilCalendar.getTime());
+        
+        HistoryDTO result=createHistory(userId, dto);
+        userStreakService.updateStreak(userId);
+        return result;
     }
 
-    private HistoryDTO convertToDTO(History history) {
+    public HistoryDTO convertToDTO(History history) {
         HistoryDTO dto = new HistoryDTO();
         dto.setHistoryId(history.getHistoryId());
-        dto.setRoutineDate(history.getRoutineDate());
-        dto.setRoutineTime(history.getRoutineTime());
+        dto.setWorkoutDate(history.getWorkoutDate());
         dto.setName(history.getName());
         
-        List<WorkoutDTO> workoutListDTOs = history.getWorkoutList().stream()
-            .map(workout -> {
-                WorkoutDTO workoutDTO = new WorkoutDTO();
-                workoutDTO.setWorkoutId(workout.getWorkoutId());
-                workoutDTO.setCategory(workout.getCategory());
-                workoutDTO.setName(workout.getName());
-                workoutDTO.setDescription(workout.getDescription());
-                workoutDTO.setLevel(workout.getLevel());
-                workoutDTO.setCalories(workout.getCalories());
-                return workoutDTO;
-            })
-            .collect(Collectors.toList());
+        WorkoutDTO workoutDTO=workoutService.convertToDTO(history.getWorkout());
         
-        dto.setWorkoutList(workoutListDTOs);
+        dto.setWorkout(workoutDTO);
         return dto;
     }
 }

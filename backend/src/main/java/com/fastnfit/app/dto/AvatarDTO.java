@@ -1,15 +1,9 @@
 // AvatarDTO.java
 package com.fastnfit.app.dto;
 
+import lombok.Data;
+
+@Data
 public class AvatarDTO {
     private String avatarLink;
-
-    // Getters and Setters
-    public String getAvatarLink() {
-        return avatarLink;
-    }
-
-    public void setAvatarLink(String avatarLink) {
-        this.avatarLink = avatarLink;
-    }
 }
