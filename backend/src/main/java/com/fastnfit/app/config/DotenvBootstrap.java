@@ -1,32 +1,37 @@
 package com.fastnfit.app.config;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+
+import jakarta.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 public class DotenvBootstrap {
 
+    private final ConfigurableEnvironment environment;
+
+    public DotenvBootstrap(ConfigurableEnvironment environment) {
+        this.environment = environment;
+    }
+
     @PostConstruct
     public void init() {
         try {
-            // Use the proper methods for this library
-            Dotenv dotenv = Dotenv.configure()
-                .ignoreIfMissing()  // Don't fail if file is missing
-                .load();
-                
-            // Set system properties manually
-            dotenv.entries().forEach(entry ->
-                System.setProperty(entry.getKey(), entry.getValue())
-            );
-            //logger.info("Successfully loaded environment variables from .env file");
-            // Or: System.out.println("Successfully loaded environment variables from .env file");
-            System.out.println("Successfully loaded environment variables from .env file");
+            Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+            Map<String, Object> envMap = new HashMap<>();
+
+            dotenv.entries().forEach(entry -> envMap.put(entry.getKey(), entry.getValue()));
+
+            // Add to Spring Boot environment
+            environment.getPropertySources().addFirst(new MapPropertySource("dotenvProperties", envMap));
+
+            System.out.println("✅ Successfully loaded environment variables from .env file");
         } catch (Exception e) {
-            // Log the error but don't crash
-            //logger.warn("Failed to load .env file: {}", e.getMessage());
-            // Or: System.out.println("Warning: Could not load .env file: " + e.getMessage());
-            System.out.println("Warning: Could not load .env file: " + e.getMessage());
+            System.out.println("⚠️ Warning: Could not load .env file: " + e.getMessage());
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.fastnfit.app.service;
 
 import com.fastnfit.app.dto.UserDetailsDTO;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,10 @@ public class ChatbotService {
 
     @Value("${openai.api.key}")
     private String openAiApiKey;
+
+    public String getOpenaiApiKey() {
+        return openAiApiKey;
+    }
 
     /*
      * returns 2 parts to the string
