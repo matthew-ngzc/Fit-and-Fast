@@ -79,9 +79,12 @@ public class HomeController {
                         return "prenatal";
                     if (category.equalsIgnoreCase("postnatal"))
                         return "postnatal";
+                    if (category.equalsIgnoreCase("low-impact"))
+                        return "low-impact";
+                    if (category.equalsIgnoreCase("high-energy"))
+                        return "high-energy";
                     return "others";
                 }));
-
         return ResponseEntity.ok(workoutsByCategory);
     }
 

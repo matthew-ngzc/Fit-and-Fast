@@ -1,7 +1,7 @@
 package com.fastnfit.app.enums;
 
 public enum FitnessLevel {
-    BEGINNER("BEGINNER"), INTERMEDIATE("INTERMEDIATE"), ADVANCED("ADVANCED");
+    Beginner("BEGINNER"), Intermediate("INTERMEDIATE"), Advanced("ADVANCED");
 
     private final String value;
 
