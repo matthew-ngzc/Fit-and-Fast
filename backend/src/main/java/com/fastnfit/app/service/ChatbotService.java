@@ -18,6 +18,11 @@ public class ChatbotService {
     @Value("${openai.api.key}")
     private String openAiApiKey;
 
+    /*
+     * returns 2 parts to the string
+     * 1. json, used for extracting the workoutDTO information for accepting of workout
+     * 2. human readable section, which is displayed to the user, include extra information that we dont need for the workoutDTO
+     */
     public String getResponse(String userInput, UserDetailsDTO userDetailsDTO, Map<String, Object> currentWorkout) {
         String apiUrl = "https://api.openai.com/v1/chat/completions";
 
