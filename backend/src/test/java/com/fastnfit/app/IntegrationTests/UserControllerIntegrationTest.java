@@ -81,7 +81,7 @@ public class UserControllerIntegrationTest {
                 userDetailsDTO.setPregnancyStatus(PregnancyStatus.NO.getValue());
                 userDetailsDTO.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS.getValue());
                 userDetailsDTO.setWorkoutDays(4);
-                userDetailsDTO.setFitnessLevel(FitnessLevel.INTERMEDIATE);
+                userDetailsDTO.setFitnessLevel(FitnessLevel.Intermediate);
                 userDetailsDTO.setMenstrualCramps(false);
                 userDetailsDTO.setCycleBasedRecommendations(false);
                 userDetailsDTO.setWorkoutType(WorkoutType.HIGH_ENERGY.getValue());
@@ -130,7 +130,7 @@ public class UserControllerIntegrationTest {
                 userDetails.setPregnancyStatus(PregnancyStatus.NO);
                 userDetails.setWorkoutGoal(WorkoutGoal.WEIGHT_LOSS.getValue());
                 userDetails.setWorkoutDays(4);
-                userDetails.setFitnessLevel(FitnessLevel.BEGINNER);
+                userDetails.setFitnessLevel(FitnessLevel.Beginner);
                 userDetails.setMenstrualCramps(false);
                 userDetails.setCycleBasedRecommendations(false);
                 userDetails.setWorkoutType(WorkoutType.HIGH_ENERGY);
@@ -174,7 +174,7 @@ public class UserControllerIntegrationTest {
                 userDetails.setWorkoutDays(3);
                 userDetails.setPregnancyStatus(PregnancyStatus.NO);
                 userDetails.setWorkoutGoal(WorkoutGoal.WEIGHT_LOSS);
-                userDetails.setFitnessLevel(FitnessLevel.BEGINNER);
+                userDetails.setFitnessLevel(FitnessLevel.Beginner);
                 userDetails.setWorkoutType(WorkoutType.HIIT);
                 userDetailsRepository.save(userDetails);
 
@@ -183,7 +183,7 @@ public class UserControllerIntegrationTest {
                 updateDTO.setUsername("updatedusername");
                 updateDTO.setWeight(70.0);
                 updateDTO.setWorkoutDays(5);
-                updateDTO.setFitnessLevel(FitnessLevel.ADVANCED);
+                updateDTO.setFitnessLevel(FitnessLevel.Advanced);
                 updateDTO.setWorkoutGoal(WorkoutGoal.STRENGTH_BUILDING.getValue());
                 updateDTO.setWorkoutType(WorkoutType.HIGH_ENERGY.getValue());
 
@@ -206,7 +206,7 @@ public class UserControllerIntegrationTest {
                 assertEquals("updatedusername", userDetails.getUsername(), "Username should be updated");
                 assertEquals(70.0, userDetails.getWeight(), "Weight should be updated");
                 assertEquals(5, userDetails.getWorkoutDays(), "Workout days should be updated");
-                assertEquals(FitnessLevel.ADVANCED, userDetails.getFitnessLevel(), "Fitness level should be updated");
+                assertEquals(FitnessLevel.Advanced, userDetails.getFitnessLevel(), "Fitness level should be updated");
                 assertEquals(WorkoutGoal.STRENGTH_BUILDING, userDetails.getWorkoutGoal(),
                                 "Workout goal should be updated");
                 assertEquals(WorkoutType.HIGH_ENERGY, userDetails.getWorkoutType(), "Workout type should be updated");

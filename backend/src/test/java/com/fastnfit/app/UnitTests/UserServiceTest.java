@@ -81,7 +81,7 @@ class UserServiceTest {
         testUserDetails.setHeight(170.0);
         testUserDetails.setWeight(70.0);
         testUserDetails.setWorkoutDays(5);
-        testUserDetails.setFitnessLevel(FitnessLevel.INTERMEDIATE);
+        testUserDetails.setFitnessLevel(FitnessLevel.Intermediate);
         testUserDetails.setPregnancyStatus(PregnancyStatus.NO);
         testUserDetails.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS);
         testUserDetails.setAvatar("default-avatar.png");
@@ -215,7 +215,7 @@ class UserServiceTest {
         detailsDTO.setHeight(175.0);
         detailsDTO.setWeight(75.0);
         detailsDTO.setWorkoutDays(4);
-        detailsDTO.setFitnessLevel(FitnessLevel.BEGINNER);
+        detailsDTO.setFitnessLevel(FitnessLevel.Beginner);
         detailsDTO.setPregnancyStatus(PregnancyStatus.NO.getValue());
         detailsDTO.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS.getValue());
         detailsDTO.setWorkoutType(WorkoutType.OTHERS.getValue());
@@ -255,7 +255,7 @@ class UserServiceTest {
         detailsDTO.setHeight(175.0);
         detailsDTO.setWeight(75.0);
         detailsDTO.setWorkoutDays(4);
-        detailsDTO.setFitnessLevel(FitnessLevel.BEGINNER);
+        detailsDTO.setFitnessLevel(FitnessLevel.Beginner);
         detailsDTO.setPregnancyStatus(PregnancyStatus.NO.getValue());
         detailsDTO.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS.getValue());
         detailsDTO.setWorkoutType(WorkoutType.OTHERS.getValue());

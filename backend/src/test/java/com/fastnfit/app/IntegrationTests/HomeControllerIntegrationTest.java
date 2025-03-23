@@ -78,7 +78,7 @@ public class HomeControllerIntegrationTest {
                 // Create user details
                 UserDetails userDetails = new UserDetails();
                 userDetails.setUser(testUser);
-                userDetails.setFitnessLevel(FitnessLevel.INTERMEDIATE);
+                userDetails.setFitnessLevel(FitnessLevel.Intermediate);
                 userDetails.setWorkoutGoal(WorkoutGoal.WEIGHT_LOSS);
                 userDetails.setWorkoutType(WorkoutType.HIIT);
                 userDetails.setPregnancyStatus(PregnancyStatus.NO);
@@ -273,7 +273,7 @@ public class HomeControllerIntegrationTest {
                 // Create user details for the mock user
                 UserDetails mockUserDetails = new UserDetails();
                 mockUserDetails.setUser(mockUser);
-                mockUserDetails.setFitnessLevel(FitnessLevel.BEGINNER);
+                mockUserDetails.setFitnessLevel(FitnessLevel.Beginner);
                 mockUserDetails.setWorkoutGoal(WorkoutGoal.STRENGTH_BUILDING);
                 mockUserDetails.setWorkoutType(WorkoutType.STRENGTH);
                 mockUserDetails.setPregnancyStatus(PregnancyStatus.NO);

@@ -3,6 +3,8 @@ package com.fastnfit.app.model;
 
 import com.fastnfit.app.enums.*;
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -40,6 +42,18 @@ public class UserDetails {
 
     // Added field for tracking longest streak
     private Integer longestStreak;
+
+    //added fields for menstrual cycle information
+    // 🩸 Menstrual Cycle Tracking Fields
+    @Column(name = "cycle_length")
+    private Integer cycleLength;
+
+    @Column(name = "period_length")
+    private Integer periodLength;
+
+    @Column(name = "last_period_start_date")
+    private LocalDate lastPeriodStartDate;
+
 
     // Getters and Setters
     public Long getUserDetailsId() {
@@ -181,4 +195,14 @@ public class UserDetails {
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
+
+    public Integer getCycleLength() { return cycleLength; }
+    public void setCycleLength(Integer cycleLength) { this.cycleLength = cycleLength; }
+
+    public Integer getPeriodLength() { return periodLength; }
+    public void setPeriodLength(Integer periodLength) { this.periodLength = periodLength; }
+
+    public LocalDate getLastPeriodStartDate() { return lastPeriodStartDate; }
+    public void setLastPeriodStartDate(LocalDate lastPeriodStartDate) { this.lastPeriodStartDate = lastPeriodStartDate; }
+    
 }

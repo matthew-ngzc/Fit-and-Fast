@@ -69,7 +69,7 @@ public class ChatbotControllerTest {
         mockUserDetails.setDob(new Date(946684800000L)); // 2000-01-01
         mockUserDetails.setHeight(160.0);
         mockUserDetails.setWeight(55.0);
-        mockUserDetails.setFitnessLevel(FitnessLevel.BEGINNER);
+        mockUserDetails.setFitnessLevel(FitnessLevel.Beginner);
         mockUserDetails.setWorkoutGoal("FAT_LOSS");
         mockUserDetails.setWorkoutType("CARDIO");
         mockUserDetails.setMenstrualCramps(true);

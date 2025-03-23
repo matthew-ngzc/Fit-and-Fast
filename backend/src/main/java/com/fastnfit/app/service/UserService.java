@@ -393,6 +393,10 @@ public class UserService {
             userDetails.setUser(savedUser);
             userDetails.setCurrentStreak(0);
             userDetails.setLongestStreak(0);
+            //default values for menstrual cycle
+            userDetails.setCycleLength(28);
+            userDetails.setPeriodLength(5);
+            userDetails.setLastPeriodStartDate(LocalDate.now().minusDays(20));
             userDetailsRepository.save(userDetails);
         }
 

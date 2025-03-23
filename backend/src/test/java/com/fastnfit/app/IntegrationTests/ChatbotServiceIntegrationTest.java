@@ -39,7 +39,7 @@ public class ChatbotServiceIntegrationTest {
         dto.setDob(Date.valueOf("2000-01-01"));
         dto.setHeight(165.0);
         dto.setWeight(60.0);
-        dto.setFitnessLevel(FitnessLevel.INTERMEDIATE);
+        dto.setFitnessLevel(FitnessLevel.Intermediate);
         dto.setWorkoutGoal("Weight Loss");
         dto.setWorkoutType("HIIT");
         dto.setMenstrualCramps(false);

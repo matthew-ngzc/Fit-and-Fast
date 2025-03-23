@@ -53,7 +53,7 @@ public class RecommendationServiceTest {
         testUser.setUserId(1L);
         testUserDetails = new UserDetails();
         testUserDetails.setWorkoutGoal(WorkoutGoal.WEIGHT_LOSS);
-        testUserDetails.setFitnessLevel(FitnessLevel.INTERMEDIATE);
+        testUserDetails.setFitnessLevel(FitnessLevel.Intermediate);
         testUserDetails.setWorkoutType(WorkoutType.HIIT);
         testUserDetails.setPregnancyStatus(PregnancyStatus.NO);
         testUser.setUserDetails(testUserDetails);
@@ -133,7 +133,7 @@ public class RecommendationServiceTest {
         // Arrange
         UserDetails pregnantUserDetails = new UserDetails();
         pregnantUserDetails.setWorkoutGoal(WorkoutGoal.WEIGHT_LOSS);
-        pregnantUserDetails.setFitnessLevel(FitnessLevel.INTERMEDIATE);
+        pregnantUserDetails.setFitnessLevel(FitnessLevel.Intermediate);
         pregnantUserDetails.setWorkoutType(WorkoutType.HIIT);
         pregnantUserDetails.setPregnancyStatus(PregnancyStatus.PREGNANT);
         
@@ -170,7 +170,7 @@ public class RecommendationServiceTest {
         // Arrange
         UserDetails postpartumUserDetails = new UserDetails();
         postpartumUserDetails.setWorkoutGoal(WorkoutGoal.WEIGHT_LOSS);
-        postpartumUserDetails.setFitnessLevel(FitnessLevel.INTERMEDIATE);
+        postpartumUserDetails.setFitnessLevel(FitnessLevel.Intermediate);
         postpartumUserDetails.setWorkoutType(WorkoutType.HIIT);
         postpartumUserDetails.setPregnancyStatus(PregnancyStatus.POSTPARTUM);
         
@@ -280,7 +280,7 @@ public class RecommendationServiceTest {
         // Arrange
         UserDetails advancedUserDetails = new UserDetails();
         advancedUserDetails.setWorkoutGoal(WorkoutGoal.WEIGHT_LOSS);
-        advancedUserDetails.setFitnessLevel(FitnessLevel.ADVANCED);
+        advancedUserDetails.setFitnessLevel(FitnessLevel.Advanced);
         advancedUserDetails.setWorkoutType(WorkoutType.STRENGTH);
         advancedUserDetails.setPregnancyStatus(PregnancyStatus.NO);
         
