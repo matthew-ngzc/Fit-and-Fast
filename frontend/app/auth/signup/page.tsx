@@ -8,18 +8,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft } from "lucide-react";
 
+import axios, { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
+import config from "../../../config";
+
 export default function SignupPage() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const router = useRouter();
 
   // Email regex pattern
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Check for empty fields
+    if (!username || !email || !password || !confirmPassword) {
+      setError("All fields must be filled out.");
+      return;
+    }
 
     // Validate that passwords match
     if (password !== confirmPassword) {
@@ -34,35 +46,37 @@ export default function SignupPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-        }),
+      const response = await axios.post(`${config.AUTH_URL}/signup`, {
+        email,
+        password,
+        username
       });
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok) {
-        // Redirect to a different page after successful signup
-        //window.location.href = "/auth/login";
-        // Store token if returned
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("userId", data.userId);
-        }
-        window.location.href = "/auth/login";
-      } else {
-        setError(data.message || "Signup failed. Please try again.");
-      }
+      if (response.status === 201) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("userId", data.userId);
+        setSuccess("Account created successfully!");
+        setError(""); 
+        setTimeout(() => {
+          router.replace("/auth/questionnaire"); // Redirect to questionnaire
+        }, 1000); 
+      } 
+     
     } catch (error) {
       console.error("Error during signup:", error);
-      setError("An error occurred. Please try again.");
+
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response?.status === 400) {
+          setError("Email is already in use. Proceed to login.");
+        } else {
+          setError("An error occurred. Please try again later.");
+        }
+      } else {
+        setError("An error occurred. Please try again later.");
+      }
     }
   };
 
@@ -96,7 +110,7 @@ export default function SignupPage() {
                 <Label htmlFor="name">Username</Label>
                 <Input
                   id="username"
-                  placeholder="Sarah Anderson"
+                  placeholder="Sarah123"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -133,15 +147,19 @@ export default function SignupPage() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              {/* <Button className="w-full" type="submit">
-                Create Account
-              </Button> */}
-
+              {error && (
+                <div className="p-3 text-sm bg-red-50 border border-red-200 text-red-600 rounded-md">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="p-3 text-sm bg-green-50 border border-green-200 text-green-600 rounded-md">
+                  {success}
+                </div>
+              )}
               <Button
                 className="w-full"
                 type="submit"
-                onClick={() => (window.location.href = "/auth/questionnaire")}
               >
                 Create Account
               </Button>

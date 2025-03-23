@@ -6,39 +6,68 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import axios, { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
+
+import config from "../../../config";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  // Email regex pattern for validation
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const handleLogin = async () => {
+    // Step 1: Validate inputs before calling the API
+
+    if (!email || !password) {
+      setError("Email and password are required.");
+      return; // Don't proceed if any field is empty
+    }
+
+    // Step 2: Validate email format using regex
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return; // Don't proceed if email format is incorrect
+    }
+
     try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+      setIsLoading(true);
+      setError(""); // Reset any previous error messages
+
+      // Make the API call
+      const response = await axios.post(`${config.AUTH_URL}/login`, {
+        email,
+        password,
       });
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok) {
-        // Store the token and user ID in localStorage
+      if (response.status === 200) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
-
-        // Optionally redirect after successful login
-        window.location.href = "/home";
-      } else {
-        alert("Login failed: " + data.message);
-      }
+        router.replace("/"); // Redirect to home after login
+      } 
     } catch (error) {
       console.error("Error during login:", error);
-      alert("An error occurred. Please try again.");
+
+      // Type check the error to handle it properly
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response?.status === 401) {
+          setError("Incorrect email or password. Please try again.");
+        } else {
+          setError("An error occurred. Please try again later.");
+        }
+      } else {
+        setError("An error occurred. Please try again later.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -88,17 +117,23 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleLogin();
+                  }}
                 />
               </div>
+              {error && (
+                <div className="p-3 text-sm bg-red-50 border border-red-200 text-red-600 rounded-md">
+                  {error}
+                </div>
+              )}
               <Button
                 className="w-full"
                 type="submit"
-                onClick={
-                  () => (window.location.href = "/")
-                  // onClick={handleLogin}
-                }
+                onClick={handleLogin}
+                disabled={isLoading}
               >
-                Sign In
+                {isLoading ? "Signing In..." : "Sign In"}
               </Button>
             </div>
           </CardContent>
