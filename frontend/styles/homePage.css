@@ -1,0 +1,12 @@
+/* recreating what we had via in-line styling earlier: 
+ * text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-pink-400 bg-clip-text text-transparent
+ */
+
+.welcome-heading {
+    font-size: 1.5rem;
+    font-weight: bold;
+    letter-spacing: -0.025em;
+    color: #FF43A4;
+    -webkit-background-clip: text;
+    background-clip: text;
+}
