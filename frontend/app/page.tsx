@@ -22,6 +22,9 @@ import {
 import { WorkoutCard } from "../components/workout-card";
 import workoutData from "./data.json";
 
+// new stylesheet
+import '../styles/homePage.css';
+
 interface Workout {
   id: string;
   title: string;
@@ -139,7 +142,7 @@ export default function HomePage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-primary to-pink-400 bg-clip-text text-transparent">
+              <h1 className="welcome-heading">
                 Welcome back, {fakeUser.username}!
               </h1>
               <p className="text-muted-foreground">
