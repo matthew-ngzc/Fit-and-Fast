@@ -71,11 +71,9 @@ public class UserService {
         // and create achievements
         User savedUser = createUser(user,registrationDTO.getUsername());
 
-        UserDTO userDTO = convertToDTO(savedUser);
         String token = jwtService.generateToken(savedUser.getUserId());
 
         return AuthResponseDTO.builder()
-                .user(userDTO)
                 .token(token)
                 .build();
     }
@@ -88,11 +86,9 @@ public class UserService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        UserDTO userDTO = convertToDTO(user);
         String token = jwtService.generateToken(user.getUserId());
 
         return AuthResponseDTO.builder()
-                .user(userDTO)
                 .token(token)
                 .build();
     }
@@ -397,7 +393,6 @@ public class UserService {
             userDetails.setUser(savedUser);
             userDetails.setCurrentStreak(0);
             userDetails.setLongestStreak(0);
-            userDetails.setUsername(username);
             userDetailsRepository.save(userDetails);
         }
 

@@ -68,7 +68,6 @@ public class AuthControllerIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(registrationDTO)))
                                 .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.user.email").value(TEST_EMAIL))
                                 .andExpect(jsonPath("$.token").isNotEmpty())
                                 .andReturn();
 
@@ -127,7 +126,6 @@ public class AuthControllerIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(loginRequest)))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.user.email").value(TEST_EMAIL))
                                 .andExpect(jsonPath("$.token").isNotEmpty())
                                 .andReturn();
 

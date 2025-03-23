@@ -104,8 +104,6 @@ class UserServiceTest {
         // Then
         assertNotNull(response);
         assertEquals("jwtToken123", response.getToken());
-        assertEquals(testUser.getUserId(), response.getUser().getUserId());
-        assertEquals(testUser.getEmail(), response.getUser().getEmail());
 
         verify(userRepository).findByEmail("test@example.com");
         verify(passwordEncoder).matches("password123", "hashedPassword");
@@ -177,8 +175,6 @@ class UserServiceTest {
         // Then
         assertNotNull(response);
         assertEquals("newJwtToken123", response.getToken());
-        assertEquals(savedUser.getUserId(), response.getUser().getUserId());
-        assertEquals(savedUser.getEmail(), response.getUser().getEmail());
 
         // Verify user creation
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -189,9 +185,6 @@ class UserServiceTest {
         ArgumentCaptor<UserDetails> userDetailsCaptor = ArgumentCaptor.forClass(UserDetails.class);
         verify(userDetailsRepository).save(userDetailsCaptor.capture());
         assertEquals(savedUser, userDetailsCaptor.getValue().getUser());
-
-        //Verify Username was set
-        assertEquals(registrationDTO.getUsername(), userDetailsCaptor.getValue().getUsername());
     }
 
     @Test
