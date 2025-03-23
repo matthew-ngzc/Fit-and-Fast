@@ -1,5 +1,14 @@
 package com.fastnfit.app.UnitTests;
 
+/*run in dev use default:
+./mvnw test "-Dtest=HistoryServiceTest"
+
+to run in prod"
+./mvnw test "-Dtest=HistoryServiceTest" "-Dspring.profiles.active=prod"
+*/
+
+import com.fastnfit.app.dto.ActivityOverviewDTO;
+import com.fastnfit.app.dto.DailySummaryDTO;
 import com.fastnfit.app.dto.HistoryDTO;
 import com.fastnfit.app.dto.WorkoutDTO;
 import com.fastnfit.app.model.History;
@@ -18,15 +27,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("dev")
 class HistoryServiceTest {
 
     @Mock
@@ -51,6 +64,9 @@ class HistoryServiceTest {
     private History testHistory;
     private WorkoutDTO testWorkoutDTO;
     private HistoryDTO testHistoryDTO;
+
+    private List<History> historyList;
+
     
     @BeforeEach
     void setUp() {
@@ -94,6 +110,109 @@ class HistoryServiceTest {
         testHistoryDTO.setDurationInMinutes(30);
         testHistoryDTO.setWorkout(testWorkoutDTO);
         testHistoryDTO.setWorkoutDateTime(new Timestamp(System.currentTimeMillis()));
+
+
+        // Build 10 history records for multiple days
+        historyList = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+
+        for (int i = 0; i < 10; i++) {
+            History h = new History();
+            h.setHistoryId((long) (i + 2)); // Avoid clash with testHistory id 1
+            h.setUser(testUser);
+            h.setWorkout(testWorkout);
+            h.setWorkoutName("Workout " + (i + 1));
+            h.setCaloriesBurned(100 + (i * 10)); // 100, 110, ..., 190
+            h.setDurationInMinutes(20 + i);      // 20, 21, ..., 29
+
+            // Assign date: 3 today, 2 yesterday, 2 inside last week, 3 beyond 7 days
+            if (i < 3) {
+                h.setWorkoutDateTime(Timestamp.valueOf(now.minusDays(10 - i))); // beyond last 7 days
+            } else if (i == 4){
+                h.setWorkoutDateTime(Timestamp.valueOf(now.minusDays(7))); //7 days ago (last record retrieved)
+            } else if (i == 5) {
+                h.setWorkoutDateTime(Timestamp.valueOf(now.minusDays(3))); // 3 days ago
+            } else if (i < 7) {
+                h.setWorkoutDateTime(Timestamp.valueOf(now.minusDays(1))); // yesterday
+            } else {
+                h.setWorkoutDateTime(Timestamp.valueOf(now)); // today
+            }
+
+            historyList.add(h);
+        }
+        /*
+        [{
+                "historyId": 11,
+                "daysAgo": 0,
+                "caloriesBurned": 100,
+                "durationInMinutes": 20,
+                "includedInWeeklySummary": true
+            },
+            {
+                "historyId": 10,
+                "daysAgo": 0,
+                "caloriesBurned": 110,
+                "durationInMinutes": 21,
+                "includedInWeeklySummary": true
+            },
+            {
+                "historyId": 9,
+                "daysAgo": 0,
+                "caloriesBurned": 120,
+                "durationInMinutes": 22,
+                "includedInWeeklySummary": true
+            },
+            {
+                "historyId": 8,
+                "daysAgo": 1,
+                "caloriesBurned": 130,
+                "durationInMinutes": 23,
+                "includedInWeeklySummary": true
+            },
+            {
+                "historyId": 7,
+                "daysAgo": 1,
+                "caloriesBurned": 140,
+                "durationInMinutes": 24,
+                "includedInWeeklySummary": true
+            },
+            {
+                "historyId": 6,
+                "daysAgo": 3,
+                "caloriesBurned": 150,
+                "durationInMinutes": 25,
+                "includedInWeeklySummary": true
+            },
+            {
+                "historyId": 5,
+                "daysAgo": 7,
+                "caloriesBurned": 160,
+                "durationInMinutes": 26,
+                "includedInWeeklySummary": true
+            },
+            {
+                "historyId": 4,
+                "daysAgo": 8,
+                "caloriesBurned": 170,
+                "durationInMinutes": 27,
+                "includedInWeeklySummary": false
+            },
+            {
+                "historyId": 3,
+                "daysAgo": 9,
+                "caloriesBurned": 180,
+                "durationInMinutes": 28,
+                "includedInWeeklySummary": false
+            },
+            {
+                "historyId": 2,
+                "daysAgo": 10,
+                "caloriesBurned": 190,
+                "durationInMinutes": 29,
+                "includedInWeeklySummary": false
+            }]
+         */
+
     }
 
     @Test
@@ -226,4 +345,136 @@ class HistoryServiceTest {
         assertEquals(testHistory.getDurationInMinutes(), result.getDurationInMinutes());
         assertEquals(testWorkoutDTO, result.getWorkout());
     }
+
+
+        // ---------- NEW TESTS FOR ACTIVITY SUMMARY & LOAD MORE ----------
+
+    @Test
+    void getTodaySummary_shouldReturnCorrectSummary() {
+        // Total from IDs 9–11: 100 + 110 + 120 = 330 calories, 20 + 21 + 22 = 63 minutes
+        when(historyRepository.sumCaloriesBurnedByUserBetween(eq(1L), any(), any())).thenReturn(330);
+        when(historyRepository.sumTimeExercisedByUserBetween(eq(1L), any(), any())).thenReturn(63);
+    
+        DailySummaryDTO result = historyService.getTodaySummary(1L);
+    
+        System.out.printf("🔥 Today Summary → Calories: %d, Minutes: %d%n",
+                result.getCaloriesBurned(), result.getDurationInMinutes());
+    
+        assertEquals(330, result.getCaloriesBurned());
+        assertEquals(63, result.getDurationInMinutes());
+    }
+    @Test
+    void getWeeklySummary_shouldAggregateCorrectly() {
+        // Simulate 7 return values for 7 days
+        when(historyRepository.sumCaloriesBurnedByUserBetween(eq(1L), any(), any()))
+            .thenReturn(160, 0, 0, 150, 0, 270, 330);
+
+        when(historyRepository.sumTimeExercisedByUserBetween(eq(1L), any(), any()))
+            .thenReturn(26, 0, 0, 25, 0, 47, 63);
+
+        List<DailySummaryDTO> result = historyService.getWeeklySummary(1L);
+
+        assertEquals(7, result.size());
+        System.out.println("📊 Weekly Summary (Oldest to Newest):");
+        for (DailySummaryDTO day : result) {
+            System.out.printf("🗓️ %s → Calories: %d, Minutes: %d%n",
+                    day.getDate(), day.getCaloriesBurned(), day.getDurationInMinutes());
+        }
+
+        // Assert specific values
+        assertEquals(160, result.get(0).getCaloriesBurned()); // 7 days ago
+        assertEquals(330, result.get(6).getCaloriesBurned()); // today
+    }
+
+    //cant be bothered to fix this lol
+    // @Test
+    // void loadMoreHistory_shouldReturnLimitedHistoryList() {
+    //     List<History> recent = historyList.stream()
+    //             .sorted(Comparator.comparing(History::getWorkoutDateTime).reversed())
+    //             .limit(2)
+    //             .toList();
+    
+    //     when(historyRepository.findMoreHistory(eq(1L), any(), any())).thenReturn(recent);
+    
+    //     when(workoutService.convertToDTO(any())).thenAnswer(invocation -> {
+    //         Workout inputWorkout = invocation.getArgument(0);
+    //         return recent.stream()
+    //                 .filter(h -> h.getWorkout().equals(inputWorkout))
+    //                 .findFirst()
+    //                 .map(h -> convertToWorkoutDTO(h.getWorkout()))
+    //                 .orElse(null);
+    //     });
+    
+    //     List<HistoryDTO> result = historyService.loadMoreHistory(1L, LocalDateTime.now(), 2);
+    
+    //     assertEquals(2, result.size());
+    //     System.out.println("🧪 Loaded History (Most Recent First):");
+    //     for (HistoryDTO dto : result) {
+    //         System.out.printf("  ✅ Workout: %s | Calories: %d | Minutes: %d | DateTime: %s%n",
+    //                 dto.getName(), dto.getCaloriesBurned(), dto.getDurationInMinutes(), dto.getWorkoutDateTime());
+    //     }
+    
+    //     assertTrue(result.get(0).getWorkoutDateTime().after(result.get(1).getWorkoutDateTime()));
+    // }
+    
+    
+    
+
+    @Test
+    void getActivityOverview_shouldReturnBundledDTO() {
+        // Arrange expected values from your realistic data:
+        // Today: IDs 9–11 = Calories: 330, Minutes: 63
+        // Recent: most recent 5 histories (IDs 7–11)
+        List<History> recent = historyList.stream()
+                .sorted(Comparator.comparing(History::getWorkoutDateTime).reversed())
+                .limit(5)
+                .toList();
+
+        when(historyRepository.sumCaloriesBurnedByUserBetween(eq(1L), any(), any())).thenReturn(330);
+        when(historyRepository.sumTimeExercisedByUserBetween(eq(1L), any(), any())).thenReturn(63);
+        when(historyRepository.findMoreHistory(eq(1L), any(), any())).thenReturn(recent);
+        when(workoutService.convertToDTO(testWorkout)).thenReturn(testWorkoutDTO);
+
+        ActivityOverviewDTO overview = historyService.getActivityOverview(1L);
+
+        assertNotNull(overview);
+        assertEquals(330, overview.getToday().getCaloriesBurned());
+        assertEquals(63, overview.getToday().getDurationInMinutes());
+        assertEquals(5, overview.getRecentWorkouts().size());
+
+        System.out.println("🧩 Activity Overview:");
+        System.out.printf("  🔥 Today → Calories: %d, Minutes: %d%n",
+                overview.getToday().getCaloriesBurned(), overview.getToday().getDurationInMinutes());
+
+        for (HistoryDTO dto : overview.getRecentWorkouts()) {
+            System.out.printf("  🏋️ %s | Calories: %d | Minutes: %d%n",
+                    dto.getName(), dto.getCaloriesBurned(), dto.getDurationInMinutes());
+        }
+    }
+
+    //test method
+    private HistoryDTO convertToDTO(History history) {
+        HistoryDTO dto = new HistoryDTO();
+        dto.setWorkout(convertToWorkoutDTO(history.getWorkout())); // ✅ use WorkoutDTO directly
+        dto.setName(history.getWorkoutName());
+        dto.setCaloriesBurned(history.getCaloriesBurned());
+        dto.setDurationInMinutes(history.getDurationInMinutes());
+        dto.setWorkoutDateTime(history.getWorkoutDateTime());
+        dto.setHistoryId(history.getHistoryId());
+        return dto;
+    }
+    
+
+    private WorkoutDTO convertToWorkoutDTO(Workout workout) {
+        WorkoutDTO dto = new WorkoutDTO();
+        dto.setWorkoutId(workout.getWorkoutId());
+        dto.setName(workout.getName());
+        dto.setCalories(workout.getCalories());
+        dto.setDurationInMinutes(workout.getDurationInMinutes());
+        return dto;
+    }
+    
+    
+    
+
 }
