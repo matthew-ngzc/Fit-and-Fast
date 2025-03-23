@@ -51,11 +51,10 @@ export default function LoginPage() {
         localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
         router.replace("/"); // Redirect to home after login
-      } 
+      }
     } catch (error) {
       console.error("Error during login:", error);
 
-      // Type check the error to handle it properly
       if (axios.isAxiosError(error)) {
         const axiosError = error as AxiosError;
         if (axiosError.response?.status === 401) {

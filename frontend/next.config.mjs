@@ -21,6 +21,15 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/old-path', // Change this to an invalid path you want to redirect
+        destination: '/404', // Redirect to your custom 404 page
+        permanent: false,
+      },
+    ];
+  },
 }
 
 mergeConfig(nextConfig, userConfig)
