@@ -21,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -214,9 +213,7 @@ public class UserStreakServiceTest {
 
         // Use doAnswer to handle different timestamp ranges
         doAnswer(invocation -> {
-            User user = invocation.getArgument(0);
             Timestamp start = invocation.getArgument(1);
-            Timestamp end = invocation.getArgument(2);
 
             // Return today's workouts if the timestamp is for today
             LocalDate today = LocalDate.now();

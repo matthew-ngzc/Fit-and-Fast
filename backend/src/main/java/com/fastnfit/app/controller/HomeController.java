@@ -9,6 +9,7 @@ import com.fastnfit.app.service.RecommendationService;
 import com.fastnfit.app.service.UserStreakService;
 import com.fastnfit.app.service.WorkoutService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,12 +29,13 @@ public class HomeController {
     private final AuthUtils authUtils;
 
     @Autowired
-    public HomeController(RecommendationService recommendationService, UserStreakService userStreakService, WorkoutService workoutService,
-                            AuthUtils authUtils) {
+    public HomeController(RecommendationService recommendationService, UserStreakService userStreakService,
+            WorkoutService workoutService,
+            AuthUtils authUtils) {
         this.recommendationService = recommendationService;
         this.userStreakService = userStreakService;
         this.workoutService = workoutService;
-        this.authUtils=authUtils;
+        this.authUtils = authUtils;
     }
 
     /**
@@ -89,12 +91,16 @@ public class HomeController {
     @GetMapping("/workouts/{category}")
     public ResponseEntity<Map<String, List<WorkoutDTO>>> getWorkoutsByCategory(
             @PathVariable String category) {
-        WorkoutType type = WorkoutType.fromString(category);
-        List<WorkoutDTO> categoryWorkouts = workoutService.getWorkoutsByCategory(type);
+        try {
+            WorkoutType type = WorkoutType.fromString(category);
+            List<WorkoutDTO> categoryWorkouts = workoutService.getWorkoutsByCategory(type);
 
-        Map<String, List<WorkoutDTO>> result = new HashMap<>();
-        result.put(category.toLowerCase(), categoryWorkouts);
+            Map<String, List<WorkoutDTO>> result = new HashMap<>();
+            result.put(category.toLowerCase(), categoryWorkouts);
 
-        return ResponseEntity.ok(result);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 }
