@@ -9,6 +9,10 @@ public enum FitnessLevel {
         this.value=value;
     }
 
+    public String getValue() {
+        return value;
+    }
+
     public static FitnessLevel fromValue(String value) {
         for (FitnessLevel level : values()) {
             if (level.value.equalsIgnoreCase(value)) {

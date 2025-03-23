@@ -16,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,6 +61,8 @@ public class UserControllerIntegrationTest {
 
         @BeforeEach
         public void setup() {
+                userDetailsRepository.deleteAll();
+                userRepository.deleteAll();
                 // Create test user
                 testUser = new User();
                 testUser.setEmail("user@example.com");

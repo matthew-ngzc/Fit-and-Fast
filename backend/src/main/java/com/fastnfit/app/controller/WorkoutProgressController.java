@@ -57,11 +57,11 @@ public class WorkoutProgressController {
      * POST endpoint for users to log a completed workout
      * This will update their workout logs, calories burned, and streak
      * 
-     * @param userId The ID of the user who completed the workout
+     * @param userId The ID of the user who completed the workout, in token
      * @param request The workout completion request containing workout ID
      * @return Workout completion response with updated statistics
      */
-    @PostMapping("/complete/{userId}")
+    @PostMapping("/complete")
     public ResponseEntity<WorkoutCompletionResponse> completeWorkout(
             @RequestBody WorkoutCompletionRequest request) {
         

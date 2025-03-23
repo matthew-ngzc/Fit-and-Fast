@@ -26,16 +26,17 @@ public class UserProfileController {
     private final AuthUtils authUtils;
 
     @Autowired
-    public UserProfileController(UserService userService, UserAchievementService userAchievementService,AuthUtils authUtils) {
+    public UserProfileController(UserService userService, UserAchievementService userAchievementService,
+            AuthUtils authUtils) {
         this.userService = userService;
         this.userAchievementService = userAchievementService;
-        this.authUtils=authUtils;
+        this.authUtils = authUtils;
     }
 
     /**
      * Get user profile information
      */
-    @GetMapping("/{userId}")
+    @GetMapping("/")
     public ResponseEntity<ProfileDTO> getUserProfile() {
         Long userId = authUtils.getCurrentUserId();
         ProfileDTO profileDTO = userService.getUserProfile(userId);
@@ -45,7 +46,7 @@ public class UserProfileController {
     /**
      * Update basic user profile information
      */
-    @PutMapping("/{userId}")
+    @PutMapping("/")
     public ResponseEntity<ProfileDTO> updateUserProfile(
             @RequestBody ProfileDTO profileDTO) {
         Long userId = authUtils.getCurrentUserId();
@@ -56,7 +57,7 @@ public class UserProfileController {
     /**
      * Update user fitness goals
      */
-    @PutMapping("/{userId}/goals")
+    @PutMapping("/goals")
     public ResponseEntity<GoalsDTO> updateUserGoals(
             @RequestBody GoalsDTO goalsDTO) {
         Long userId = authUtils.getCurrentUserId();
@@ -67,7 +68,7 @@ public class UserProfileController {
     /**
      * Update user avatar
      */
-    @PutMapping("/{userId}/avatar")
+    @PutMapping("/avatar")
     public ResponseEntity<AvatarDTO> updateUserAvatar(
             @RequestBody AvatarDTO avatarDTO) {
         Long userId = authUtils.getCurrentUserId();
@@ -78,7 +79,7 @@ public class UserProfileController {
     /**
      * Get user's weekly workout statistics
      */
-    @GetMapping("/{userId}/weekly-workouts")
+    @GetMapping("/weekly-workouts")
     public ResponseEntity<WeeklyWorkoutsDTO> getWeeklyWorkouts() {
         Long userId = authUtils.getCurrentUserId();
         WeeklyWorkoutsDTO weeklyWorkoutsDTO = userService.getWeeklyWorkouts(userId);
@@ -88,19 +89,18 @@ public class UserProfileController {
     /**
      * Get user's achievements
      */
-    @GetMapping("/{userId}/achievements")
+    @GetMapping("/achievements")
     public ResponseEntity<List<AchievementResponseDTO>> getUserAchievements() {
         Long userId = authUtils.getCurrentUserId();
         List<UserAchievement> userAchievements = userAchievementService.getUserAchievements(userId);
-        
+
         List<AchievementResponseDTO> achievementDTOs = userAchievements.stream()
-            .map(ua -> new AchievementResponseDTO(
-                ua.getAchievement().getTitle(),
-                ua.getAchievement().getDescription(),
-                ua.isCompleted()
-            ))
-            .collect(Collectors.toList());
-        
+                .map(ua -> new AchievementResponseDTO(
+                        ua.getAchievement().getTitle(),
+                        ua.getAchievement().getDescription(),
+                        ua.isCompleted()))
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(achievementDTOs);
     }
 }
