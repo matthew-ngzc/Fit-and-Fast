@@ -15,6 +15,9 @@ import com.fastnfit.app.dto.GoalsDTO;
 import com.fastnfit.app.dto.AuthResponseDTO;
 import com.fastnfit.app.dto.AvatarDTO;
 import com.fastnfit.app.dto.WeeklyWorkoutsDTO;
+import com.fastnfit.app.enums.PregnancyStatus;
+import com.fastnfit.app.enums.WorkoutGoal;
+import com.fastnfit.app.enums.WorkoutType;
 import com.fastnfit.app.model.User;
 import com.fastnfit.app.model.UserDetails;
 import com.fastnfit.app.repository.UserDetailsRepository;
@@ -40,80 +43,77 @@ public class UserService {
     private final JwtService jwtService;
 
     @Autowired
-    public UserService(UserRepository userRepository, 
-                    UserDetailsRepository userDetailsRepository,
-                    HistoryRepository historyRepository,
-                    UserAchievementService userAchievementService,
-                    PasswordEncoder passwordEncoder,
-                    JwtService jwtService) {
+    public UserService(UserRepository userRepository,
+            UserDetailsRepository userDetailsRepository,
+            HistoryRepository historyRepository,
+            UserAchievementService userAchievementService,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService) {
         this.userRepository = userRepository;
         this.userDetailsRepository = userDetailsRepository;
         this.historyRepository = historyRepository;
-        this.userAchievementService=userAchievementService;
+        this.userAchievementService = userAchievementService;
         this.passwordEncoder = passwordEncoder;
-        this.jwtService=jwtService;
+        this.jwtService = jwtService;
     }
 
-    // public UserDTO login(LoginRequestDTO loginRequest) {
-    //     User user = userRepository.findByEmail(loginRequest.getEmail())
-    //         .orElseThrow(() -> new RuntimeException("Invalid email or password"));
-        
-    //     if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-    //         throw new RuntimeException("Invalid email or password");
-    //     }
-        
-    //     UserDTO userDTO = new UserDTO();
-    //     userDTO.setUserId(user.getUserId());
-    //     userDTO.setEmail(user.getEmail());
-        
-    //     return userDTO;
-    // }
+    public AuthResponseDTO registerUser(UserRegistrationDTO registrationDTO) {
+        if (userRepository.existsByEmail(registrationDTO.getEmail())) {
+            throw new RuntimeException("Email is already in use");
+        }
 
-    // @Transactional
-    // public UserDTO registerUser(UserRegistrationDTO registrationDTO) {
-    //     if (userRepository.existsByEmail(registrationDTO.getEmail())) {
-    //         throw new RuntimeException("Email already in use");
-    //     }
+        // Create basic user with encrypted password
+        User user = new User();
+        user.setEmail(registrationDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
 
-    //     // Create and save user
-    //     User user = new User();
-    //     user.setEmail(registrationDTO.getEmail());
-    //     user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-    //     User savedUser=userRepository.save(user);
+        // Use the createUser method to save user, initialize UserDetails if needed,
+        // and create achievements
+        User savedUser = createUser(user,registrationDTO.getUsername());
 
-    //     // Create basic user details if username is provided
-    //     if (registrationDTO.getUsername() != null && !registrationDTO.getUsername().isEmpty()) {
-    //         UserDetails userDetails = new UserDetails();
-    //         userDetails.setUser(savedUser);
-    //         userDetails.setUsername(registrationDTO.getUsername());
-    //         userDetailsRepository.save(userDetails);
-    //     }
+        UserDTO userDTO = convertToDTO(savedUser);
+        String token = jwtService.generateToken(savedUser.getUserId());
 
-    //     // Return DTO
-    //     UserDTO userDTO = new UserDTO();
-    //     userDTO.setUserId(savedUser.getUserId());
-    //     userDTO.setEmail(savedUser.getEmail());
+        return AuthResponseDTO.builder()
+                .user(userDTO)
+                .token(token)
+                .build();
+    }
 
-    //     return userDTO;
-    // }
+    public AuthResponseDTO login(LoginRequestDTO loginRequest) {
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        UserDTO userDTO = convertToDTO(user);
+        String token = jwtService.generateToken(user.getUserId());
+
+        return AuthResponseDTO.builder()
+                .user(userDTO)
+                .token(token)
+                .build();
+    }
 
     @Transactional
     public UserDetailsDTO completeUserQuestionnaire(Long userId, UserDetailsDTO detailsDTO) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-            
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         // Check if user details already exist
         Optional<UserDetails> existingDetails = userDetailsRepository.findByUser(user);
         UserDetails userDetails;
-        
+
         if (existingDetails.isPresent()) {
             userDetails = existingDetails.get();
         } else {
             userDetails = new UserDetails();
-            userDetails.setUser(user);
         }
 
         // Update user details with questionnaire data
+        userDetails.setUser(user);
         userDetails.setUsername(detailsDTO.getUsername());
         userDetails.setDob(detailsDTO.getDob());
         userDetails.setHeight(detailsDTO.getHeight());
@@ -133,13 +133,13 @@ public class UserService {
 
     public UserDetailsDTO getUserDetails(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-            
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         UserDetails userDetails = userDetailsRepository.findByUser(user)
-            .orElseThrow(() -> new RuntimeException("User details not found"));
+                .orElseThrow(() -> new RuntimeException("User details not found"));
 
         UserDetailsDTO dto = new UserDetailsDTO();
-        dto.setUserId(userDetails.getUserId());
+        dto.setUserId(userDetails.getUser().getUserId());
         dto.setUsername(userDetails.getUsername());
         dto.setDob(userDetails.getDob());
         dto.setHeight(userDetails.getHeight());
@@ -157,35 +157,106 @@ public class UserService {
 
     @Transactional
     public UserDetailsDTO updateUserDetails(Long userId, UserDetailsDTO detailsDTO) {
-        UserDetails userDetails = userDetailsRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User details not found"));
+        // Find the user first
+        if (detailsDTO==null || detailsDTO.getUsername()==null){
+            throw new RuntimeException("DTO is invalid");
+        }
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Find user details by user, not by userId
+        UserDetails userDetails = userDetailsRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("User details not found"));
+
+        // Update fields
         userDetails.setUsername(detailsDTO.getUsername());
-        userDetails.setDob(detailsDTO.getDob());
-        userDetails.setHeight(detailsDTO.getHeight());
-        userDetails.setWeight(detailsDTO.getWeight());
-        userDetails.setPregnancyStatus(detailsDTO.getPregnancyStatus());
-        userDetails.setWorkoutGoal(detailsDTO.getWorkoutGoal());
-        userDetails.setWorkoutDays(detailsDTO.getWorkoutDays());
-        userDetails.setFitnessLevel(detailsDTO.getFitnessLevel());
+
+        if (detailsDTO.getDob() != null) {
+            userDetails.setDob(detailsDTO.getDob());
+        }
+
+        if (detailsDTO.getHeight() != null) {
+            userDetails.setHeight(detailsDTO.getHeight());
+        }
+
+        if (detailsDTO.getWeight() != null) {
+            userDetails.setWeight(detailsDTO.getWeight());
+        }
+
+        if (detailsDTO.getPregnancyStatus() != null) {
+            try {
+                // First try direct enum mapping
+                userDetails.setPregnancyStatus(PregnancyStatus.valueOf(detailsDTO.getPregnancyStatus()));
+            } catch (IllegalArgumentException e) {
+                // If that fails, try matching by value (assuming you have a fromValue method)
+                userDetails.setPregnancyStatus(PregnancyStatus.fromValue(detailsDTO.getPregnancyStatus()));
+            }
+        }
+
+        if (detailsDTO.getWorkoutGoal() != null) {
+            try {
+                // First try direct enum mapping
+                userDetails.setWorkoutGoal(WorkoutGoal.valueOf(detailsDTO.getWorkoutGoal()));
+            } catch (IllegalArgumentException e) {
+                // If that fails, try matching by value
+                userDetails.setWorkoutGoal(WorkoutGoal.fromString(detailsDTO.getWorkoutGoal()));
+            }
+        }
+
+        if (detailsDTO.getWorkoutDays() != null) {
+            userDetails.setWorkoutDays(detailsDTO.getWorkoutDays());
+        }
+
+        if (detailsDTO.getFitnessLevel() != null) {
+            userDetails.setFitnessLevel(detailsDTO.getFitnessLevel());
+        }
+
+        if (detailsDTO.getWorkoutType() != null) {
+            try {
+                // First try direct enum mapping
+                userDetails.setWorkoutType(WorkoutType.valueOf(detailsDTO.getWorkoutType()));
+            } catch (IllegalArgumentException e) {
+                // If that fails, try matching by value
+                userDetails.setWorkoutType(WorkoutType.fromString(detailsDTO.getWorkoutType()));
+            }
+        }
+
         userDetails.setMenstrualCramps(detailsDTO.getMenstrualCramps());
         userDetails.setCycleBasedRecommendations(detailsDTO.getCycleBasedRecommendations());
-        userDetails.setWorkoutType(detailsDTO.getWorkoutType());
+        userDetails.setUser(user);
 
         userDetailsRepository.save(userDetails);
 
-        return detailsDTO;
+        // Convert back to DTO for response
+        UserDetailsDTO responseDTO = new UserDetailsDTO();
+        responseDTO.setUserId(userDetails.getUser().getUserId());
+        responseDTO.setUsername(userDetails.getUsername());
+        responseDTO.setDob(userDetails.getDob());
+        responseDTO.setHeight(userDetails.getHeight());
+        responseDTO.setWeight(userDetails.getWeight());
+        responseDTO.setPregnancyStatus(userDetails.getPregnancyStatus().getValue());
+        responseDTO.setWorkoutGoal(userDetails.getWorkoutGoal().getValue());
+        responseDTO.setWorkoutDays(userDetails.getWorkoutDays());
+        responseDTO.setFitnessLevel(userDetails.getFitnessLevel());
+        responseDTO.setMenstrualCramps(userDetails.getMenstrualCramps());
+        responseDTO.setCycleBasedRecommendations(userDetails.getCycleBasedRecommendations());
+        responseDTO.setWorkoutType(userDetails.getWorkoutType().getValue());
+        responseDTO.setCurrentStreak(userDetails.getCurrentStreak());
+        responseDTO.setLongestStreak(userDetails.getLongestStreak());
+
+        return responseDTO;
     }
 
     // New methods for the additional APIs
 
     public ProfileDTO getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         UserDetails userDetails = userDetailsRepository.findByUser(user)
-            .orElseThrow(() -> new RuntimeException("User details not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User details not found"));
+
         ProfileDTO profileDTO = new ProfileDTO();
         profileDTO.setUsername(userDetails.getUsername());
         profileDTO.setEmail(user.getEmail());
@@ -195,266 +266,165 @@ public class UserService {
         profileDTO.setWorkoutGoal(userDetails.getWorkoutGoal().getValue());
         profileDTO.setWorkoutDays(userDetails.getWorkoutDays());
         profileDTO.setAvatar(userDetails.getAvatar());
-        
+
         return profileDTO;
     }
-    
+
     @Transactional
     public ProfileDTO updateBasicProfile(Long userId, ProfileDTO profileDTO) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         UserDetails userDetails = userDetailsRepository.findByUser(user)
-            .orElseThrow(() -> new RuntimeException("User details not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User details not found"));
+
         // Update basic profile information
         userDetails.setUsername(profileDTO.getUsername());
         user.setEmail(profileDTO.getEmail());
         userDetails.setHeight(profileDTO.getHeight());
         userDetails.setWeight(profileDTO.getWeight());
         userDetails.setDob(profileDTO.getDob());
-        
+
         userRepository.save(user);
         userDetailsRepository.save(userDetails);
-        
+
         return profileDTO;
     }
-    
+
     @Transactional
     public GoalsDTO updateUserGoals(Long userId, GoalsDTO goalsDTO) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         UserDetails userDetails = userDetailsRepository.findByUser(user)
-            .orElseThrow(() -> new RuntimeException("User details not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User details not found"));
+
         // Update user goals
         userDetails.setWorkoutGoal(goalsDTO.getWorkoutGoal());
         userDetails.setWorkoutDays(goalsDTO.getWorkoutDaysPerWeekGoal());
-        
+
         userDetailsRepository.save(userDetails);
-        
+
         return goalsDTO;
     }
-    
+
     @Transactional
     public AvatarDTO updateUserAvatar(Long userId, AvatarDTO avatarDTO) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         UserDetails userDetails = userDetailsRepository.findByUser(user)
-            .orElseThrow(() -> new RuntimeException("User details not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User details not found"));
+
         // Update avatar link
         userDetails.setAvatar(avatarDTO.getAvatarLink());
-        
+
         userDetailsRepository.save(userDetails);
-        
+
         return avatarDTO;
     }
-    
+
     public WeeklyWorkoutsDTO getWeeklyWorkouts(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         // Calculate the start and end dates for the current week (Monday to Friday)
         LocalDate today = LocalDate.now();
         LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
-        
+
         // Convert to LocalDateTime to include time component
         LocalDateTime startDateTime = startOfWeek.atStartOfDay();
         LocalDateTime endDateTime = endOfWeek.plusDays(1).atStartOfDay();
-        
+
         // Convert LocalDateTime to Timestamp
         Timestamp startTimestamp = Timestamp.valueOf(startDateTime);
         Timestamp endTimestamp = Timestamp.valueOf(endDateTime);
-        
+
         // Get the count of workouts completed between Monday and Friday
         int workoutCount = historyRepository.countByUserAndWorkoutDateTimeBetween(user, startTimestamp, endTimestamp);
-        
+
         WeeklyWorkoutsDTO weeklyWorkoutsDTO = new WeeklyWorkoutsDTO();
         weeklyWorkoutsDTO.setTotalWorkouts(workoutCount);
-        
+
         return weeklyWorkoutsDTO;
     }
 
     // /
-    //  * Get all users
-    //  */
+    // * Get all users
+    // */
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-    
+
     // /
-    //  * Get user by ID
-    //  */
+    // * Get user by ID
+    // */
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
-    
+
     // /
-    //  * Get user by email
-    //  */
+    // * Get user by email
+    // */
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
-    
+
     // /
-    //  * Get user by username
-    //  */
+    // * Get user by username
+    // */
     public Optional<User> getUserByUsername(String username) {
-        Optional<UserDetails> userDetails=userDetailsRepository.findByUsername(username);
-        if (userDetails.isPresent()){
-            return userRepository.findById(userDetails.get().getUserId());
+        Optional<UserDetails> userDetails = userDetailsRepository.findByUsername(username);
+        if (userDetails.isPresent()) {
+            return userRepository.findById(userDetails.get().getUser().getUserId());
         }
-        return null;
-    }
-    
-    // /
-    //  * Create a new user
-    //  */
-    @Transactional
-    public User createUser(User user) {
-        // Initialize UserDetails if not already set
-        if (user.getUserDetails() == null) {
-            UserDetails userDetails = new UserDetails();
-            userDetails.setUser(user);
-            userDetails.setCurrentStreak(0);
-            userDetails.setLongestStreak(0);
-            user.setUserDetails(userDetails);
-        }
-        
-        // Save the user
-        User savedUser = userRepository.save(user);
-        
-        // Initialize achievements for the new user
-        userAchievementService.initializeUserAchievements(savedUser);
-        
-        return savedUser;
-    }
-    
-    // /
-    //  * Update an existing user
-    //  */
-    public User updateUser(User user) {
-        return userRepository.save(user);
-    }
-    
-    // /
-    //  * Delete a user
-    //  */
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
-    }
-    
-    // /
-    //  * Update user details
-    //  */
-    @Transactional
-    public User updateUserDetails(Long userId, UserDetails userDetails) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            UserDetails existingDetails = user.getUserDetails();
-            
-            if (existingDetails != null) {
-                // Update fields that are not null in the new userDetails
-                if (userDetails.getUsername() != null) {
-                    existingDetails.setUsername(userDetails.getUsername());
-                }
-                if (userDetails.getDob() != null) {
-                    existingDetails.setDob(userDetails.getDob());
-                }
-                if (userDetails.getHeight() != null) {
-                    existingDetails.setHeight(userDetails.getHeight());
-                }
-                if (userDetails.getWeight() != null) {
-                    existingDetails.setWeight(userDetails.getWeight());
-                }
-                if (userDetails.getPregnancyStatus() != null) {
-                    existingDetails.setPregnancyStatus(userDetails.getPregnancyStatus());
-                }
-                if (userDetails.getWorkoutGoal() != null) {
-                    existingDetails.setWorkoutGoal(userDetails.getWorkoutGoal());
-                }
-                if (userDetails.getWorkoutDays() != null) {
-                    existingDetails.setWorkoutDays(userDetails.getWorkoutDays());
-                }
-                if (userDetails.getFitnessLevel() != null) {
-                    existingDetails.setFitnessLevel(userDetails.getFitnessLevel());
-                }
-                if (userDetails.getWorkoutType() != null) {
-                    existingDetails.setWorkoutType(userDetails.getWorkoutType());
-                }
-                if (userDetails.getAvatar() != null) {
-                    existingDetails.setAvatar(userDetails.getAvatar());
-                }
-            } else {
-                // Create new UserDetails if it doesn't exist
-                userDetails.setUser(user);
-                userDetails.setCurrentStreak(0);
-                userDetails.setLongestStreak(0);
-                user.setUserDetails(userDetails);
-            }
-            
-            return userRepository.save(user);
-        }
-        
         return null;
     }
 
-    public UserDTO convertToDTO(User user){
-        UserDTO dto=new UserDTO();
+    // /
+    // * Create a new user
+    // */
+    @Transactional
+    public User createUser(User user,String username) {
+
+        // Save the user
+        User savedUser = userRepository.save(user);
+
+        // Initialize UserDetails if not already set
+        if (user.getUserDetails() == null) {
+            UserDetails userDetails = new UserDetails();
+            userDetails.setUser(savedUser);
+            userDetails.setCurrentStreak(0);
+            userDetails.setLongestStreak(0);
+            userDetails.setUsername(username);
+            userDetailsRepository.save(userDetails);
+        }
+
+        // Initialize achievements for the new user
+        userAchievementService.initializeUserAchievements(savedUser);
+
+        return savedUser;
+    }
+
+    // /
+    // * Update an existing user
+    // */
+    public User updateUser(User user) {
+        return userRepository.save(user);
+    }
+
+    // /
+    // * Delete a user
+    // */
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    public UserDTO convertToDTO(User user) {
+        UserDTO dto = new UserDTO();
         dto.setEmail(user.getEmail());
         dto.setUserId(user.getUserId());
         return dto;
     }
-
-    public AuthResponseDTO login(LoginRequestDTO loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
-        
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
-        }
-        
-        UserDTO userDTO = convertToDTO(user);
-        String token = jwtService.generateToken(user.getUserId());
-        
-        return AuthResponseDTO.builder()
-                .user(userDTO)
-                .token(token)
-                .build();
-    }
-
-    public AuthResponseDTO registerUser(UserRegistrationDTO registrationDTO) {
-        if (userRepository.existsByEmail(registrationDTO.getEmail())) {
-            throw new RuntimeException("Email is already in use");
-        }
-        
-        User user = new User();
-        user.setEmail(registrationDTO.getEmail());
-        user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-        User savedUser=userRepository.save(user);
-
-        //Create basic user details if username is provided
-        if (registrationDTO.getUsername() != null && !registrationDTO.getUsername().isEmpty()) {
-            UserDetails userDetails = new UserDetails();
-            userDetails.setUser(savedUser);
-            userDetails.setUsername(registrationDTO.getUsername());
-            userDetailsRepository.save(userDetails);
-        }
-        
-        UserDTO userDTO = convertToDTO(savedUser);
-        String token = jwtService.generateToken(savedUser.getUserId());
-        
-        return AuthResponseDTO.builder()
-                .user(userDTO)
-                .token(token)
-                .build();
-    }
-
-
 }

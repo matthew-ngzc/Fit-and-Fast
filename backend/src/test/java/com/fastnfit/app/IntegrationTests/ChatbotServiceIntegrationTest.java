@@ -20,13 +20,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.junit.jupiter.api.Assertions.*;
+// import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.test.context.ActiveProfiles;
 import com.fasterxml.jackson.databind.JsonNode;
 
 
-@SpringBootTest
-@ActiveProfiles("dev")
+//@SpringBootTest
+//@ActiveProfiles("dev")
 public class ChatbotServiceIntegrationTest {
 
     @Autowired

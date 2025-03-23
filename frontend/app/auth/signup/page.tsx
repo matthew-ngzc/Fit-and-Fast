@@ -56,7 +56,7 @@ export default function SignupPage() {
           localStorage.setItem("token", data.token);
           localStorage.setItem("userId", data.userId);
         }
-        window.location.href = "/auth/questionnaire";
+        window.location.href = "/auth/login";
       } else {
         setError(data.message || "Signup failed. Please try again.");
       }

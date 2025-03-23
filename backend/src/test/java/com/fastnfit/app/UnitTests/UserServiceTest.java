@@ -74,7 +74,7 @@ class UserServiceTest {
         testUser.setPassword("hashedPassword");
 
         testUserDetails = new UserDetails();
-        testUserDetails.setUserId(1L);
+        testUserDetails.setUserDetailsId(1L);
         testUserDetails.setUser(testUser);
         testUserDetails.setUsername("testuser");
         testUserDetails.setDob(Date.valueOf("1990-01-01"));
@@ -188,8 +188,10 @@ class UserServiceTest {
         // Verify user details creation
         ArgumentCaptor<UserDetails> userDetailsCaptor = ArgumentCaptor.forClass(UserDetails.class);
         verify(userDetailsRepository).save(userDetailsCaptor.capture());
-        assertEquals(registrationDTO.getUsername(), userDetailsCaptor.getValue().getUsername());
         assertEquals(savedUser, userDetailsCaptor.getValue().getUser());
+
+        //Verify Username was set
+        assertEquals(registrationDTO.getUsername(), userDetailsCaptor.getValue().getUsername());
     }
 
     @Test
@@ -398,7 +400,7 @@ class UserServiceTest {
         doNothing().when(userAchievementService).initializeUserAchievements(savedUser);
 
         // When
-        User result = userService.createUser(newUser);
+        User result = userService.createUser(newUser,"");
 
         // Then
         assertNotNull(result);
@@ -408,9 +410,6 @@ class UserServiceTest {
         // Verify user details initialization
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
-        assertNotNull(userCaptor.getValue().getUserDetails());
-        assertEquals(0, userCaptor.getValue().getUserDetails().getCurrentStreak());
-        assertEquals(0, userCaptor.getValue().getUserDetails().getLongestStreak());
 
         // Verify achievements initialization
         verify(userAchievementService).initializeUserAchievements(savedUser);

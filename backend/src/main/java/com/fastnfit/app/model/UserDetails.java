@@ -10,7 +10,7 @@ import java.util.Date;
 public class UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long userDetailsId;
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -42,12 +42,12 @@ public class UserDetails {
     private Integer longestStreak;
 
     // Getters and Setters
-    public Long getUserId() {
-        return userId;
+    public Long getUserDetailsId() {
+        return userDetailsId;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUserDetailsId(Long userDetailsId) {
+        this.userDetailsId = userDetailsId;
     }
 
     public int getCurrentStreak() {

@@ -11,7 +11,7 @@ public enum FitnessLevel {
 
     public static FitnessLevel fromValue(String value) {
         for (FitnessLevel level : values()) {
-            if (level.value.equals(value.toUpperCase())) {
+            if (level.value.equalsIgnoreCase(value)) {
                 return level;
             }
         }

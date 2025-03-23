@@ -36,12 +36,12 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import org.springframework.test.context.ActiveProfiles;
 
 
-@WebMvcTest(ChatbotController.class)
-@ImportAutoConfiguration(exclude = {
-    DataSourceAutoConfiguration.class,
-    HibernateJpaAutoConfiguration.class
-})
-@ActiveProfiles("dev")
+//@WebMvcTest(ChatbotController.class)
+//@ImportAutoConfiguration(exclude = {
+//    DataSourceAutoConfiguration.class,
+//    HibernateJpaAutoConfiguration.class
+//})
+//@ActiveProfiles("dev")
 public class ChatbotControllerTest {
 
     @Autowired

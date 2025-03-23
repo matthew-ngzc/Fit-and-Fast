@@ -24,3 +24,6 @@ logging.level.com.fastnfit.app=DEBUG
 
 # AWS Configuration
 aws.region=${AWS_REGION:us-east-1}
+
+#openai API key
+openai.api.key=${OPENAI_API_KEY}

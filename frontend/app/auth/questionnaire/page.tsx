@@ -86,20 +86,21 @@ export default function QuestionnairePage() {
         return;
       }
       
-      // Format the data to match the DTO structure
       const requestData = {
         username: formData.username,
-        height: parseFloat(formData.height), // Convert to Double
-        weight: parseFloat(formData.weight), // Convert to Double
-        dob: formData.birthdate, // Send as string, backend can parse
-        fitnessLevel: formData.fitnessLevel.toUpperCase(), // Convert to enum format
+        height: parseFloat(formData.height), 
+        weight: parseFloat(formData.weight),
+        dob: formData.birthdate, // Make sure this is in a format the backend can parse
+        fitnessLevel: formData.fitnessLevel.toUpperCase(),
         menstrualCramps: formData.menstrualCramps === "yes",
-        pregnancyStatus: formData.pregnancyStatus,
+        pregnancyStatus: formData.pregnancyStatus.toUpperCase(), // Convert to match enum
         cycleBasedRecommendations: formData.cycleBasedRecommendations === "yes",
-        workoutType: formData.workoutType,
-        workoutDays: parseInt(formData.workoutDays), // Match the DTO field name
-        workoutGoal: formData.fitnessGoal // Match the DTO field name
+        workoutType: formData.workoutType.toUpperCase(), // Convert to match enum
+        workoutDays: parseInt(formData.workoutDays),
+        workoutGoal: formData.fitnessGoal.toUpperCase() // Renamed to match DTO field name
       };
+
+      
       
       const response = await fetch("http://localhost:8080/api/users/questionnaire", {
         method: "POST",

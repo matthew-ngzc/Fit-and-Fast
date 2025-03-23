@@ -2,9 +2,9 @@ package com.fastnfit.app.enums;
 
 // Enums for type safety
 public enum PregnancyStatus {
-    NO("no"),
-    PREGNANT("yes, pregnant"),
-    POSTPARTUM("yes postpartum");
+    NO("NO"),
+    PREGNANT("YES, PREGNANT"),
+    POSTPARTUM("YES POSTPARTUM");
 
     private final String value;
 
@@ -18,7 +18,7 @@ public enum PregnancyStatus {
 
     public static PregnancyStatus fromValue(String value) {
         for (PregnancyStatus status : values()) {
-            if (status.value.equals(value)) {
+            if (status.value.equalsIgnoreCase(value)) {
                 return status;
             }
         }
