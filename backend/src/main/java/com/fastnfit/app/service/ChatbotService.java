@@ -18,6 +18,11 @@ public class ChatbotService {
     @Value("${openai.api.key}")
     private String openAiApiKey;
 
+    /*
+     * returns 2 parts to the string
+     * 1. json, used for extracting the workoutDTO information for accepting of workout
+     * 2. human readable section, which is displayed to the user, include extra information that we dont need for the workoutDTO
+     */
     public String getResponse(String userInput, UserDetailsDTO userDetailsDTO, Map<String, Object> currentWorkout) {
         String apiUrl = "https://api.openai.com/v1/chat/completions";
 
@@ -50,18 +55,61 @@ public class ChatbotService {
 
     private String buildSystemPrompt(UserDetailsDTO dto, Map<String, Object> workout) {
         List<String> exercises = (List<String>) workout.get("exercises");
-
+    
         return """
-            You are an AI fitness trainer specializing in time-efficient, effective workouts for busy women.
-            Format your reply like this:
-            **Here is your modified routine**
-            **Format:** 40s work, 20s rest
-            - Exercise 1
-            - Exercise 2
-            ...
-            **Would you like to use this instead?**
+            You are an AI fitness coach helping users get personalized workout routines based on their profile and preferences.
             
-            Avoid long explanations. Be concise.
+            Please respond in TWO clearly separated sections:
+            
+            ---
+            
+            **[JSON]**  
+            Use this section to structure the workout for the backend. Output strictly valid JSON:
+            
+            <BEGIN_JSON>
+            {
+            "name": "Workout Title",
+            "description": "Purpose or focus of the workout",
+            "durationInMinutes": 20,
+            "calories": 180,
+            "level": "BEGINNER",
+            "category": "STRENGTH",
+            "exercises": [
+                { "name": "Jumping Jacks", "duration": 40, "rest": 20 },
+                { "name": "Bodyweight Squats", "duration": 40, "rest": 20 }
+            ]
+            }
+            <END_JSON>
+            
+            ---
+            
+            **[Natural Language]**  
+            Use this section to write a motivational and readable workout suggestion for the user.
+            
+            Format it like this (keep structure, but personalize):
+            
+            Here's a gentle workout that's more suitable during your period:
+            
+            **Warm-up (5 minutes)**  
+            • Gentle walking in place - 2 minutes  
+            • Shoulder rolls - 1 minute  
+            • Gentle side stretches - 2 minutes
+            
+            **Main Workout (10 minutes)**  
+            • Modified cat-cow stretches - 2 minutes  
+            • Seated overhead stretches - 3 sets of 30 seconds  
+            • Gentle core engagement (seated) - 3 sets of 10 reps  
+            • Light arm raises with or without light weights - 3 sets of 12 reps  
+            • Seated leg extensions - 3 sets of 10 reps
+            
+            **Cool Down (5 minutes)**  
+            • Deep breathing exercises  
+            • Gentle full-body stretching
+            
+            Wrap it up with a line like:  
+            "This workout avoids intense abdominal exercises and high-impact movements. Would you like to try this workout?"
+            
+            ---
             
             User Profile:
             - Age: %s
@@ -75,18 +123,17 @@ public class ChatbotService {
             Current Workout:
             - Format: %s
             - Exercises: %s
-            
-            Adjust for menstrual comfort, and offer variety if possible.
-        """.formatted(
-                dto.getDob() != null ? dto.getDob().toString().substring(0, 4) : "N/A",
-                dto.getHeight() != null ? dto.getHeight() : 0,
-                dto.getWeight() != null ? dto.getWeight() : 0,
-                dto.getFitnessLevel(),
-                dto.getWorkoutGoal(),
-                dto.getWorkoutType(),
-                dto.getMenstrualCramps() ? "Yes" : "No",
-                workout.get("format"),
-                String.join(", ", exercises)
-        );
+            """.formatted(
+                        dto.getDob() != null ? dto.getDob().toString().substring(0, 4) : "N/A",
+                        dto.getHeight() != null ? dto.getHeight() : 0,
+                        dto.getWeight() != null ? dto.getWeight() : 0,
+                        dto.getFitnessLevel(),
+                        dto.getWorkoutGoal(),
+                        dto.getWorkoutType(),
+                        dto.getMenstrualCramps() ? "Yes" : "No",
+                        workout.get("format"),
+                        String.join(", ", exercises)
+                );
     }
+    
 }
