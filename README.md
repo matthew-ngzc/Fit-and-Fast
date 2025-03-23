@@ -17,3 +17,9 @@ Codebase for CS206 Project Fast&amp;Fit, an AI powered fitness app for busy wome
       powershell : $env:OPENAI_API_KEY="your_api_key_here"
 
 4. mvn spring-boot:run "-Dspring-boot.run.profiles=dev" or ./mvnw spring-boot:run "-Dspring-boot.run.profiles=dev"
+
+# To run frontend
+npm install --legacy-peer-deps
+npm run dev
+
+To integrate the APIS, call from config.js
