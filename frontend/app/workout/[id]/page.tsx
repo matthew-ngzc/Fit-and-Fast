@@ -502,6 +502,9 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
         />
       )}
 
+      {/* When workout is completed, POST request here: /api/history/user/{userId} 
+        * Provide all the information required to create a history */}
+
       <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
