@@ -21,6 +21,7 @@ export default function ActivityPage() {
   // Use useEffect to load data when the component mounts
   useEffect(() => {
     async function loadActivityData() {
+
       try {
         // Set today's calories and minutes from the data
         setTodayCalories(data.todayCalories);
@@ -33,6 +34,22 @@ export default function ActivityPage() {
     // Call the async function to load activity data
     loadActivityData();
   }, []); // Empty dependency array ensures this runs only once when the component mounts
+
+    // Load Activity Data API call logic
+      /* one GET call to /api/history/activity/overview that returns all three elements required
+       *  for the activity overview.
+       * First: "today": object containing date (not displayed), caloriesBurned: used in setTodayCalories,
+       * durationInMinutes: used in setTodayMinutes
+       * 
+       * Second: weekly, which is for the graph, contains date, caloriesBurned and durationInMinutes.
+       * We use date and caloriesBurned on each point on the graph plot, durationInMinds is for future potential use cases
+       * 
+       * Third: recent workouts. We fetch the 5 most recent workouts, array of objects that contain
+       * every bit of data required for each workout. historyId: unique ID for each workout completed,
+       * one history is a full, completed unique exercise session. workoutId is one workout session that can be repeated or
+       * used by multiple people, for example squats, RDLs, leg press is id 1, shoulder press, pullups is id 2, etc.
+       * also received is every other parameter such as name, workout details, calories burned, duration in minutes.
+      */
 
   {/* API call to get user calories and minutes */}
   // Fetch data from the API when the component mounts
@@ -58,6 +75,33 @@ export default function ActivityPage() {
   //   // Call the async function to load activity data
   //   loadActivityData();
   // }, []);
+
+  // Load more data API call logic
+      /* one GET call to /api/history/load-more that returns
+       * parameters:
+       * 1. after (DateTime): date and time of bottommost displayed historyId
+       * 2. limit (Integer): number of results to return, optional parameter, default 5
+       * returned data: more histories. same format as third response from Load Activty Data API Call
+      */
+
+  {/* API call to load more data after user scrolls */}
+  // async function loadMoreData() => {
+  //    const response = await fetch("/api/history/load-more?after={after}&limit={limit}");
+  // }
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+
+  // OPTIONAL API CALL: Load data between dates API call logic
+  // GET /api/history/user/{userId}/date-range?startDate={startDate}&endDate={endDate}
+  // startDate, endDate are Strings in the format yyyy-MM-dd (might change to DateTime)
+  // We may or may not implement this. Uncertain currently.
 
   return (
     <div className="container px-4 py-6 md:py-10 pb-20 max-w-5xl mx-auto">
@@ -117,6 +161,9 @@ export default function ActivityPage() {
               <ActivityLog />
             </CardContent>
           </Card>
+          {/* potential logic for tracking scrolling past the bottom
+            * for loading more workouts than just the 5 displayed 
+            function: loadMoreData */}
         </section>
       </div>
     </div>
