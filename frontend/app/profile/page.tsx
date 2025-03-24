@@ -20,7 +20,6 @@ import { Switch } from "@/components/ui/switch";
 import {
   EditIcon,
   LogOutIcon,
-  SettingsIcon,
   TrophyIcon,
   CheckIcon,
   XIcon,
@@ -37,6 +36,7 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
+  DialogFooter,
 } from "@/components/ui/dialog";
 
 const fetchUserData = async () => {
@@ -82,6 +82,12 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(userData.avatar);
 
+  const [cycleData, setCycleData] = useState({
+    cycleLength: 28,
+    periodLength: 5,
+    periodStart: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+  });
+
   // Predefined avatars
   const avatars = [
     { id: 0, src: "/avatars/avatar.png", alt: "Default Avatar" },
@@ -95,28 +101,6 @@ export default function ProfilePage() {
     { id: 8, src: "/avatars/avatar8.png", alt: "Avatar 8" },
     { id: 9, src: "/avatars/avatar9.png", alt: "Avatar 9" },
   ];
-
-  {
-    /* Fetch user data api */
-  }
-  {
-    /* Get user data api */
-  }
-  {
-    /* Update user data api */
-  }
-  {
-    /* Update user avatar api */
-  }
-  {
-    /* Update user primary goal api */
-  }
-  {
-    /* Update user goal to exercise per week api */
-  }
-  {
-    /* Get user total workout days for the week Mon-Fri*/
-  }
 
   return (
     <div className="container px-4 py-6 md:py-10 pb-20 max-w-5xl mx-auto">
@@ -434,9 +418,7 @@ export default function ProfilePage() {
                         key={index}
                         className="flex flex-col items-center p-4 border rounded-lg"
                       >
-                        <div
-                          className={`bg-muted rounded-full p-3 mb-2`}
-                        >
+                        <div className={`bg-muted rounded-full p-3 mb-2`}>
                           <TrophyIcon
                             className={`h-6 w-6 ${
                               achievement.isCompleted
@@ -513,7 +495,110 @@ export default function ProfilePage() {
                   </div>
                 </CardContent>
               </Card>
-
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Period Information</CardTitle>
+                    <CardDescription>
+                      Manage your period cycle information
+                    </CardDescription>
+                  </div>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <EditIcon className="h-4 w-4 mr-2" />
+                        Edit Period
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit Period Information</DialogTitle>
+                        <DialogDescription>
+                          Update your period details to get more accurate
+                          predictions
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="grid gap-2">
+                            <Label htmlFor="cycle-length">Cycle Length</Label>
+                            <Input
+                              id="cycle-length"
+                              defaultValue={cycleData.cycleLength.toString()}
+                              onChange={(e) =>
+                                setCycleData({
+                                  ...cycleData,
+                                  cycleLength: Number.parseInt(e.target.value),
+                                })
+                              }
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="period-length">Period Length</Label>
+                            <Input
+                              id="period-length"
+                              defaultValue={cycleData.periodLength.toString()}
+                              onChange={(e) =>
+                                setCycleData({
+                                  ...cycleData,
+                                  periodLength: Number.parseInt(e.target.value),
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="last-period">
+                            Last Period Start Date
+                          </Label>
+                          <div className="flex gap-2">
+                            <Input
+                              id="last-period"
+                              defaultValue={
+                                cycleData.periodStart
+                                  .toISOString()
+                                  .split("T")[0]
+                              }
+                              type="date"
+                              onChange={(e) =>
+                                setCycleData({
+                                  ...cycleData,
+                                  periodStart: new Date(e.target.value),
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button type="submit">Save changes</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Cycle Length
+                      </p>
+                      <p>{cycleData.cycleLength} days</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Period Length
+                      </p>
+                      <p>{cycleData.periodLength} days</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Last Period Start Date
+                      </p>
+                      <p>{cycleData.periodStart.toISOString().split("T")[0]}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
               <Card>
                 <CardHeader>
                   <CardTitle>Account Settings</CardTitle>

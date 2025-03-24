@@ -157,49 +157,6 @@ export default function CalendarPage() {
     <div className="container px-4 py-6 md:py-10 pb-20 max-w-5xl mx-auto">
       <div className="flex flex-col gap-6">
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <EditIcon className="h-4 w-4 mr-2" />
-                  Edit Period
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Edit Period Information</DialogTitle>
-                  <DialogDescription>Update your period details to get more accurate predictions</DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="cycle-length">Cycle Length</Label>
-                      <Input id="cycle-length" defaultValue={cycleData.cycleLength.toString()} />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="period-length">Period Length</Label>
-                      <Input id="period-length" defaultValue={cycleData.periodLength.toString()} />
-                    </div>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="last-period">Last Period Start Date</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        id="last-period"
-                        defaultValue={cycleData.periodStart.toISOString().split("T")[0]}
-                        type="date"
-                      />
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit">Save changes</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="lg:col-span-2">
               <CardHeader>
