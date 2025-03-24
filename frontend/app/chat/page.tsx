@@ -67,6 +67,30 @@ export default function ChatPage() {
     setInputValue("")
     setLoading(true)
 
+    /* simulating API call to the Chatbot, in the format Matthew wants
+    * two keys: message (user message) and exercises: array of objects
+    * exercises will be obtained from the user's current state
+    {
+      "message": "What workout should I do today?",
+      "exercises:" [
+        { "name": "Jumping Jacks", "duration": 40, "rest": 20 },
+        { "name": "Bodyweight Squats", "duration": 40, "rest": 20 }
+      ]
+    }
+
+    * then, what is received back from the chatbot:
+    * two parts: first, JSON segment. Second, natural language segment.
+    * JSON segment is hidden from the user, keep in the state to replace workout, send back to BackEnd
+    * second segment: natural language, will be displayed to user
+    * "Here's a great workout for improving posture and...
+    * **Warm-up (3 minutes)**
+    * * Arm Circles - 1 minute
+    * * ...
+    * * Would you like to try this workout?
+    * 
+    * So, the JSON segment will be sent in the accept POST endpoint,
+    */
+
     // Simulate bot response after a short delay
     setTimeout(() => {
       const botResponse = getBotResponse(inputValue)
