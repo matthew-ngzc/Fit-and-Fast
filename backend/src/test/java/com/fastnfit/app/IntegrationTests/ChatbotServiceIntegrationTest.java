@@ -11,6 +11,8 @@ import com.fastnfit.app.enums.FitnessLevel;
 import com.fastnfit.app.service.ChatbotService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,8 +27,8 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.JsonNode;
 
 
-//@SpringBootTest
-//@ActiveProfiles("dev")
+@SpringBootTest
+@ActiveProfiles("dev")
 public class ChatbotServiceIntegrationTest {
 
     @Autowired

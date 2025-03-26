@@ -164,6 +164,11 @@ public class HomeControllerIntegrationTest {
 
         @Test
         public void testGetUserStreak_Authenticated() throws Exception {
+                assertNotNull(testUser, "Test user must be created");
+                UserDetails userDetails = userDetailsRepository.findByUser(testUser)
+                                .orElseThrow(() -> new AssertionError("User details must exist"));
+                assertEquals(5, userDetails.getCurrentStreak(), "Streak should match user details");
+
                 // Perform request with JWT token
                 MvcResult result = mockMvc.perform(get("/api/home/streak")
                                 .header("Authorization", "Bearer " + authToken)

@@ -266,7 +266,7 @@ public class UserStreakServiceTest {
     public void testGetUserStreak_ReturnsCorrectStreak() {
         // Arrange
         testUserDetails.setCurrentStreak(7);
-        when(userDetailsRepository.findById(userId)).thenReturn(Optional.of(testUserDetails));
+        when(userDetailsRepository.findByUserUserId(userId)).thenReturn(Optional.of(testUserDetails));
 
         // Act
         StreakDTO result = userStreakService.getUserStreak(userId);
@@ -280,7 +280,7 @@ public class UserStreakServiceTest {
     public void testGetLongestUserStreak_ReturnsCorrectStreak() {
         // Arrange
         testUserDetails.setLongestStreak(14);
-        when(userDetailsRepository.findById(userId)).thenReturn(Optional.of(testUserDetails));
+        when(userDetailsRepository.findByUserUserId(userId)).thenReturn(Optional.of(testUserDetails));
 
         // Act
         StreakDTO result = userStreakService.getLongestUserStreak(userId);
@@ -293,7 +293,7 @@ public class UserStreakServiceTest {
     @Test
     public void testGetUserStreak_UserNotFound_ThrowsException() {
         // Arrange
-        when(userDetailsRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userDetailsRepository.findByUserUserId(userId)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> userStreakService.getUserStreak(userId));
@@ -302,7 +302,7 @@ public class UserStreakServiceTest {
     @Test
     public void testGetLongestUserStreak_UserNotFound_ThrowsException() {
         // Arrange
-        when(userDetailsRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userDetailsRepository.findByUserUserId(userId)).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> userStreakService.getLongestUserStreak(userId));

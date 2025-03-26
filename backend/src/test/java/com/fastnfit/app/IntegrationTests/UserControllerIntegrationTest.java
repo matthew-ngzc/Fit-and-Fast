@@ -196,7 +196,7 @@ public class UserControllerIntegrationTest {
                                 .andExpect(jsonPath("$.username").value("updatedusername"))
                                 .andExpect(jsonPath("$.weight").value(70.0))
                                 .andExpect(jsonPath("$.workoutDays").value(5))
-                                .andExpect(jsonPath("$.fitnessLevel").value("ADVANCED"))
+                                .andExpect(jsonPath("$.fitnessLevel").value("Advanced"))
                                 .andExpect(jsonPath("$.workoutGoal").value(WorkoutGoal.STRENGTH_BUILDING.getValue()))
                                 .andExpect(jsonPath("$.workoutType").value(WorkoutType.HIGH_ENERGY.getValue()));
 

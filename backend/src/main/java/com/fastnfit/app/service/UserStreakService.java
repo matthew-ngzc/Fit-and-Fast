@@ -132,7 +132,7 @@ public class UserStreakService {
     }
 
     public StreakDTO getUserStreak(Long userId) {
-        UserDetails userDetails = userDetailsRepository.findById(userId)
+        UserDetails userDetails = userDetailsRepository.findByUserUserId(userId)
             .orElseThrow(() -> new RuntimeException("User details not found"));
         StreakDTO streakDTO=new StreakDTO();
         streakDTO.setDays(userDetails.getCurrentStreak());
@@ -140,7 +140,7 @@ public class UserStreakService {
     }
 
     public StreakDTO getLongestUserStreak(Long userId) {
-        UserDetails userDetails = userDetailsRepository.findById(userId)
+        UserDetails userDetails = userDetailsRepository.findByUserUserId(userId)
             .orElseThrow(() -> new RuntimeException("User details not found"));
         StreakDTO streakDTO=new StreakDTO();
         streakDTO.setDays(userDetails.getLongestStreak());
