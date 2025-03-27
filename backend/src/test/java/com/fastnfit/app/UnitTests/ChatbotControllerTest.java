@@ -1,12 +1,16 @@
 package com.fastnfit.app.UnitTests;
 
+//./mvnw test "-Dtest=ChatbotControllerTest"
+
 import com.fastnfit.app.config.AwsConfig;
 import com.fastnfit.app.config.JwtConfig;
 import com.fastnfit.app.controller.ChatbotController;
 import com.fastnfit.app.dto.UserDetailsDTO;
 import com.fastnfit.app.enums.FitnessLevel;
 import com.fastnfit.app.service.ChatbotService;
+import com.fastnfit.app.service.JwtService;
 import com.fastnfit.app.service.UserService;
+import com.fastnfit.app.service.WorkoutService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -41,6 +46,7 @@ import org.springframework.test.context.ActiveProfiles;
     DataSourceAutoConfiguration.class,
     HibernateJpaAutoConfiguration.class
 })
+@AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class ChatbotControllerTest {
 
@@ -54,7 +60,13 @@ public class ChatbotControllerTest {
     private ChatbotService chatbotService;
 
     @MockBean
+    private WorkoutService workoutService;
+
+
+    @MockBean
     private JwtConfig jwtConfig;
+    @MockBean
+    private JwtService jwtService;
 
     @MockBean
     private AwsConfig awsConfig;
@@ -84,18 +96,24 @@ public class ChatbotControllerTest {
         String expectedReply = "**Here is your modified routine**\n- Jumping Jacks\n- Squats";
 
         Mockito.when(userService.getUserDetails(1L)).thenReturn(mockUserDetails);
-        Mockito.when(chatbotService.getResponse(anyString(), any(), anyMap()))
+        Mockito.when(chatbotService.getResponse(any(org.json.JSONObject.class), any()))
                 .thenReturn(expectedReply);
 
         String requestJson = """
         {
             "message": "Make it easier",
-            "currentWorkout": {
-                "format": "40s work, 20s rest",
-                "exercises": ["Jumping Jacks", "Push Ups", "Squats"]
-            }
+            "exercises": [
+                { "name": "Jumping Jacks", "duration": 40, "rest": 20 },
+                { "name": "Push Ups", "duration": 40, "rest": 20 }
+                ],
+            "exercises_supported": [
+                { "name": "Jumping Jacks" },
+                { "name": "Push Ups" },
+                { "name": "Squats" }
+            ]
         }
         """;
+
 
         MvcResult result = mockMvc.perform(post("/api/chatbot/1")
                 .with(csrf()) // ✅ Disable CSRF blocking

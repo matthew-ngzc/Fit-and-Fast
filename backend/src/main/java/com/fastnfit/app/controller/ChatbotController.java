@@ -5,6 +5,8 @@ import com.fastnfit.app.dto.WorkoutDTO;
 import com.fastnfit.app.service.UserService;
 import com.fastnfit.app.service.ChatbotService;
 import com.fastnfit.app.service.WorkoutService;
+
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,11 +32,14 @@ public class ChatbotController {
             @RequestBody Map<String, Object> payload
     ) {
         try {
-            String userMessage = (String) payload.get("message");
-            Map<String, Object> workout = (Map<String, Object>) payload.get("currentWorkout");
+            // String userMessage = (String) payload.get("message");
+            // Map<String, Object> workout = (Map<String, Object>) payload.get("currentWorkout");
 
+            // UserDetailsDTO userDetails = userService.getUserDetails(userId);
+            // String response = chatbotService.getResponse(userMessage, userDetails, workout);
             UserDetailsDTO userDetails = userService.getUserDetails(userId);
-            String response = chatbotService.getResponse(userMessage, userDetails, workout);
+            JSONObject request = new JSONObject(payload);
+            String response = chatbotService.getResponse(request, userDetails);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Failed to process chatbot message.");
