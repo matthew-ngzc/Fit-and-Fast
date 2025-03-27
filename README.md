@@ -2,7 +2,7 @@
 Codebase for CS206 Project Fast&amp;Fit, an AI powered fitness app for busy women
 
 # To run backend
-1. Setup databse in mySQL - create the schema called "fastnfit_app". Set the username and password both to "root". Details for the database can be found in "backend\src\main\resources\application-dev.properties". Set the username and password using this code in the mySQL workbench
+1. Startup your wampserver, Setup databse in mySQL - create the schema called "fastnfit_app". Set the username and password both to "root". Details for the database can be found in "backend\src\main\resources\application-dev.properties". Set the username and password using this code in the mySQL workbench
    
       ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
       FLUSH PRIVILEGES;
