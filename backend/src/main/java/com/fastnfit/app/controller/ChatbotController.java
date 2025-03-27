@@ -32,11 +32,6 @@ public class ChatbotController {
             @RequestBody Map<String, Object> payload
     ) {
         try {
-            // String userMessage = (String) payload.get("message");
-            // Map<String, Object> workout = (Map<String, Object>) payload.get("currentWorkout");
-
-            // UserDetailsDTO userDetails = userService.getUserDetails(userId);
-            // String response = chatbotService.getResponse(userMessage, userDetails, workout);
             UserDetailsDTO userDetails = userService.getUserDetails(userId);
             JSONObject request = new JSONObject(payload);
             String response = chatbotService.getResponse(request, userDetails);

@@ -225,12 +225,10 @@ public class ChatbotServiceIntegrationTest {
         }
 
 
-        // 🔍 Extract '''json
-        Pattern jsonPattern = Pattern.compile("```json\\s*([\\s\\S]*?)\\s*```");
-
+        // 🔍 Extract JSON block between <BEGIN_JSON> and <END_JSON>
+        Pattern jsonPattern = Pattern.compile("<BEGIN_JSON>\\s*([\\s\\S]*?)\\s*<END_JSON>");
         Matcher matcher = jsonPattern.matcher(response);
-        assertTrue(matcher.find(), "Response should contain a ```json block");
-
+        assertTrue(matcher.find(), "Response should contain a JSON block enclosed by <BEGIN_JSON> and <END_JSON>");
 
         String jsonPart = matcher.group(1).trim();
         System.out.println("\n=== Extracted JSON Block ===\n" + jsonPart);

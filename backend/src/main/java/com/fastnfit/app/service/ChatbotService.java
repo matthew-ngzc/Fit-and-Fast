@@ -79,10 +79,6 @@ public class ChatbotService {
         // Reverse to chronological order (oldest → newest)
         Collections.reverse(history);
 
-        // JSONArray messages = new JSONArray()
-        //         .put(new JSONObject().put("role", "system").put("content", systemPrompt))
-        //         .put(new JSONObject().put("role", "user").put("content", userInput));
-
         // Add chat history
         for (ChatHistory msg : history) {
             messages.put(new JSONObject()
@@ -122,17 +118,6 @@ public class ChatbotService {
                 new HttpEntity<>(requestBody.toString(), headers),
                 String.class
         );
-
-        // HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
-
-        // RestTemplate restTemplate = new RestTemplate();
-        // ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
-
-        // return new JSONObject(response.getBody())
-        //         .getJSONArray("choices")
-        //         .getJSONObject(0)
-        //         .getJSONObject("message")
-        //         .getString("content");
     
         String chatbotReply = new JSONObject(response.getBody())
                                 .getJSONArray("choices")
@@ -167,12 +152,15 @@ public class ChatbotService {
 
                 ---
 
+                ❗ When generating workout plans, strictly choose only from the list of supported exercises provided.  
+                Do not invent new exercises or suggest ones outside the supported list.
+
                 If the user is asking for a workout plan, respond in TWO clearly separated sections:
 
                 ---
 
                 **[JSON]**  
-                Use this section to structure the workout for the backend. Output strictly valid JSON:
+                Use this section to structure the workout for the backend. Output strictly valid JSON with the following structure. Make sure to include <BEGIN JSON> and <END JSON> tags as they are needed for parsing.:
 
                 <BEGIN_JSON>
                 {
@@ -251,12 +239,6 @@ public class ChatbotService {
 
     }
 
-    // private int calculateAge(Date dob) {
-    //     return java.time.Period.between(
-    //         dob.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate(),
-    //         LocalDateTime.now().toLocalDate()
-    //     ).getYears();
-    // }
     private int calculateAge(Date dob) {
     if (dob == null) return -1;
 
