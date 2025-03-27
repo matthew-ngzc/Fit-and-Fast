@@ -13,7 +13,7 @@ public class ProfileDTO {
     private Double height;
     private Double weight;
     private Date dob;
-    private String workoutGoal;
+    private WorkoutGoal workoutGoal;
     private Integer workoutDays;
     private String avatar;
 }

@@ -90,6 +90,7 @@ public class UserService {
 
         return AuthResponseDTO.builder()
                 .token(token)
+                .userId(user.getUserId())
                 .build();
     }
 
@@ -121,6 +122,12 @@ public class UserService {
         userDetails.setMenstrualCramps(detailsDTO.getMenstrualCramps());
         userDetails.setCycleBasedRecommendations(detailsDTO.getCycleBasedRecommendations());
         userDetails.setWorkoutType(detailsDTO.getWorkoutType());
+
+        if (detailsDTO.getLastPeriodDate()!=null && detailsDTO.getPeriodLength()!=null && detailsDTO.getCycleLength()!=null){
+            userDetails.setLastPeriodStartDate(detailsDTO.getLastPeriodDate());
+            userDetails.setPeriodLength(detailsDTO.getPeriodLength());
+            userDetails.setCycleLength(detailsDTO.getCycleLength());
+        }
 
         userDetailsRepository.save(userDetails);
 
@@ -259,7 +266,7 @@ public class UserService {
         profileDTO.setHeight(userDetails.getHeight());
         profileDTO.setWeight(userDetails.getWeight());
         profileDTO.setDob(userDetails.getDob());
-        profileDTO.setWorkoutGoal(userDetails.getWorkoutGoal().getValue());
+        profileDTO.setWorkoutGoal(userDetails.getWorkoutGoal());
         profileDTO.setWorkoutDays(userDetails.getWorkoutDays());
         profileDTO.setAvatar(userDetails.getAvatar());
 

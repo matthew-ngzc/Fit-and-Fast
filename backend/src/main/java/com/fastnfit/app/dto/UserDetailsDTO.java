@@ -4,6 +4,7 @@ package com.fastnfit.app.dto;
 import lombok.Data;
 import java.util.Date;
 import com.fastnfit.app.enums.*;
+import java.time.LocalDate;
 
 @Data
 public class UserDetailsDTO {
@@ -19,6 +20,9 @@ public class UserDetailsDTO {
     private boolean menstrualCramps;
     private boolean cycleBasedRecommendations;
     private String workoutType;
+    private Integer cycleLength;
+    private Integer periodLength;
+    private LocalDate lastPeriodDate;
     private Integer currentStreak;
     private Integer longestStreak;
 

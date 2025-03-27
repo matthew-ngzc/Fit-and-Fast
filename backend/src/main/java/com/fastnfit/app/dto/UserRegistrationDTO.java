@@ -2,8 +2,6 @@
 package com.fastnfit.app.dto;
 
 import lombok.Data;
-import java.util.Date;
-import com.fastnfit.app.enums.*;
 
 @Data
 public class UserRegistrationDTO {

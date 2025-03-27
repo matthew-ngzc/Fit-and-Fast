@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -85,6 +86,9 @@ public class UserControllerIntegrationTest {
                 userDetailsDTO.setMenstrualCramps(false);
                 userDetailsDTO.setCycleBasedRecommendations(false);
                 userDetailsDTO.setWorkoutType(WorkoutType.HIGH_ENERGY.getValue());
+                userDetailsDTO.setCycleLength(5);
+                userDetailsDTO.setPeriodLength(10);
+                userDetailsDTO.setLastPeriodDate(LocalDate.of(2025, 4, 1));
         }
 
         @Test
@@ -107,7 +111,9 @@ public class UserControllerIntegrationTest {
                 assertEquals(testUser,savedDetails.get().getUser(), "User should remain the same");
                 assertEquals("testuser", savedDetails.get().getUsername(), "Username should match");
                 assertEquals(4, savedDetails.get().getWorkoutDays(), "Workout days should match");
-                assertTrue(foundDetails.isPresent(),"Unable to find user through findByUser(User user)");
+                assertEquals(5,savedDetails.get().getCycleLength(),"Period cycle failed to set");
+                assertEquals(10,savedDetails.get().getPeriodLength(),"Period length failed to set");
+                assertEquals(userDetailsDTO.getLastPeriodDate(),savedDetails.get().getLastPeriodStartDate(),"Period length failed to set");
         }
 
         @Test

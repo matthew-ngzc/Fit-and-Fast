@@ -122,7 +122,7 @@ public class UserProfileControllerIntegrationTest {
                 .andExpect(jsonPath("$.email").value(TEST_EMAIL))
                 .andExpect(jsonPath("$.height").value(175.0))
                 .andExpect(jsonPath("$.weight").value(70.0))
-                .andExpect(jsonPath("$.workoutGoal").value("Weight Loss"))
+                .andExpect(jsonPath("$.workoutGoal").value("WEIGHT_LOSS"))
                 .andExpect(jsonPath("$.workoutDays").value(5))
                 .andExpect(jsonPath("$.avatar").value("default-avatar.png"));
     }
