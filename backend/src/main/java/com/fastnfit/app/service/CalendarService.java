@@ -78,7 +78,7 @@ public class CalendarService {
 
         int cycleLength = Optional.ofNullable(details.getCycleLength()).orElse(28); //default is 28 if not set yet
         int periodLength = Optional.ofNullable(details.getPeriodLength()).orElse(5); //default is 5 if not set yet
-        LocalDate lastPeriodStart = LocalDate.now().minusDays(20); // fallback default
+        LocalDate lastPeriodStart = Optional.ofNullable(details.getLastPeriodStartDate()).orElse(LocalDate.now().minusDays(20)); // fallback default
 
         if (details.getDob() != null) {
             lastPeriodStart = details.getDob().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
