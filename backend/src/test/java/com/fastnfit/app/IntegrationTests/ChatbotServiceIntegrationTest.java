@@ -10,6 +10,7 @@ To run:
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fastnfit.app.dto.UserDetailsDTO;
 import com.fastnfit.app.enums.FitnessLevel;
+import com.fastnfit.app.enums.WorkoutGoal;
 import com.fastnfit.app.model.ChatHistory;
 import com.fastnfit.app.model.User;
 import com.fastnfit.app.model.UserDetails;
@@ -84,7 +85,7 @@ public class ChatbotServiceIntegrationTest {
             details.setHeight(165.0);
             details.setWeight(60.0);
             details.setFitnessLevel(FitnessLevel.Intermediate);
-            details.setWorkoutGoal("Weight Loss");
+            details.setWorkoutGoal(WorkoutGoal.WEIGHT_LOSS.getValue());
             details.setWorkoutType("HIIT");
             details.setMenstrualCramps(false);
             userDetailsRepository.save(details);

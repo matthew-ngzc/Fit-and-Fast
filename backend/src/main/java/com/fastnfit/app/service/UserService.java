@@ -70,9 +70,9 @@ public class UserService {
 
         // Use the createUser method to save user, initialize UserDetails if needed,
         // and create achievements
-        User savedUser = createUser(user,registrationDTO.getUsername());
+        user = createUser(user,registrationDTO.getUsername());
 
-        String token = jwtService.generateToken(savedUser.getUserId());
+        String token = jwtService.generateToken(user.getUserId());
 
         return AuthResponseDTO.builder()
                 .token(token)
@@ -413,6 +413,7 @@ public class UserService {
         if (user.getUserDetails() == null) {
             UserDetails userDetails = new UserDetails();
             userDetails.setUser(savedUser);
+            userDetails.setUsername(username);
             userDetails.setCurrentStreak(0);
             userDetails.setLongestStreak(0);
             //default values for menstrual cycle

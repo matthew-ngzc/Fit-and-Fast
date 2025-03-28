@@ -5,6 +5,8 @@ import com.fastnfit.app.dto.AuthResponseDTO;
 import com.fastnfit.app.dto.LoginRequestDTO;
 import com.fastnfit.app.dto.UserRegistrationDTO;
 import com.fastnfit.app.model.User;
+import com.fastnfit.app.model.UserDetails;
+import com.fastnfit.app.repository.UserDetailsRepository;
 import com.fastnfit.app.repository.UserRepository;
 import com.fastnfit.app.service.JwtService;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +26,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Optional;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test") // Use test profile
@@ -41,6 +45,9 @@ public class AuthControllerIntegrationTest {
 
         @Autowired
         private PasswordEncoder passwordEncoder;
+
+        @Autowired
+        private UserDetailsRepository userDetailsRepository;
 
         @Autowired
         private JwtService jwtService;
@@ -85,6 +92,12 @@ public class AuthControllerIntegrationTest {
                 assertTrue(jwtService.validateToken(response.getToken()), "Token should be valid");
                 assertEquals(savedUser.getUserId(), jwtService.extractUserId(response.getToken()),
                                 "Token should contain correct user ID");
+                
+                //verify user Details created with username
+                Optional<UserDetails> userDetails=userDetailsRepository.findByUser(savedUser);
+                assertTrue(userDetails.isPresent(),"User details should be created");
+                assertEquals(TEST_USERNAME,userDetails.get().getUsername());
+
         }
 
         @Test
