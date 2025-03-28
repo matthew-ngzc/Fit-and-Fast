@@ -86,7 +86,7 @@ public class WorkoutControllerIntegrationTest {
         testWorkout.setExercises(exercises);
         testWorkout.setDurationInMinutes(20);
         testWorkout.setDescription("Test workout");
-        testWorkout.setCategory(WorkoutType.HIGH_ENERGY);
+        testWorkout.setCategory(WorkoutType.LOW_IMPACT);
         testWorkout.setCalories(100);
         workoutRepository.save(testWorkout);
 

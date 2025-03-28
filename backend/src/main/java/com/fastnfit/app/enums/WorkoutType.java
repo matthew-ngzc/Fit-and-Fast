@@ -1,14 +1,13 @@
 package com.fastnfit.app.enums;
 
 public enum WorkoutType {
-    HIGH_ENERGY("high-energy"),
     LOW_IMPACT("low-impact"),
     OTHERS("others"),
     PRENATAL("prenatal"),
     POSTNATAL("postnatal"),
     Yoga("yoga"),
     HIIT("HIIT"),
-    STRENGTH("Strength");
+    STRENGTH("strength");
 
     private final String value;
 

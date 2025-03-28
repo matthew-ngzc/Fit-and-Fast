@@ -86,7 +86,7 @@ public class UserControllerIntegrationTest {
                 userDetailsDTO.setFitnessLevel(FitnessLevel.Intermediate);
                 userDetailsDTO.setMenstrualCramps(false);
                 userDetailsDTO.setCycleBasedRecommendations(false);
-                userDetailsDTO.setWorkoutType(WorkoutType.HIGH_ENERGY.getValue());
+                userDetailsDTO.setWorkoutType(WorkoutType.LOW_IMPACT.getValue());
                 userDetailsDTO.setCycleLength(5);
                 userDetailsDTO.setPeriodLength(10);
                 userDetailsDTO.setLastPeriodDate(LocalDate.of(2025, 4, 1));
@@ -105,7 +105,7 @@ public class UserControllerIntegrationTest {
                 dto.setFitnessLevel(FitnessLevel.Intermediate);
                 dto.setMenstrualCramps(false);
                 dto.setCycleBasedRecommendations(false);
-                dto.setWorkoutType(WorkoutType.HIGH_ENERGY.getValue());
+                dto.setWorkoutType(WorkoutType.LOW_IMPACT.getValue());
                 dto.setCycleLength(5);
                 dto.setPeriodLength(10);
                 dto.setLastPeriodDate(LocalDate.of(2025, 4, 1));
@@ -151,7 +151,7 @@ public class UserControllerIntegrationTest {
                 userDetails.setFitnessLevel(FitnessLevel.Beginner);
                 userDetails.setMenstrualCramps(false);
                 userDetails.setCycleBasedRecommendations(false);
-                userDetails.setWorkoutType(WorkoutType.HIGH_ENERGY);
+                userDetails.setWorkoutType(WorkoutType.LOW_IMPACT);
                 userDetails = userDetailsRepository.save(userDetails);
 
                 // Perform GET request
@@ -203,7 +203,7 @@ public class UserControllerIntegrationTest {
                 updateDTO.setWorkoutDays(5);
                 updateDTO.setFitnessLevel(FitnessLevel.Advanced);
                 updateDTO.setWorkoutGoal(WorkoutGoal.STRENGTH_BUILDING.getValue());
-                updateDTO.setWorkoutType(WorkoutType.HIGH_ENERGY.getValue());
+                updateDTO.setWorkoutType(WorkoutType.LOW_IMPACT.getValue());
 
                 // Perform PUT request
                 mockMvc.perform(put("/api/users/details")
@@ -216,7 +216,7 @@ public class UserControllerIntegrationTest {
                                 .andExpect(jsonPath("$.workoutDays").value(5))
                                 .andExpect(jsonPath("$.fitnessLevel").value("Advanced"))
                                 .andExpect(jsonPath("$.workoutGoal").value(WorkoutGoal.STRENGTH_BUILDING.getValue()))
-                                .andExpect(jsonPath("$.workoutType").value(WorkoutType.HIGH_ENERGY.getValue()));
+                                .andExpect(jsonPath("$.workoutType").value(WorkoutType.LOW_IMPACT.getValue()));
 
                 // Verify updates in database
                 userDetails = userDetailsRepository.findByUser(testUser).orElse(null);
@@ -227,7 +227,7 @@ public class UserControllerIntegrationTest {
                 assertEquals(FitnessLevel.Advanced, userDetails.getFitnessLevel(), "Fitness level should be updated");
                 assertEquals(WorkoutGoal.STRENGTH_BUILDING, userDetails.getWorkoutGoal(),
                                 "Workout goal should be updated");
-                assertEquals(WorkoutType.HIGH_ENERGY, userDetails.getWorkoutType(), "Workout type should be updated");
+                assertEquals(WorkoutType.LOW_IMPACT, userDetails.getWorkoutType(), "Workout type should be updated");
         }
 
         @Test

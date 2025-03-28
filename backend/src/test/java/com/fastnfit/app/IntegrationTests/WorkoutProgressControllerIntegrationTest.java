@@ -76,7 +76,7 @@ public class WorkoutProgressControllerIntegrationTest {
         testWorkout = new Workout();
         testWorkout.setName("Test Workout");
         testWorkout.setDescription("A workout for testing purposes");
-        testWorkout.setCategory(WorkoutType.HIGH_ENERGY);
+        testWorkout.setCategory(WorkoutType.LOW_IMPACT);
         testWorkout.setLevel(WorkoutLevel.Beginner);
         testWorkout.setCalories(150);
         testWorkout.setDurationInMinutes(30);

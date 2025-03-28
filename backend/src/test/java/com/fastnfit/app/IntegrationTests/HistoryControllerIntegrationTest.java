@@ -85,7 +85,7 @@ public class HistoryControllerIntegrationTest {
         testWorkout.setCalories(200);
         testWorkout.setDurationInMinutes(30);
         testWorkout.setLevel(WorkoutLevel.Beginner);
-        testWorkout.setCategory(WorkoutType.HIGH_ENERGY);
+        testWorkout.setCategory(WorkoutType.LOW_IMPACT);
         testWorkout = workoutRepository.save(testWorkout);
 
         // Generate auth token for test user

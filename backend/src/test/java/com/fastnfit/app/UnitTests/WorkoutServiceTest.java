@@ -49,7 +49,7 @@ public class WorkoutServiceTest {
         testWorkout2.setWorkoutId(2L);
         testWorkout2.setName("Running");
         testWorkout2.setDescription("Cardio exercise");
-        testWorkout2.setCategory(WorkoutType.HIGH_ENERGY);
+        testWorkout2.setCategory(WorkoutType.LOW_IMPACT);
         testWorkout2.setLevel(WorkoutLevel.Intermediate);
         testWorkout2.setCalories(200);
     }
