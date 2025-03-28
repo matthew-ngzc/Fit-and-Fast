@@ -40,10 +40,10 @@ public class HistoryService {
 
     @Autowired
     public HistoryService(HistoryRepository historyRepository,
-                        UserRepository userRepository,
-                        WorkoutRepository workoutRepository,
-                        WorkoutService workoutService,
-                        UserStreakService userStreakService) {
+            UserRepository userRepository,
+            WorkoutRepository workoutRepository,
+            WorkoutService workoutService,
+            UserStreakService userStreakService) {
         this.historyRepository = historyRepository;
         this.userRepository = userRepository;
         this.workoutRepository = workoutRepository;
@@ -53,40 +53,40 @@ public class HistoryService {
 
     public List<HistoryDTO> getUserHistory(Long userId) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         return historyRepository.findByUser(user).stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     public List<HistoryDTO> getUserHistoryBetweenDates(Long userId, Date startDate, Date endDate) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         Timestamp startTimestamp = new Timestamp(startDate.getTime());
         Timestamp endTimestamp = new Timestamp(endDate.getTime());
-        
+
         return historyRepository.findByUserAndWorkoutDateTimeBetween(user, startTimestamp, endTimestamp).stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional
     public HistoryDTO createHistory(Long userId, HistoryDTO historyDTO) {
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-        
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         History history = new History();
         history.setUser(user);
-        
+
         // Convert Date to Timestamp if needed
         if (historyDTO.getWorkoutDateTime() != null) {
             history.setWorkoutDateTime(new Timestamp(historyDTO.getWorkoutDateTime().getTime()));
         }
-        
+
         history.setWorkoutName(historyDTO.getName());
-        
+
         Optional<Workout> workout = workoutRepository.findById(historyDTO.getWorkout().getWorkoutId());
         if (workout.isPresent()) {
             history.setWorkout(workout.get());
@@ -94,7 +94,7 @@ public class HistoryService {
 
         history.setCaloriesBurned(historyDTO.getCaloriesBurned());
         history.setDurationInMinutes(historyDTO.getDurationInMinutes());
-        
+
         History savedHistory = historyRepository.save(history);
         return convertToDTO(savedHistory);
     }
@@ -106,25 +106,25 @@ public class HistoryService {
         dto.setWorkout(workout);
         dto.setWorkoutDateTime(new Timestamp(currentUtilCalendar.getTimeInMillis()));
         dto.setDurationInMinutes(workout.getDurationInMinutes());
-        
+
         HistoryDTO result = createHistory(userId, dto);
         userStreakService.updateStreak(userId);
         return result;
     }
-    
-//ACTIVITY METHODS
+
+    // ACTIVITY METHODS
     public DailySummaryDTO getTodaySummary(Long userId) {
         LocalDate today = LocalDate.now();
         Timestamp start = Timestamp.valueOf(today.atStartOfDay());
         Timestamp end = Timestamp.valueOf(today.plusDays(1).atStartOfDay());
-    
+
         int calories = historyRepository.sumCaloriesBurnedByUserBetween(userId, start, end);
         int minutes = historyRepository.sumTimeExercisedByUserBetween(userId, start, end);
-    
+
         return new DailySummaryDTO(today, calories, minutes);
     }
 
-    //returns a list of daily summaries in ascending date order
+    // returns a list of daily summaries in ascending date order
     public List<DailySummaryDTO> getWeeklySummary(Long userId) {
         List<DailySummaryDTO> result = new ArrayList<>();
         LocalDate today = LocalDate.now();
@@ -143,12 +143,13 @@ public class HistoryService {
         return result;
     }
 
-    
-    //method to 1 shot load all the things needed for activity, instead of multiple http requests
+    // method to 1 shot load all the things needed for activity, instead of multiple
+    // http requests
     public ActivityOverviewDTO getActivityOverview(Long userId) {
         DailySummaryDTO today = getTodaySummary(userId);
         List<DailySummaryDTO> weekly = getWeeklySummary(userId);
-        List<HistoryDTO> recent = loadMoreHistory(userId, LocalDateTime.now(), 5); // You can adjust 5 to whatever feels best
+        List<HistoryDTO> recent = loadMoreHistory(userId, LocalDateTime.now(), 5); // You can adjust 5 to whatever feels
+                                                                                   // best
 
         return new ActivityOverviewDTO(today, weekly, recent);
     }
@@ -156,12 +157,11 @@ public class HistoryService {
     public List<HistoryDTO> loadMoreHistory(Long userId, LocalDateTime after, int limit) {
         Timestamp afterTimestamp = Timestamp.valueOf(after);
         Pageable pageable = PageRequest.of(0, limit);
+
         return historyRepository.findMoreHistory(userId, afterTimestamp, pageable).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-    
-
 
     public HistoryDTO convertToDTO(History history) {
         HistoryDTO dto = new HistoryDTO();
@@ -169,9 +169,10 @@ public class HistoryService {
         dto.setName(history.getWorkoutName());
         dto.setCaloriesBurned(history.getCaloriesBurned());
         dto.setDurationInMinutes(history.getDurationInMinutes());
-        
+        dto.setWorkoutDateTime(history.getWorkoutDateTime());
+
         WorkoutDTO workoutDTO = workoutService.convertToDTO(history.getWorkout());
-        
+
         dto.setWorkout(workoutDTO);
         return dto;
     }

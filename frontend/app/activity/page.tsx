@@ -13,95 +13,106 @@ import { ActivityLineChart } from "@/components/activity-line-chart";
 import { ActivityLog } from "@/components/activity-log";
 import data from "./data.json";
 
+import axios, { AxiosError } from "axios";
+import config from "../../config";
+
+interface TodayActivity {
+  date: string;
+  caloriesBurned: number;
+  durationInMinutes: number;
+}
+
+interface WeeklyActivity {
+  date: string;
+  caloriesBurned: number;
+  durationInMinutes: number;
+}
+
+interface WorkoutHistory {
+  historyId: number;
+  workoutDateTime: string;
+  name: string;
+  workout: WorkoutDTO;
+  caloriesBurned: number;
+  durationInMinutes: number;
+}
+
+interface WorkoutDTO {
+  name: string;
+  category: string;
+}
+
+interface ActivityData {
+  today: TodayActivity;
+  weekly: WeeklyActivity[];
+  recentWorkouts: WorkoutHistory[];
+}
+
 export default function ActivityPage() {
   // Set up state variables for today's calories and minutes
   const [todayCalories, setTodayCalories] = useState(0);
   const [todayMinutes, setTodayMinutes] = useState(0);
+  const [weeklyData, setWeeklyData] = useState<WeeklyActivity[]>([]);
+  const [recentWorkouts, setRecentWorkouts] = useState<WorkoutHistory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Use useEffect to load data when the component mounts
   useEffect(() => {
     async function loadActivityData() {
-
       try {
-        // Set today's calories and minutes from the data
-        setTodayCalories(data.todayCalories);
-        setTodayMinutes(data.todayMinutes);
+        const token = localStorage.getItem("token");
+  
+        if (!token) {
+          setError("No authentication token found. Please log in.");
+          setIsLoading(false);
+          return;
+        }
+  
+        setIsLoading(true);
+  
+        const response = await axios.get<ActivityData>(
+          `${config.HISTORY_URL}/activity/overview`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        const { today, weekly, recentWorkouts } = response.data;
+
+  
+  
+        const validWeeklyData: WeeklyActivity[] = weekly.map((item) => {
+          return {
+            date: item.date, 
+            caloriesBurned: item.caloriesBurned,
+            durationInMinutes: item.durationInMinutes,
+          };
+        });
+  
+        setTodayCalories(today.caloriesBurned);
+        setTodayMinutes(today.durationInMinutes);
+        setWeeklyData(validWeeklyData);
+        setRecentWorkouts(recentWorkouts);
+
+        console.log(recentWorkouts);
       } catch (error) {
-        console.error("Failed to load activity data:", error);
+        if (axios.isAxiosError(error)) {
+          setError(error.response?.data?.message || "An error occurred while fetching activity data");
+          console.error("API error:", error);
+        } else {
+          setError("An unexpected error occurred");
+          console.error("Unexpected error:", error);
+        }
+      } finally {
+        setIsLoading(false);
       }
     }
-
-    // Call the async function to load activity data
+  
     loadActivityData();
-  }, []); // Empty dependency array ensures this runs only once when the component mounts
-
-    // Load Activity Data API call logic
-      /* one GET call to /api/history/activity/overview that returns all three elements required
-       *  for the activity overview.
-       * First: "today": object containing date (not displayed), caloriesBurned: used in setTodayCalories,
-       * durationInMinutes: used in setTodayMinutes
-       * 
-       * Second: weekly, which is for the graph, contains date, caloriesBurned and durationInMinutes.
-       * We use date and caloriesBurned on each point on the graph plot, durationInMinds is for future potential use cases
-       * 
-       * Third: recent workouts. We fetch the 5 most recent workouts, array of objects that contain
-       * every bit of data required for each workout. historyId: unique ID for each workout completed,
-       * one history is a full, completed unique exercise session. workoutId is one workout session that can be repeated or
-       * used by multiple people, for example squats, RDLs, leg press is id 1, shoulder press, pullups is id 2, etc.
-       * also received is every other parameter such as name, workout details, calories burned, duration in minutes.
-      */
-
-  {/* API call to get user calories and minutes */}
-  // Fetch data from the API when the component mounts
-  // useEffect(() => {
-  //   async function loadActivityData() {
-  //     try {
-  //       // Fetch the data from your API
-  //       const response = await fetch("/api/activity");
-
-  //       if (!response.ok) {
-  //         throw new Error("Failed to fetch data");
-  //       }
-
-  //       const data = await response.json();
-
-  //       // Set today's calories and minutes from the API response
-  //       setTodayCalories(data.todayCalories);
-  //       setTodayMinutes(data.todayMinutes);
-  //     } catch (error) {
-  //       console.error("Failed to load activity data:", error);
-  //     }
-  //   }
-  //   // Call the async function to load activity data
-  //   loadActivityData();
-  // }, []);
-
-  // Load more data API call logic
-      /* one GET call to /api/history/load-more that returns
-       * parameters:
-       * 1. after (DateTime): date and time of bottommost displayed historyId
-       * 2. limit (Integer): number of results to return, optional parameter, default 5
-       * returned data: more histories. same format as third response from Load Activty Data API Call
-      */
-
-  {/* API call to load more data after user scrolls */}
-  // async function loadMoreData() => {
-  //    const response = await fetch("/api/history/load-more?after={after}&limit={limit}");
-  // }
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-
-  // OPTIONAL API CALL: Load data between dates API call logic
-  // GET /api/history/user/{userId}/date-range?startDate={startDate}&endDate={endDate}
-  // startDate, endDate are Strings in the format yyyy-MM-dd (might change to DateTime)
-  // We may or may not implement this. Uncertain currently.
+  }, []);
 
   return (
     <div className="container px-4 py-6 md:py-10 pb-20 max-w-5xl mx-auto">
@@ -148,7 +159,7 @@ export default function ActivityPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ActivityLineChart />
+              <ActivityLineChart weeklyData={weeklyData} />
             </CardContent>
           </Card>
 
@@ -158,12 +169,9 @@ export default function ActivityPage() {
               <CardDescription>Your workout history</CardDescription>
             </CardHeader>
             <CardContent>
-              <ActivityLog />
+              <ActivityLog recentWorkouts={recentWorkouts}/>
             </CardContent>
           </Card>
-          {/* potential logic for tracking scrolling past the bottom
-            * for loading more workouts than just the 5 displayed 
-            function: loadMoreData */}
         </section>
       </div>
     </div>
