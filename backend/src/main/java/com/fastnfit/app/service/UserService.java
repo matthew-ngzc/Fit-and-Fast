@@ -112,6 +112,7 @@ public class UserService {
         }
 
         // Update user details with questionnaire data
+        userDetails.setUser(user);
         userDetails.setDob(questionnaireDTO.getDob());
         userDetails.setHeight(questionnaireDTO.getHeight());
         userDetails.setWeight(questionnaireDTO.getWeight());

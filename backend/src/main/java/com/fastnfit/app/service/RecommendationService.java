@@ -80,12 +80,12 @@ public class RecommendationService {
         List<Workout> filteredWorkouts;
         
         // First, check pregnancy status for specialized workouts
-        if (pregnancyStatus.getValue().equalsIgnoreCase("yes, pregnant")) {
+        if (pregnancyStatus.getValue().equalsIgnoreCase(PregnancyStatus.PREGNANT.getValue())) {
             filteredWorkouts = workoutRepository.findByCategory(WorkoutType.PRENATAL);
             if (!filteredWorkouts.isEmpty()) {
                 return convertToRecommendationDTO(getRandomWorkout(filteredWorkouts));
             }
-        }else if(pregnancyStatus.getValue().equalsIgnoreCase("yes postpartum")){
+        }else if(pregnancyStatus.getValue().equalsIgnoreCase(PregnancyStatus.POSTPARTUM.getValue())){
             filteredWorkouts = workoutRepository.findByCategory(WorkoutType.POSTNATAL);
             if (!filteredWorkouts.isEmpty()) {
                 return convertToRecommendationDTO(getRandomWorkout(filteredWorkouts));

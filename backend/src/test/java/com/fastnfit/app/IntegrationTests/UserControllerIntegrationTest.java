@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fastnfit.app.dto.QuestionnaireDTO;
 import com.fastnfit.app.dto.UserDetailsDTO;
 import com.fastnfit.app.enums.FitnessLevel;
 import com.fastnfit.app.enums.PregnancyStatus;
@@ -94,25 +95,37 @@ public class UserControllerIntegrationTest {
         @Test
         public void testCompleteQuestionnaire_Success() throws Exception {
                 // Perform POST request
+                QuestionnaireDTO dto = new QuestionnaireDTO();
+                dto.setDob(new Date(System.currentTimeMillis() - 365L * 24 * 60 * 60 * 1000)); // 1 year ago
+                dto.setHeight(170.0);
+                dto.setWeight(65.0);
+                dto.setPregnancyStatus(PregnancyStatus.NO.getValue());
+                dto.setWorkoutGoal(WorkoutGoal.GENERAL.getValue());
+                dto.setWorkoutDays(4);
+                dto.setFitnessLevel(FitnessLevel.Intermediate);
+                dto.setMenstrualCramps(false);
+                dto.setCycleBasedRecommendations(false);
+                dto.setWorkoutType(WorkoutType.HIGH_ENERGY.getValue());
+                dto.setCycleLength(5);
+                dto.setPeriodLength(10);
+                dto.setLastPeriodDate(LocalDate.of(2025, 4, 1));
                 MvcResult result = mockMvc.perform(post("/api/users/questionnaire")
                                 .header("Authorization", "Bearer " + authToken)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userDetailsDTO)))
+                                .content(objectMapper.writeValueAsString(dto)))
                                 .andExpect(status().isCreated())
                                 .andExpect(jsonPath("$.workoutGoal").value(WorkoutGoal.GENERAL.getValue()))
                                 .andExpect(jsonPath("$.workoutDays").value(4))
                                 .andReturn();
 
                 // Verify user details saved in database
-                Optional<UserDetails> savedDetails = userDetailsRepository.findByUsername("testuser");
-                Optional<UserDetails> foundDetails = userDetailsRepository.findByUser(testUser);
+                Optional<UserDetails> savedDetails = userDetailsRepository.findByUserUserId(testUser.getUserId());
                 assertTrue(savedDetails.isPresent(), "User details should be saved in database");
                 assertEquals(testUser,savedDetails.get().getUser(), "User should remain the same");
-                assertEquals("testuser", savedDetails.get().getUsername(), "Username should match");
                 assertEquals(4, savedDetails.get().getWorkoutDays(), "Workout days should match");
                 assertEquals(5,savedDetails.get().getCycleLength(),"Period cycle failed to set");
                 assertEquals(10,savedDetails.get().getPeriodLength(),"Period length failed to set");
-                assertEquals(userDetailsDTO.getLastPeriodDate(),savedDetails.get().getLastPeriodStartDate(),"Period length failed to set");
+                assertEquals(dto.getLastPeriodDate(),savedDetails.get().getLastPeriodStartDate(),"Period length failed to set");
         }
 
         @Test
