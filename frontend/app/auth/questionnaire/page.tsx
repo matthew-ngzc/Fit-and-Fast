@@ -1,36 +1,21 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-
-import axios, { AxiosError } from "axios";
-import config from "../../../config";
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Progress } from "@/components/ui/progress"
+import { ArrowLeft, ArrowRight } from "lucide-react"
+import config from "../../../config"
 
 export default function QuestionnairePage() {
-  const [step, setStep] = useState(1);
-  const totalSteps = 4;
+  const [step, setStep] = useState(1)
+  const totalSteps = 4
 
   const [formData, setFormData] = useState({
     height: "",
@@ -46,71 +31,72 @@ export default function QuestionnairePage() {
     cycleLength: "",
     periodLength: "",
     lastPeriodDate: "",
-  });
+  })
 
   const nextStep = () => {
     if (step < totalSteps) {
-      setStep(step + 1);
-      window.scrollTo(0, 0);
+      if (isCurrentStepComplete()) {
+        setStep(step + 1)
+        window.scrollTo(0, 0)
+      } else {
+        alert("Please complete all fields before proceeding to the next step.")
+      }
     }
-  };
+  }
 
   const prevStep = () => {
     if (step > 1) {
-      setStep(step - 1);
-      window.scrollTo(0, 0);
+      setStep(step - 1)
+      window.scrollTo(0, 0)
     }
-  };
+  }
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-    isSelect = false
-  ) => {
-    const { name, value } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>, isSelect = false) => {
+    const { name, value } = e.target
 
     if (isSelect) {
       // Handle the change for Select components
       setFormData({
         ...formData,
         [name]: value,
-      });
+      })
     } else {
       // Handle regular input changes
       setFormData({
         ...formData,
         [name]: value,
-      });
+      })
     }
-  };
+  }
 
   const handleSubmit = async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("token")
 
       if (!token) {
-        alert("Unauthorised Action");
-        window.location.href = "/auth/login";
-        return;
+        alert("Unauthorised Action")
+        window.location.href = "/auth/login"
+        return
       }
 
       const requestData = {
-        height: parseFloat(formData.height),
-        weight: parseFloat(formData.weight),
+        height: Number.parseFloat(formData.height),
+        weight: Number.parseFloat(formData.weight),
         dob: formData.birthdate,
         fitnessLevel: formData.fitnessLevel,
         menstrualCramps: formData.menstrualCramps === "yes",
         pregnancyStatus: formData.pregnancyStatus?.toUpperCase(),
         cycleBasedRecommendations: formData.cycleBasedRecommendations === "yes",
         workoutType: formData.workoutType,
-        workoutDays: parseInt(formData.workoutDays),
+        workoutDays: Number.parseInt(formData.workoutDays),
         workoutGoal: formData.fitnessGoal,
-        cycleLength: parseInt(formData.cycleLength),
-        periodLength: parseInt(formData.periodLength),
+        cycleLength: Number.parseInt(formData.cycleLength),
+        periodLength: Number.parseInt(formData.periodLength),
         lastPeriodDate: formData.lastPeriodDate,
-      };
+      }
 
-      console.log("Submitting request:", requestData);
-      console.log(token);
+      console.log("Submitting request:", requestData)
+      console.log(token)
       const response = await fetch(`${config.USER_URL}/questionnaire`, {
         method: "POST",
         headers: {
@@ -118,18 +104,68 @@ export default function QuestionnairePage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(requestData),
-      });
+      })
 
       if (response.status === 201) {
-        window.location.href = "/home";
+        window.location.href = "/home"
       } else {
-        alert("Failed to submit form. Please try again.");
+        alert("Failed to submit form. Please try again.")
       }
     } catch (error) {
-      alert(`Error submitting form`);
-      console.error(error);
+      alert(`Error submitting form`)
+      console.error(error)
     }
-  };
+  }
+
+  const isStep1Complete = () => {
+    return (
+      formData.height.trim() !== "" &&
+      formData.weight.trim() !== "" &&
+      formData.birthdate.trim() !== "" &&
+      formData.fitnessLevel.trim() !== ""
+    )
+  }
+
+  const isStep2Complete = () => {
+    return (
+      formData.menstrualCramps.trim() !== "" &&
+      formData.pregnancyStatus.trim() !== "" &&
+      formData.cycleBasedRecommendations.trim() !== ""
+    )
+  }
+
+  const isStep3Complete = () => {
+    // Only validate if they opted for cycle-based recommendations
+    if (formData.cycleBasedRecommendations === "yes") {
+      return (
+        formData.cycleLength.trim() !== "" &&
+        formData.periodLength.trim() !== "" &&
+        formData.lastPeriodDate.trim() !== ""
+      )
+    }
+    return true
+  }
+
+  const isStep4Complete = () => {
+    return (
+      formData.workoutType.trim() !== "" && formData.workoutDays.trim() !== "" && formData.fitnessGoal.trim() !== ""
+    )
+  }
+
+  const isCurrentStepComplete = () => {
+    switch (step) {
+      case 1:
+        return isStep1Complete()
+      case 2:
+        return isStep2Complete()
+      case 3:
+        return isStep3Complete()
+      case 4:
+        return isStep4Complete()
+      default:
+        return false
+    }
+  }
 
   return (
     <div className="container flex min-h-screen w-screen flex-col items-center justify-center py-10">
@@ -140,12 +176,8 @@ export default function QuestionnairePage() {
               <img src="/icon.png" alt="Fit&Fast" className="h-7 w-7" />
             </div>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Let's personalize your experience
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Tell us about yourself so we can customize your workouts
-          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">Let's personalize your experience</h1>
+          <p className="text-sm text-muted-foreground">Tell us about yourself so we can customize your workouts</p>
         </div>
 
         <div className="space-y-2">
@@ -155,10 +187,7 @@ export default function QuestionnairePage() {
             </span>
             <span>{getStepTitle(step)}</span>
           </div>
-          <Progress
-            value={(step / totalSteps) * 100}
-            className="h-2 transition-all duration-500 ease-in-out"
-          />
+          <Progress value={(step / totalSteps) * 100} className="h-2 transition-all duration-500 ease-in-out" />
         </div>
 
         {step === 1 && (
@@ -195,22 +224,14 @@ export default function QuestionnairePage() {
 
               <div className="space-y-2">
                 <Label htmlFor="birthdate">Date of Birth</Label>
-                <Input
-                  id="birthdate"
-                  name="birthdate"
-                  type="date"
-                  value={formData.birthdate}
-                  onChange={handleChange}
-                />
+                <Input id="birthdate" name="birthdate" type="date" value={formData.birthdate} onChange={handleChange} />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="fitness-level">Fitness Level</Label>
                 <Select
                   value={formData.fitnessLevel}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, fitnessLevel: value })
-                  }
+                  onValueChange={(value) => setFormData({ ...formData, fitnessLevel: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select your fitness level" />
@@ -227,6 +248,7 @@ export default function QuestionnairePage() {
               <Button
                 className="w-full bg-primary hover:bg-primary/90"
                 onClick={nextStep}
+                disabled={!isStep1Complete()}
               >
                 Continue
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -239,16 +261,11 @@ export default function QuestionnairePage() {
           <Card className="border-none shadow-md bg-gradient-to-b from-white to-pink-50">
             <CardHeader>
               <CardTitle>Women's Health</CardTitle>
-              <CardDescription>
-                Help us tailor workouts to your specific needs
-              </CardDescription>
+              <CardDescription>Help us tailor workouts to your specific needs</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>
-                  Do you experience menstrual cramps or period-related
-                  discomfort?
-                </Label>
+                <Label>Do you experience menstrual cramps or period-related discomfort?</Label>
                 <RadioGroup
                   name="menstrualCramps"
                   value={formData.menstrualCramps}
@@ -300,9 +317,7 @@ export default function QuestionnairePage() {
               </div>
 
               <div className="space-y-2">
-                <Label>
-                  Would you like cycle-based workout recommendations?
-                </Label>
+                <Label>Would you like cycle-based workout recommendations?</Label>
                 <RadioGroup
                   name="cycleBasedRecommendations"
                   value={formData.cycleBasedRecommendations}
@@ -324,8 +339,7 @@ export default function QuestionnairePage() {
                   </div>
                 </RadioGroup>
                 <p className="text-xs text-muted-foreground">
-                  This helps us adjust workouts based on your menstrual cycle
-                  phase
+                  This helps us adjust workouts based on your menstrual cycle phase
                 </p>
               </div>
             </CardContent>
@@ -337,6 +351,7 @@ export default function QuestionnairePage() {
               <Button
                 className="flex-1 bg-primary hover:bg-primary/90"
                 onClick={nextStep}
+                disabled={!isStep2Complete()}
               >
                 Continue
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -349,42 +364,34 @@ export default function QuestionnairePage() {
           <Card className="border-none shadow-md bg-gradient-to-b from-white to-pink-50">
             <CardHeader>
               <CardTitle>Cycle Information</CardTitle>
-              <CardDescription>
-                Help us adapt your workouts to your menstrual cycle
-              </CardDescription>
+              <CardDescription>Help us adapt your workouts to your menstrual cycle</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground mb-4">
-                  Fit&Fast helps track your menstrual cycle to recommend the
-                  most effective workouts for each phase, optimizing your
-                  fitness results and comfort.
+                  Fit&Fast helps track your menstrual cycle to recommend the most effective workouts for each phase,
+                  optimizing your fitness results and comfort.
                 </p>
 
                 <div className="space-y-2">
                   <Label htmlFor="cycleLength">Cycle Length (days)</Label>
                   <Select
                     value={formData.cycleLength}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, cycleLength: value })
-                    }
+                    onValueChange={(value) => setFormData({ ...formData, cycleLength: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select cycle length" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 10 }, (_, i) => i + 21).map(
-                        (days) => (
-                          <SelectItem key={days} value={days.toString()}>
-                            {days} days
-                          </SelectItem>
-                        )
-                      )}
+                      {Array.from({ length: 10 }, (_, i) => i + 21).map((days) => (
+                        <SelectItem key={days} value={days.toString()}>
+                          {days} days
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    Average time from the first day of one period to the first
-                    day of the next
+                    Average time from the first day of one period to the first day of the next
                   </p>
                 </div>
 
@@ -392,21 +399,17 @@ export default function QuestionnairePage() {
                   <Label htmlFor="periodLength">Period Length (days)</Label>
                   <Select
                     value={formData.periodLength}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, periodLength: value })
-                    }
+                    onValueChange={(value) => setFormData({ ...formData, periodLength: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select period length" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 10 }, (_, i) => i + 1).map(
-                        (days) => (
-                          <SelectItem key={days} value={days.toString()}>
-                            {days} days
-                          </SelectItem>
-                        )
-                      )}
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map((days) => (
+                        <SelectItem key={days} value={days.toString()}>
+                          {days} days
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -431,6 +434,7 @@ export default function QuestionnairePage() {
               <Button
                 className="flex-1 bg-primary hover:bg-primary/90"
                 onClick={nextStep}
+                disabled={!isStep3Complete()}
               >
                 Continue
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -443,15 +447,11 @@ export default function QuestionnairePage() {
           <Card className="border-none shadow-md bg-gradient-to-b from-white to-pink-50">
             <CardHeader>
               <CardTitle>Workout Preferences</CardTitle>
-              <CardDescription>
-                Tell us how you like to exercise
-              </CardDescription>
+              <CardDescription>Tell us how you like to exercise</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>
-                  Do you prefer high-energy workouts or low-impact workouts?
-                </Label>
+                <Label>Do you prefer high-energy workouts or low-impact workouts?</Label>
                 <RadioGroup
                   name="workoutType"
                   value={formData.workoutType}
@@ -465,15 +465,11 @@ export default function QuestionnairePage() {
                 >
                   <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-pink-50 transition-colors">
                     <RadioGroupItem value="high-energy" id="high-energy" />
-                    <Label htmlFor="high-energy">
-                      High-Energy (HIIT, Strength)
-                    </Label>
+                    <Label htmlFor="high-energy">High-Energy (HIIT, Strength)</Label>
                   </div>
                   <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-pink-50 transition-colors">
                     <RadioGroupItem value="low-impact" id="low-impact" />
-                    <Label htmlFor="low-impact">
-                      Low-Impact (Yoga, Stretching)
-                    </Label>
+                    <Label htmlFor="low-impact">Low-Impact (Yoga, Stretching)</Label>
                   </div>
                   <div className="flex items-center space-x-2 p-2 rounded-md hover:bg-pink-50 transition-colors">
                     <RadioGroupItem value="both" id="both" />
@@ -483,9 +479,7 @@ export default function QuestionnairePage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="workout-days">
-                  How many days per week do you plan to work out?
-                </Label>
+                <Label htmlFor="workout-days">How many days per week do you plan to work out?</Label>
                 <Select
                   name="workoutDays"
                   value={formData.workoutDays}
@@ -513,9 +507,7 @@ export default function QuestionnairePage() {
                 <Label>What is your primary fitness goal?</Label>
                 <Select
                   value={formData.fitnessGoal}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, fitnessGoal: value })
-                  }
+                  onValueChange={(value) => setFormData({ ...formData, fitnessGoal: value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select your primary goal" />
@@ -527,9 +519,7 @@ export default function QuestionnairePage() {
                     <SelectItem value="flexibility">Flexibility</SelectItem>
                     <SelectItem value="stress-relief">Stress Relief</SelectItem>
                     <SelectItem value="prenatal">Prenatal</SelectItem>
-                    <SelectItem value="post-pregnancy">
-                      Post-Pregnancy Recovery
-                    </SelectItem>
+                    <SelectItem value="post-pregnancy">Post-Pregnancy Recovery</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -542,6 +532,7 @@ export default function QuestionnairePage() {
               <Button
                 className="flex-1 bg-primary hover:bg-primary/90"
                 onClick={handleSubmit}
+                disabled={!isStep4Complete()}
               >
                 Complete
               </Button>
@@ -556,20 +547,21 @@ export default function QuestionnairePage() {
         )}
       </div>
     </div>
-  );
+  )
 }
 
 function getStepTitle(step: number): string {
   switch (step) {
     case 1:
-      return "Basic Information";
+      return "Basic Information"
     case 2:
-      return "Women's Health";
+      return "Women's Health"
     case 3:
-      return "Cycle Information";
+      return "Cycle Information"
     case 4:
-      return "Workout Preferences";
+      return "Workout Preferences"
     default:
-      return "";
+      return ""
   }
 }
+
