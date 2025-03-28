@@ -209,8 +209,7 @@ class UserServiceTest {
     @Test
     void completeUserQuestionnaire_shouldCreateDetailsWhenNotExists() {
         // Given
-        UserDetailsDTO detailsDTO = new UserDetailsDTO();
-        detailsDTO.setUsername("updatedUser");
+        QuestionnaireDTO detailsDTO = new QuestionnaireDTO();
         detailsDTO.setDob(Date.valueOf("1992-05-15"));
         detailsDTO.setHeight(175.0);
         detailsDTO.setWeight(75.0);
@@ -225,7 +224,7 @@ class UserServiceTest {
         when(userDetailsRepository.save(any(UserDetails.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        UserDetailsDTO result = userService.completeUserQuestionnaire(1L, detailsDTO);
+        QuestionnaireDTO result = userService.completeUserQuestionnaire(1L, detailsDTO);
 
         // Then
         assertNotNull(result);
@@ -236,7 +235,6 @@ class UserServiceTest {
         
         UserDetails capturedDetails = userDetailsCaptor.getValue();
         assertEquals(testUser, capturedDetails.getUser());
-        assertEquals(detailsDTO.getUsername(), capturedDetails.getUsername());
         assertEquals(detailsDTO.getDob(), capturedDetails.getDob());
         assertEquals(detailsDTO.getHeight(), capturedDetails.getHeight());
         assertEquals(detailsDTO.getWeight(), capturedDetails.getWeight());
@@ -249,8 +247,7 @@ class UserServiceTest {
     @Test
     void completeUserQuestionnaire_shouldUpdateExistingDetails() {
         // Given
-        UserDetailsDTO detailsDTO = new UserDetailsDTO();
-        detailsDTO.setUsername("updatedUser");
+        QuestionnaireDTO detailsDTO = new QuestionnaireDTO();
         detailsDTO.setDob(Date.valueOf("1992-05-15"));
         detailsDTO.setHeight(175.0);
         detailsDTO.setWeight(75.0);
@@ -265,7 +262,7 @@ class UserServiceTest {
         when(userDetailsRepository.save(any(UserDetails.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // When
-        UserDetailsDTO result = userService.completeUserQuestionnaire(1L, detailsDTO);
+        QuestionnaireDTO result = userService.completeUserQuestionnaire(1L, detailsDTO);
 
         // Then
         assertNotNull(result);
@@ -276,7 +273,6 @@ class UserServiceTest {
         
         UserDetails capturedDetails = userDetailsCaptor.getValue();
         assertEquals(testUser, capturedDetails.getUser());
-        assertEquals(detailsDTO.getUsername(), capturedDetails.getUsername());
         assertEquals(detailsDTO.getDob(), capturedDetails.getDob());
         assertEquals(detailsDTO.getHeight(), capturedDetails.getHeight());
         assertEquals(detailsDTO.getWeight(), capturedDetails.getWeight());

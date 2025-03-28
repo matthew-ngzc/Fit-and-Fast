@@ -11,6 +11,7 @@ import com.fastnfit.app.dto.UserDetailsDTO;
 import com.fastnfit.app.dto.UserRegistrationDTO;
 import com.fastnfit.app.dto.LoginRequestDTO;
 import com.fastnfit.app.dto.ProfileDTO;
+import com.fastnfit.app.dto.QuestionnaireDTO;
 import com.fastnfit.app.dto.GoalsDTO;
 import com.fastnfit.app.dto.AuthResponseDTO;
 import com.fastnfit.app.dto.AvatarDTO;
@@ -96,7 +97,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDetailsDTO completeUserQuestionnaire(Long userId, UserDetailsDTO detailsDTO) {
+    public QuestionnaireDTO completeUserQuestionnaire(Long userId, QuestionnaireDTO questionnaireDTO) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -111,28 +112,26 @@ public class UserService {
         }
 
         // Update user details with questionnaire data
-        userDetails.setUser(user);
-        userDetails.setUsername(detailsDTO.getUsername());
-        userDetails.setDob(detailsDTO.getDob());
-        userDetails.setHeight(detailsDTO.getHeight());
-        userDetails.setWeight(detailsDTO.getWeight());
-        userDetails.setPregnancyStatus(detailsDTO.getPregnancyStatus());
-        userDetails.setWorkoutGoal(detailsDTO.getWorkoutGoal());
-        userDetails.setWorkoutDays(detailsDTO.getWorkoutDays());
-        userDetails.setFitnessLevel(detailsDTO.getFitnessLevel());
-        userDetails.setMenstrualCramps(detailsDTO.getMenstrualCramps());
-        userDetails.setCycleBasedRecommendations(detailsDTO.getCycleBasedRecommendations());
-        userDetails.setWorkoutType(detailsDTO.getWorkoutType());
+        userDetails.setDob(questionnaireDTO.getDob());
+        userDetails.setHeight(questionnaireDTO.getHeight());
+        userDetails.setWeight(questionnaireDTO.getWeight());
+        userDetails.setPregnancyStatus(questionnaireDTO.getPregnancyStatus());
+        userDetails.setWorkoutGoal(questionnaireDTO.getWorkoutGoal());
+        userDetails.setWorkoutDays(questionnaireDTO.getWorkoutDays());
+        userDetails.setFitnessLevel(questionnaireDTO.getFitnessLevel());
+        userDetails.setMenstrualCramps(questionnaireDTO.getMenstrualCramps());
+        userDetails.setCycleBasedRecommendations(questionnaireDTO.getCycleBasedRecommendations());
+        userDetails.setWorkoutType(questionnaireDTO.getWorkoutType());
 
-        if (detailsDTO.getLastPeriodDate()!=null && detailsDTO.getPeriodLength()!=null && detailsDTO.getCycleLength()!=null){
-            userDetails.setLastPeriodStartDate(detailsDTO.getLastPeriodDate());
-            userDetails.setPeriodLength(detailsDTO.getPeriodLength());
-            userDetails.setCycleLength(detailsDTO.getCycleLength());
+        if (questionnaireDTO.getLastPeriodDate()!=null && questionnaireDTO.getPeriodLength()!=null && questionnaireDTO.getCycleLength()!=null){
+            userDetails.setLastPeriodStartDate(questionnaireDTO.getLastPeriodDate());
+            userDetails.setPeriodLength(questionnaireDTO.getPeriodLength());
+            userDetails.setCycleLength(questionnaireDTO.getCycleLength());
         }
 
         userDetailsRepository.save(userDetails);
 
-        return detailsDTO;
+        return questionnaireDTO;
     }
 
     public UserDetailsDTO getUserDetails(Long userId) {
@@ -155,6 +154,9 @@ public class UserService {
         dto.setMenstrualCramps(userDetails.getMenstrualCramps());
         dto.setCycleBasedRecommendations(userDetails.getCycleBasedRecommendations());
         dto.setWorkoutType(userDetails.getWorkoutType().getValue());
+        dto.setCycleLength(userDetails.getCycleLength());
+        dto.setPeriodLength(userDetails.getPeriodLength());
+        dto.setLastPeriodDate(userDetails.getLastPeriodStartDate());
 
         return dto;
     }
@@ -226,9 +228,20 @@ public class UserService {
             }
         }
 
+        if (detailsDTO.getCycleLength()!=null){
+            userDetails.setCycleLength(detailsDTO.getCycleLength());
+        }
+
+        if (detailsDTO.getLastPeriodDate()!=null){
+            userDetails.setLastPeriodStartDate(detailsDTO.getLastPeriodDate());
+        }
+
+        if (detailsDTO.getPeriodLength()!=null){
+            userDetails.setPeriodLength(detailsDTO.getPeriodLength());
+        }
+
         userDetails.setMenstrualCramps(detailsDTO.getMenstrualCramps());
         userDetails.setCycleBasedRecommendations(detailsDTO.getCycleBasedRecommendations());
-        userDetails.setUser(user);
 
         userDetailsRepository.save(userDetails);
 

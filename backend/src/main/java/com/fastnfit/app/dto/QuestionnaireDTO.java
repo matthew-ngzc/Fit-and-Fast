@@ -1,16 +1,14 @@
-// UserDetailsDTO.java
 package com.fastnfit.app.dto;
-
-import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.Date;
-import com.fastnfit.app.enums.*;
+
+import com.fastnfit.app.enums.FitnessLevel;
+
+import lombok.Data;
 
 @Data
-public class UserDetailsDTO {
-    private Long userId;
-    private String username;
+public class QuestionnaireDTO {
     private Date dob;
     private Double height;
     private Double weight;
@@ -21,11 +19,10 @@ public class UserDetailsDTO {
     private boolean menstrualCramps;
     private boolean cycleBasedRecommendations;
     private String workoutType;
-    private Integer currentStreak;
-    private Integer longestStreak;
     private Integer periodLength;
     private Integer cycleLength;
     private LocalDate lastPeriodDate;
+
 
     public boolean getMenstrualCramps(){
         return this.menstrualCramps;

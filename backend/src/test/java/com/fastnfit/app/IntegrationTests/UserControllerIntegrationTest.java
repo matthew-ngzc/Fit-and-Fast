@@ -99,7 +99,6 @@ public class UserControllerIntegrationTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(userDetailsDTO)))
                                 .andExpect(status().isCreated())
-                                .andExpect(jsonPath("$.username").value("testuser"))
                                 .andExpect(jsonPath("$.workoutGoal").value(WorkoutGoal.GENERAL.getValue()))
                                 .andExpect(jsonPath("$.workoutDays").value(4))
                                 .andReturn();
@@ -149,7 +148,7 @@ public class UserControllerIntegrationTest {
                                 .andExpect(jsonPath("$.username").value("testuser"))
                                 .andExpect(jsonPath("$.height").value(170.0))
                                 .andExpect(jsonPath("$.weight").value(65.0))
-                                .andExpect(jsonPath("$.workoutGoal").value("Weight Loss"))
+                                .andExpect(jsonPath("$.workoutGoal").value("weight-loss"))
                                 .andExpect(jsonPath("$.workoutDays").value(4));
         }
 

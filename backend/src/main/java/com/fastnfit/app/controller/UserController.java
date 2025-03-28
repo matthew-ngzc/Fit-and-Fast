@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.fastnfit.app.dto.QuestionnaireDTO;
 import com.fastnfit.app.dto.UserDetailsDTO;
 import com.fastnfit.app.service.UserService;
 
@@ -35,11 +36,11 @@ public class UserController {
     }
 
     @PostMapping("/questionnaire")
-    public ResponseEntity<UserDetailsDTO> completeQuestionnaire(
-            @RequestBody UserDetailsDTO questionnaireData) {
+    public ResponseEntity<QuestionnaireDTO> completeQuestionnaire(
+            @RequestBody QuestionnaireDTO questionnaireData) {
         try {
             Long userId = authUtils.getCurrentUserId();
-            UserDetailsDTO userDetailsDTO = userService.completeUserQuestionnaire(userId, questionnaireData);
+            QuestionnaireDTO userDetailsDTO = userService.completeUserQuestionnaire(userId, questionnaireData);
             return ResponseEntity.status(HttpStatus.CREATED).body(userDetailsDTO);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
