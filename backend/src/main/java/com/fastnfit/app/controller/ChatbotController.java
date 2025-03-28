@@ -1,5 +1,6 @@
 package com.fastnfit.app.controller;
 
+import com.fastnfit.app.dto.ChatbotResponseDTO;
 import com.fastnfit.app.dto.UserDetailsDTO;
 import com.fastnfit.app.dto.WorkoutDTO;
 import com.fastnfit.app.service.UserService;
@@ -26,20 +27,36 @@ public class ChatbotController {
     @Autowired
     private WorkoutService workoutService;
 
+    // @PostMapping("/{userId}")
+    // public ResponseEntity<String> chat(
+    //         @PathVariable Long userId,
+    //         @RequestBody Map<String, Object> payload
+    // ) {
+    //     try {
+    //         UserDetailsDTO userDetails = userService.getUserDetails(userId);
+    //         JSONObject request = new JSONObject(payload);
+    //         String response = chatbotService.getResponse(request, userDetails);
+    //         return ResponseEntity.ok(response);
+    //     } catch (Exception e) {
+    //         return ResponseEntity.status(500).body("Failed to process chatbot message.");
+    //     }
+    // }
+
     @PostMapping("/{userId}")
-    public ResponseEntity<String> chat(
+    public ResponseEntity<ChatbotResponseDTO> chat(
             @PathVariable Long userId,
             @RequestBody Map<String, Object> payload
     ) {
         try {
             UserDetailsDTO userDetails = userService.getUserDetails(userId);
             JSONObject request = new JSONObject(payload);
-            String response = chatbotService.getResponse(request, userDetails);
+            ChatbotResponseDTO response = chatbotService.getResponse(request, userDetails);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Failed to process chatbot message.");
+            return ResponseEntity.status(500).build();
         }
     }
+
 
     // Accept AI-generated workout endpoint
     @PostMapping("/{userId}/accept")

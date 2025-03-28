@@ -1,6 +1,11 @@
 package com.fastnfit.app.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fastnfit.app.dto.ChatbotResponseDTO;
 import com.fastnfit.app.dto.UserDetailsDTO;
+import com.fastnfit.app.dto.WorkoutDTO;
 import com.fastnfit.app.model.ChatHistory;
 import com.fastnfit.app.model.User;
 import com.fastnfit.app.repository.ChatHistoryRepository;
@@ -24,6 +29,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 //one shot give response, not streamed
 @Service
@@ -52,7 +59,7 @@ public class ChatbotService {
      * 1. json, used for extracting the workoutDTO information for accepting of workout
      * 2. human readable section, which is displayed to the user, include extra information that we dont need for the workoutDTO
      */
-    public String getResponse(JSONObject fullRequest, UserDetailsDTO userDetailsDTO) {
+    public ChatbotResponseDTO getResponse(JSONObject fullRequest, UserDetailsDTO userDetailsDTO) {
         String apiUrl = "https://api.openai.com/v1/chat/completions";
         Long userId = userDetailsDTO.getUserId();
         User user = userRepository.findById(userId).orElseThrow();
@@ -125,6 +132,47 @@ public class ChatbotService {
                                 .getJSONObject("message")
                                 .getString("content");
 
+        //extract the JSON and Natural Language segments
+        Pattern jsonPattern = Pattern.compile("<BEGIN_JSON>\\s*([\\s\\S]*?)\\s*<END_JSON>");
+        Matcher matcher = jsonPattern.matcher(chatbotReply);
+
+        String jsonPart = null;
+        String responsePart = chatbotReply;
+
+        if (matcher.find()) {
+            jsonPart = matcher.group(1).trim();
+            responsePart = chatbotReply.substring(matcher.end()).trim();
+}
+
+         ObjectMapper mapper = new ObjectMapper();
+        // String[] parts = chatbotReply.split("---", 2);
+
+        // String jsonBlock = "";
+        // String responseText = "";
+
+        // if (parts.length == 2) {
+        //     int start = parts[0].indexOf("<BEGIN_JSON>");
+        //     int end = parts[0].indexOf("<END_JSON>");
+        //     if (start != -1 && end != -1) {
+        //         jsonBlock = parts[0].substring(start + "<BEGIN_JSON>".length(), end).trim();
+        //     }
+        //     responseText = parts[1].trim();
+        // }
+
+        // Convert JSON into DTO
+        WorkoutDTO workout = null;
+        try {
+            workout = mapper.readValue(jsonPart, WorkoutDTO.class);
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (JsonProcessingException e) {
+            System.err.println("Failed to parse workout JSON: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        // Wrap into chatbot response DTO
+        ChatbotResponseDTO result = new ChatbotResponseDTO(workout, responsePart);
+
         System.out.println("Saving chat content. Length: " + chatbotReply.length());
 
         // Save assistant response
@@ -135,7 +183,7 @@ public class ChatbotService {
                                     .timestamp(LocalDateTime.now())
                                     .build());
 
-        return chatbotReply;
+        return result;
     }
 
     private String buildSystemPrompt(UserDetailsDTO dto, List<String> exerciseList, List<String> workoutExercises) {
@@ -146,14 +194,15 @@ public class ChatbotService {
         return """
                 You are an AI fitness coach helping users get personalized workout routines based on their profile and preferences.
                 
-                Your main role is to assist with workouts, fitness plans, and exercise-related questions.  
-                ❗ If the user asks about something unrelated to exercise or fitness (e.g., jokes, the weather, or personal questions), politely guide them back to fitness topics with a message like:  
+                Your main role is to assist with workouts, fitness plans, and exercise-related questions. 
+                If the user asks about something unrelated to exercise or fitness (e.g., jokes, the weather, or personal questions), politely guide them back to fitness topics with a message like:  
                 *"Let's stay focused on your fitness goals. How can I help with your workout today?"*
 
                 ---
 
-                ❗ When generating workout plans, strictly choose only from the list of supported exercises provided.  
+                When generating workout plans, strictly choose only from the list of supported exercises provided.  
                 Do not invent new exercises or suggest ones outside the supported list.
+                By default, the total duration of the workout should be 7 minutes. This is because our main target audience is busy women professionals who do not have time for a longer workout.
 
                 If the user is asking for a workout plan, respond in TWO clearly separated sections:
 
@@ -162,14 +211,35 @@ public class ChatbotService {
                 **[JSON]**  
                 Use this section to structure the workout for the backend. Output strictly valid JSON with the following structure. Make sure to include <BEGIN JSON> and <END JSON> tags as they are needed for parsing.:
 
+                🛑 DO NOT include exercise IDs.  
+                ✅ Only use the format: name, duration, rest.
+                
+                • `"level"` must be one of:  
+                    - "Beginner"  
+                    - "Intermediate"  
+                    - "Advanced"  
+                    - "All_Levels"
+
+                • `"category"` must be one of:  
+                    - "low-impact"  
+                    - "others"  
+                    - "prenatal"  
+                    - "postnatal"  
+                    - "yoga"  
+                    - "HIIT"  
+                    - "strength"  
+                    - "body-weight"
+
+                Example:
+
                 <BEGIN_JSON>
                 {
                 "name": "Workout Title",
-                "description": "Purpose or focus of the workout",
+                "description": "Lower body strength and power workout",
                 "durationInMinutes": 20,
                 "calories": 180,
-                "level": "BEGINNER",
-                "category": "STRENGTH",
+                "level": "Beginner",
+                "category": "strength",
                 "exercises": [
                     { "name": "Jumping Jacks", "duration": 40, "rest": 20 },
                     { "name": "Bodyweight Squats", "duration": 40, "rest": 20 }
@@ -223,6 +293,11 @@ public class ChatbotService {
                 Supported Exercises:
                 - %s
 
+                Strictly only use exercises from the supported exercise list.
+                Do not invent new exercises.
+                Do not add IDs - only include name, duration, and rest for each exercise.
+
+
                 Current Workout:
                 - Exercises: %s
                 """.formatted(
@@ -240,17 +315,16 @@ public class ChatbotService {
     }
 
     private int calculateAge(Date dob) {
-    if (dob == null) return -1;
+        if (dob == null) return -1;
 
-    // Always convert to java.util.Date before using toInstant
-    java.util.Date safeDate = new java.util.Date(dob.getTime());
+        // Always convert to java.util.Date before using toInstant
+        java.util.Date safeDate = new java.util.Date(dob.getTime());
 
-    LocalDate birthDate = safeDate.toInstant()
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate();
+        LocalDate birthDate = safeDate.toInstant()
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate();
 
-    return Period.between(birthDate, LocalDate.now()).getYears();
-}
+        return Period.between(birthDate, LocalDate.now()).getYears();
+    }
 
-    
 }
