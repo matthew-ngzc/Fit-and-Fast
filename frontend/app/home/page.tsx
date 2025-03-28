@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,8 +23,9 @@ import {
 import { WorkoutCard } from "../../components/workout-card";
 import workoutData from "./data.json";
 
-// new stylesheet
-import '../../styles/homePage.css';
+import "../../styles/homePage.css";
+
+import config from "../../config";
 
 interface Workout {
   id: string;
@@ -47,12 +49,6 @@ interface WorkoutCategory {
   icon: string;
 }
 
-// Fake data
-const fakeUser = {
-  username: "Sarah",
-  streak: 5,
-};
-
 const fakeRecommendation = {
   workoutId: "workout-1",
   title: "Low-Impact Energy Boost",
@@ -66,6 +62,78 @@ export default function HomePage() {
   } | null>(null);
   const [selectedTab, setSelectedTab] = useState<string>("yoga");
   const [loading, setLoading] = useState(true);
+  const [streak, setStreak] = useState<number>(0);
+  const [username, setUsername] = useState("");
+  const [recommendedWorkoutData, setRecommendedWorkoutData] = useState<{
+    workoutId: string | null;
+    title: string | null;
+    description: string | null;
+    level: string | null;
+    category: string | null;
+    calories: string | null;
+  } | null>(null);
+
+  // fetch username & streak
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    async function fetchStreak() {
+      try {
+        const response = await axios.get(`${config.HOME_URL}/streak`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setStreak(response.data.days);
+      } catch (error) {
+        console.error("Error fetching streak:", error);
+      }
+    }
+
+    async function fetchUsername() {
+      try {
+        const response = await axios.get(`${config.PROFILE_URL}/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setUsername(response.data.username);
+      } catch (error) {
+        console.error("Error fetching username:", error);
+      }
+    }
+
+    // Fetch workout recommendation
+    async function fetchWorkoutRecommendation() {
+      try {
+        const response = await axios.get(`${config.HOME_URL}/recommendation`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const workoutRecommendation = response.data;
+
+        // Set only the relevant fields in the state
+        setRecommendedWorkoutData({
+          workoutId: workoutRecommendation.workoutId || null,
+          title: workoutRecommendation.title || null,
+          description: workoutRecommendation.description || null,
+          level: workoutRecommendation.level || null,
+          category: workoutRecommendation.category || null,
+          calories: workoutRecommendation.calories || null,
+        });
+        
+      } catch (error) {
+        console.error("Error fetching workout recommendation:", error);
+      }
+    }
+
+    fetchStreak();
+    fetchUsername();
+    fetchWorkoutRecommendation();
+    console.log(recommendedWorkoutData?.workoutId);
+    
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -142,9 +210,7 @@ export default function HomePage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="welcome-heading">
-                Welcome back, {fakeUser.username}!
-              </h1>
+              <h1 className="welcome-heading">Welcome back, {username}!</h1>
               <p className="text-muted-foreground">
                 Ready for your 7-minute workout today?
               </p>
@@ -183,13 +249,13 @@ export default function HomePage() {
                   <TrendingUpIcon className="h-8 w-8 text-primary" />
                 </div>
                 <p className="text-3xl font-bold text-primary">
-                  {fakeUser.streak > 0 ? fakeUser.streak : "Start your streak!"}
+                  {streak > 0 ? streak : "Start your streak!"}
                 </p>
                 <p className="text-sm font-medium text-muted-foreground">
                   Day Streak
                 </p>
                 <p className="text-xs mt-2">
-                  {fakeUser.streak > 0 ? "Keep it up!" : "Let's get started!"}
+                  {streak > 0 ? "Keep it up!" : "Let's get started!"}
                 </p>
               </CardContent>
             </Card>
