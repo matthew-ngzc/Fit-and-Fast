@@ -9,7 +9,7 @@ const config = {
   USER_URL: `${API_BASE}/api/users`,
   PROFILE_URL: `${API_BASE}/api/profile`,
   WORKOUT_URL: `${API_BASE}/api/workouts`,
-  PROFILE_URL: `${API_BASE}/api/workout-progress`
+  PROGRESS_URL: `${API_BASE}/api/workout-progress`
 };
 
 export default config;
