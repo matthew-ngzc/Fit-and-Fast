@@ -257,7 +257,6 @@ export default function ProfilePage() {
     }
 
     try {
-      console.log(selectedAvatar);
       const response = await axios.put(
         `${config.PROFILE_URL}/avatar`,
 
@@ -350,10 +349,6 @@ export default function ProfilePage() {
 
     fetchAchievements();
   }, []);
-
-  useEffect(() => {
-    console.log(achievements);
-  });
 
   return (
     <div className="container px-4 py-6 md:py-10 pb-20 max-w-5xl mx-auto">
