@@ -3,8 +3,8 @@ package com.fastnfit.app.enums;
 // Enums for type safety
 public enum PregnancyStatus {
     NO("NO"),
-    PREGNANT("YES, PREGNANT"),
-    POSTPARTUM("YES POSTPARTUM");
+    PREGNANT("PREGNANT"),
+    POSTPARTUM("POSTPARTUM");
 
     private final String value;
 

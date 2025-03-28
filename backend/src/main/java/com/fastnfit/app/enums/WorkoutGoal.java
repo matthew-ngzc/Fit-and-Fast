@@ -2,13 +2,12 @@ package com.fastnfit.app.enums;
 
 public enum WorkoutGoal {
     GENERAL("general"),
-    GENERAL_FITNESS("General Fitness"),
-    WEIGHT_LOSS("Weight Loss"),
-    STRENGTH_BUILDING("Strength Building"),
-    FLEXIBILITY("Flexibility"),
-    STRESS_RELIEF("Stress Relief"),
-    PRENATAL("Prenatal"),
-    POST_PREGNANCY_RECOVERY("Post-Pregnancy Recovery");
+    WEIGHT_LOSS("weight-loss"),
+    STRENGTH_BUILDING("strength"),
+    FLEXIBILITY("flexibility"),
+    STRESS_RELIEF("stress-relief"),
+    PRENATAL("prenatal"),
+    POST_PREGNANCY_RECOVERY("post-pregnancy");
 
     private final String value;
 

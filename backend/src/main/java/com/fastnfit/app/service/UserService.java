@@ -75,6 +75,7 @@ public class UserService {
 
         return AuthResponseDTO.builder()
                 .token(token)
+                .userId(user.getUserId())
                 .build();
     }
 

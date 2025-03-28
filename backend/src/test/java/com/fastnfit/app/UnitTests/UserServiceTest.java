@@ -83,7 +83,7 @@ class UserServiceTest {
         testUserDetails.setWorkoutDays(5);
         testUserDetails.setFitnessLevel(FitnessLevel.Intermediate);
         testUserDetails.setPregnancyStatus(PregnancyStatus.NO);
-        testUserDetails.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS);
+        testUserDetails.setWorkoutGoal(WorkoutGoal.GENERAL);
         testUserDetails.setAvatar("default-avatar.png");
     }
 
@@ -217,7 +217,7 @@ class UserServiceTest {
         detailsDTO.setWorkoutDays(4);
         detailsDTO.setFitnessLevel(FitnessLevel.Beginner);
         detailsDTO.setPregnancyStatus(PregnancyStatus.NO.getValue());
-        detailsDTO.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS.getValue());
+        detailsDTO.setWorkoutGoal(WorkoutGoal.GENERAL.getValue());
         detailsDTO.setWorkoutType(WorkoutType.OTHERS.getValue());
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
@@ -257,7 +257,7 @@ class UserServiceTest {
         detailsDTO.setWorkoutDays(4);
         detailsDTO.setFitnessLevel(FitnessLevel.Beginner);
         detailsDTO.setPregnancyStatus(PregnancyStatus.NO.getValue());
-        detailsDTO.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS.getValue());
+        detailsDTO.setWorkoutGoal(WorkoutGoal.GENERAL.getValue());
         detailsDTO.setWorkoutType(WorkoutType.OTHERS.getValue());
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));

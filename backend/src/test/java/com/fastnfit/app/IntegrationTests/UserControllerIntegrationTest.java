@@ -80,7 +80,7 @@ public class UserControllerIntegrationTest {
                 userDetailsDTO.setHeight(170.0);
                 userDetailsDTO.setWeight(65.0);
                 userDetailsDTO.setPregnancyStatus(PregnancyStatus.NO.getValue());
-                userDetailsDTO.setWorkoutGoal(WorkoutGoal.GENERAL_FITNESS.getValue());
+                userDetailsDTO.setWorkoutGoal(WorkoutGoal.GENERAL.getValue());
                 userDetailsDTO.setWorkoutDays(4);
                 userDetailsDTO.setFitnessLevel(FitnessLevel.Intermediate);
                 userDetailsDTO.setMenstrualCramps(false);
@@ -100,7 +100,7 @@ public class UserControllerIntegrationTest {
                                 .content(objectMapper.writeValueAsString(userDetailsDTO)))
                                 .andExpect(status().isCreated())
                                 .andExpect(jsonPath("$.username").value("testuser"))
-                                .andExpect(jsonPath("$.workoutGoal").value(WorkoutGoal.GENERAL_FITNESS.getValue()))
+                                .andExpect(jsonPath("$.workoutGoal").value(WorkoutGoal.GENERAL.getValue()))
                                 .andExpect(jsonPath("$.workoutDays").value(4))
                                 .andReturn();
 
