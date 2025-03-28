@@ -1,6 +1,8 @@
 // Exercise.java
 package com.fastnfit.app.model;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -28,7 +30,6 @@ public class Exercise {
     @Column(length = 500)
     private String tips;
     
-    @ManyToOne
-    @JoinColumn(name = "workout_id")
-    private Workout workout;
+    @ManyToMany(mappedBy = "exercises", fetch = FetchType.LAZY)
+    private List<Workout> workout;
 }

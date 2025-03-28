@@ -16,5 +16,7 @@ public class WorkoutDTO {
     private WorkoutLevel level;
     private Integer calories;
     private Integer durationInMinutes;
-    private List<ExerciseDTO> exercises;
+    private List<Long> exercises;
+
+
 }

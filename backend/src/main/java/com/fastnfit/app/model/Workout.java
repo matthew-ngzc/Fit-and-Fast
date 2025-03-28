@@ -33,9 +33,14 @@ public class Workout {
     private Integer calories;
     private Integer durationInMinutes;
     
-    @OneToMany(mappedBy = "workout")
+    @OneToMany(mappedBy = "workout",fetch=FetchType.LAZY)
     private List<History> historyWorkoutList;
 
-    @OneToMany(mappedBy = "workout", fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "workout_exercise",
+        joinColumns=@JoinColumn(name="workout_id"),
+        inverseJoinColumns=@JoinColumn(name="exercise_id")
+    )
     private List<Exercise> exercises;
 }
