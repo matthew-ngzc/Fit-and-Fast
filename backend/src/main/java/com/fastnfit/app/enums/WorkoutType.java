@@ -7,7 +7,8 @@ public enum WorkoutType {
     POSTNATAL("postnatal"),
     Yoga("yoga"),
     HIIT("HIIT"),
-    STRENGTH("strength");
+    STRENGTH("strength"),
+    BODY_WEIGHT("body-weight");
 
     private final String value;
 

@@ -10,7 +10,7 @@ import { ArrowLeft } from "lucide-react";
 
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import config from "../../../config";
+import config from "@/config";
 
 export default function SignupPage() {
   const [username, setUsername] = useState("");

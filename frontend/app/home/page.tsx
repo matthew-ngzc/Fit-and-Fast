@@ -19,20 +19,19 @@ import {
   Zap,
   Baby,
   Sparkles,
+  Activity,
+  UserIcon,
 } from "lucide-react";
 import { WorkoutCard } from "../../components/workout-card";
-import workoutData from "./data.json";
-
-import "../../styles/homePage.css";
-
-import config from "../../config";
+import "@/styles/homePage.css";
+import config from "@/config";
 
 interface Workout {
-  id: string;
-  title: string;
-  duration: string;
+  workoutId: number;
+  name: string;
+  durationInMinutes: number;
   level: string;
-  calories: string;
+  calories: number;
   image: string;
   category: string;
   description: string;
@@ -49,12 +48,6 @@ interface WorkoutCategory {
   icon: string;
 }
 
-const fakeRecommendation = {
-  workoutId: "workout-1",
-  title: "Low-Impact Energy Boost",
-  recommendation: "Perfect for day 15 of your cycle",
-};
-
 export default function HomePage() {
   const [data, setData] = useState<{
     workoutCategories: WorkoutCategory[];
@@ -64,6 +57,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState<number>(0);
   const [username, setUsername] = useState("");
+  const [workoutsData, setWorkoutsData] = useState<Workout[]>([]);
   const [recommendedWorkoutData, setRecommendedWorkoutData] = useState<{
     workoutId: string | null;
     title: string | null;
@@ -73,7 +67,6 @@ export default function HomePage() {
     calories: string | null;
   } | null>(null);
 
-  // fetch username & streak
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -103,7 +96,22 @@ export default function HomePage() {
       }
     }
 
-    // Fetch workout recommendation
+    fetchStreak();
+    fetchUsername();
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const today = new Date().toISOString().split("T")[0];
+
+    const savedWorkout = localStorage.getItem("recommendedWorkoutData");
+    const savedDate = localStorage.getItem("recommendedWorkoutDate");
+
+    if (savedWorkout && savedDate === today) {
+      setRecommendedWorkoutData(JSON.parse(savedWorkout));
+      return;
+    }
+
     async function fetchWorkoutRecommendation() {
       try {
         const response = await axios.get(`${config.HOME_URL}/recommendation`, {
@@ -113,71 +121,77 @@ export default function HomePage() {
         });
         const workoutRecommendation = response.data;
 
-        // Set only the relevant fields in the state
-        setRecommendedWorkoutData({
+        const workoutData = {
           workoutId: workoutRecommendation.workoutId || null,
           title: workoutRecommendation.title || null,
           description: workoutRecommendation.description || null,
           level: workoutRecommendation.level || null,
           category: workoutRecommendation.category || null,
           calories: workoutRecommendation.calories || null,
-        });
-        
+        };
+
+        localStorage.setItem(
+          "recommendedWorkoutData",
+          JSON.stringify(workoutData)
+        );
+        localStorage.setItem("recommendedWorkoutDate", today);
+
+        setRecommendedWorkoutData(workoutData);
       } catch (error) {
         console.error("Error fetching workout recommendation:", error);
       }
     }
 
-    fetchStreak();
-    fetchUsername();
     fetchWorkoutRecommendation();
-    console.log(recommendedWorkoutData?.workoutId);
-    
+  }, []);
+
+  useEffect(() => {
+    async function loadWorkouts() {
+      try {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          console.error("No token found. Please log in.");
+          return;
+        }
+
+        const response = await axios.get(`${config.HOME_URL}/workouts`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setWorkoutsData(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching workouts:", error);
+        setLoading(false);
+      }
+    }
+
+    loadWorkouts();
   }, []);
 
   useEffect(() => {
     async function loadData() {
-      // Define the workout categories
       const workoutCategories: WorkoutCategory[] = [
         { id: "yoga", name: "Yoga", icon: "yoga" },
         { id: "hiit", name: "HIIT", icon: "zap" },
         { id: "strength", name: "Strength", icon: "dumbbell" },
         { id: "prenatal", name: "Prenatal", icon: "baby" },
         { id: "postnatal", name: "Postnatal", icon: "sparkles" },
+        { id: "low-impact", name: "Low Impact", icon: "activity" },
+        { id: "body-weight", name: "Body Weight", icon: "user" },
         { id: "others", name: "Others", icon: "heart" },
       ];
 
-      // Group workouts by category
-      const workouts: WorkoutsByCategory = workoutData.reduce(
-        (acc: WorkoutsByCategory, workout: Workout) => {
-          const category = workout.category.toLowerCase();
-          const categoryId =
-            category === "yoga"
-              ? "yoga"
-              : category === "hiit"
-              ? "hiit"
-              : category === "strength"
-              ? "strength"
-              : category === "prenatal"
-              ? "prenatal"
-              : category === "postnatal"
-              ? "postnatal"
-              : "others";
-
-          if (!acc[categoryId]) {
-            acc[categoryId] = [];
-          }
-          acc[categoryId].push(workout);
-          return acc;
-        },
-        {}
-      );
-
-      setData({ workoutCategories, workouts });
+      setData({
+        workoutCategories,
+        workouts: workoutsData as unknown as WorkoutsByCategory,
+      });
       setLoading(false);
     }
 
-    // Get the saved tab from localStorage
     if (typeof window !== "undefined") {
       const savedTab = localStorage.getItem("selectedWorkoutTab");
       if (savedTab) {
@@ -186,7 +200,7 @@ export default function HomePage() {
     }
 
     loadData();
-  }, []);
+  }, [workoutsData]);
 
   const saveSelectedTab = (value: string) => {
     setSelectedTab(value);
@@ -232,10 +246,10 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1 text-center md:text-left">
                     <h3 className="font-semibold text-lg">
-                      {fakeRecommendation.title}
+                      {recommendedWorkoutData?.title}
                     </h3>
                     <p className="text-muted-foreground text-sm">
-                      {fakeRecommendation.recommendation}
+                      {recommendedWorkoutData?.description}
                     </p>
                   </div>
                   <Button>Start Workout</Button>
@@ -275,7 +289,7 @@ export default function HomePage() {
             className="w-full"
           >
             <div className="bg-pink-100/50 p-2 rounded-lg mb-4">
-              <TabsList className="grid grid-cols-3 md:grid-cols-6 h-auto bg-white/80 p-1 rounded-md shadow-sm">
+              <TabsList className="grid grid-cols-2 md:grid-cols-4 h-auto bg-white/80 p-1 rounded-md shadow-sm">
                 {workoutCategories.map((category) => (
                   <TabsTrigger
                     key={category.id}
@@ -300,9 +314,9 @@ export default function HomePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {workouts[category.id]?.map((workout) => (
                     <WorkoutCard
-                      key={workout.id}
+                      key={workout.workoutId}
                       workoutData={workout}
-                      href={`/workout/${workout.id}`}
+                      href={`/workout/${workout.workoutId}`}
                     />
                   ))}
                 </div>
@@ -315,7 +329,6 @@ export default function HomePage() {
   );
 }
 
-// Helper function to get the icon component based on the icon name
 function getIconComponent(iconName: string) {
   switch (iconName) {
     case "yoga":
@@ -330,6 +343,10 @@ function getIconComponent(iconName: string) {
       return <Baby className="h-5 w-5" />;
     case "sparkles":
       return <Sparkles className="h-5 w-5" />;
+    case "activity":
+      return <Activity className="h-5 w-5" />;
+    case "user":
+      return <UserIcon className="h-5 w-5" />;
     default:
       return <DumbbellIcon className="h-5 w-5" />;
   }

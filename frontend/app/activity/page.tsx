@@ -12,7 +12,7 @@ import { FlameIcon, TimerIcon } from "lucide-react";
 import { ActivityLineChart } from "@/components/activity-line-chart";
 import { ActivityLog } from "@/components/activity-log";
 import axios from "axios";
-import config from "../../config";
+import config from "@/config";
 
 interface TodayActivity {
   date: string;

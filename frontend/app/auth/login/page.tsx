@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 
 import axios, { AxiosError } from "axios";
-import config from "../../../config";
+import config from "@/config";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");

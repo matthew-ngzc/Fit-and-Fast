@@ -5,11 +5,11 @@ import { ClockIcon, FlameIcon } from "lucide-react"
 import Link from "next/link"
 
 interface WorkoutData {
-  id: string;
-  title: string;
-  duration: string;
+  workoutId: number;
+  name: string;
+  durationInMinutes: number;
   level: string;
-  calories: string;
+  calories: number;
   image: string;
   category: string;
   description: string;
@@ -22,7 +22,7 @@ interface WorkoutCardProps {
 }
 
 export function WorkoutCard({ workoutData, href }: WorkoutCardProps) {
-  const { title, duration, level, calories, image } = workoutData;
+  const { workoutId, durationInMinutes, level, calories, image } = workoutData;
 
   const handleClick = () => {
     // Store the full workout data in localStorage before navigating
@@ -32,14 +32,14 @@ export function WorkoutCard({ workoutData, href }: WorkoutCardProps) {
   const content = (
     <Card className="overflow-hidden">
       <div className="relative h-48">
-        <Image src={image || "/placeholder.svg"} alt={title} fill className="object-cover" />
+        <Image src={image || "/placeholder.svg"} alt={workoutData.name} fill className="object-cover" />
       </div>
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="font-semibold">{title}</h3>
+          <h3 className="font-semibold">{workoutData.name}</h3>
           <div className="flex items-center text-xs text-muted-foreground">
             <ClockIcon className="h-3 w-3 mr-1" />
-            {duration}
+            {durationInMinutes}
           </div>
         </div>
         <div className="flex justify-between items-center">

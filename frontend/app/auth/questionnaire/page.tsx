@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight } from "lucide-react";
-import config from "../../../config";
+import config from "@/config";
 
 export default function QuestionnairePage() {
   const [step, setStep] = useState(1);
@@ -525,6 +525,7 @@ export default function QuestionnairePage() {
                     <SelectItem value="strength">Strength</SelectItem>
                     <SelectItem value="yoga">Yoga</SelectItem>
                     <SelectItem value="low-impact">Low-Impact Workouts</SelectItem>
+                    <SelectItem value="body-weight">Bodyweight workouts</SelectItem>
                     <SelectItem value="postnatal">
                       Postnatal Recovery
                     </SelectItem>

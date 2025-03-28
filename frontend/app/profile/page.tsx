@@ -1,15 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import type React from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,7 +37,7 @@ import {
   UserCircle2,
   UserCheck,
 } from "lucide-react";
-import Link from "next/link";
+
 import {
   Dialog,
   DialogContent,
@@ -39,17 +49,76 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
-
-const fetchUserData = async () => {
-  const response = await fetch("/api/user"); // Replace with your API endpoint
-  if (!response.ok) {
-    throw new Error("Failed to fetch user data");
-  }
-  return response.json();
-};
+import config from "@/config";
+import axios from "axios";
 
 export default function ProfilePage() {
   const router = useRouter();
+  const token = localStorage.getItem("token");
+  const [userData, setUserData] = useState({
+    username: "",
+    email: "",
+    height: "",
+    weight: "",
+    dob: "",
+    workoutDays: "",
+    workoutGoal: "",
+    avatar: "",
+  });
+
+  useEffect(() => {
+    if (!token) {
+      console.error("No token found. Please log in.");
+      return;
+    }
+
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(`${config.PROFILE_URL}/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setUserData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      }
+    };
+    fetchUserData();
+  }, [token]);
+
+  const [userFormData, setUserFormData] = useState({
+    username: userData.username || "",
+    email: userData.email || "",
+    height: userData.height || "",
+    weight: userData.weight || "",
+    dob: userData.dob ? new Date(userData.dob).toISOString().split("T")[0] : "",
+  });
+
+  const [userGoalData, setUserGoalData] = useState({
+    workoutGoal: userData.workoutGoal || "",
+    workoutDaysPerWeekGoal: userData.workoutDays || 0,
+  });
+
+  useEffect(() => {
+    if (userData) {
+      setUserFormData({
+        username: userData.username || "",
+        email: userData.email || "",
+        height: userData.height || "",
+        weight: userData.weight || "",
+        dob: userData.dob
+          ? new Date(userData.dob).toISOString().split("T")[0]
+          : "",
+      });
+
+      setUserGoalData({
+        workoutGoal: userData.workoutGoal || "",
+        workoutDaysPerWeekGoal: userData.workoutDays ? userData.workoutDays : 0,
+      });
+    }
+  }, [userData]);
+
   const handleSignOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
@@ -57,38 +126,104 @@ export default function ProfilePage() {
     router.push("/auth/login");
   };
 
-  // Sample user data - in a real app this would come from a database
-  const userData = {
-    name: "Sarah Anderson",
-    email: "sarah@gmail.com",
-    height: "165",
-    weight: "58",
-    birthdate: "1990-05-15",
-    goal: "Stay fit",
-    workoutsPerWeek: "5 days",
-    avatar: "/avatars/avatar.png",
+  const handleUserFormInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const { id, value } = e.target;
+    setUserFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
   };
 
-  // Achievements data (sample)
-  const achievements = [
-    {
-      title: "5-Day Streak",
-      description: "Completed workouts 5 days in a row",
-      isCompleted: true,
-    },
-    {
-      title: "First Milestone",
-      description: "Completed 10 workouts",
-      isCompleted: true,
-    },
-    {
-      title: "30-Day Streak",
-      description: "Complete workouts for 30 days",
-      isCompleted: false,
-    },
-  ];
+  const handleUpdateUserPersonalDetails = async () => {
+    try {
+      const response = await fetch(`${config.PROFILE_URL}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(userFormData),
+      });
+
+      if (response.ok) {
+        alert("User details updated successfully");
+        setIsEditingUserDetails(false);
+
+        const fetchUserData = async () => {
+          try {
+            const response = await axios.get(`${config.PROFILE_URL}/`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            setUserData(response.data);
+          } catch (error) {
+            console.error("Failed to fetch user data:", error);
+          }
+        };
+
+        fetchUserData();
+      } else {
+        alert("Failed to update user details");
+      }
+    } catch (error) {
+      console.error("Error updating user details:", error);
+      alert("An error occurred while updating the details");
+    }
+  };
+
+  const handleUpdateUserGoal = async () => {
+    try {
+      const response = await fetch(`${config.PROFILE_URL}/goals`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(userGoalData),
+      });
+
+      if (response.ok) {
+        alert("User goals updated successfully");
+        setIsEditing(false);
+
+        const fetchUserData = async () => {
+          try {
+            const response = await axios.get(`${config.PROFILE_URL}/`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            setUserData(response.data);
+          } catch (error) {
+            console.error("Failed to fetch user goals:", error);
+          }
+        };
+
+        fetchUserData();
+      } else {
+        alert("Failed to update user goals");
+      }
+    } catch (error) {
+      console.error("Error updating user goals:", error);
+      alert("An error occurred while updating the goals");
+    }
+  };
+
+  const goalDisplayMap: { [key: string]: string } = {
+    GENERAL: "General Fitness",
+    WEIGHT_LOSS: "Weight Loss",
+    STRENGTH_BUILDING: "Strength Building",
+    FLEXIBILITY: "Flexibility",
+    STRESS_RELIEF: "Stress Relief",
+    PRENATAL: "Prenatal",
+    POST_PREGNANCY_RECOVERY: "Post-Pregnancy Recovery",
+  };
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingUserDetails, setIsEditingUserDetails] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(userData.avatar);
 
   const [cycleData, setCycleData] = useState({
@@ -111,6 +246,115 @@ export default function ProfilePage() {
     { id: 9, src: "/avatars/avatar9.png", alt: "Avatar 9" },
   ];
 
+  const saveAvatar = async () => {
+    if (!selectedAvatar) return;
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("No token found! Please log in.");
+      return;
+    }
+
+    try {
+      console.log(selectedAvatar);
+      const response = await axios.put(
+        `${config.PROFILE_URL}/avatar`,
+
+        { avatarLink: selectedAvatar },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const fetchUserData = async () => {
+          try {
+            const response = await axios.get(`${config.PROFILE_URL}/`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            setUserData(response.data);
+          } catch (error) {
+            console.error("Failed to fetch user goals:", error);
+          }
+        };
+
+        fetchUserData();
+      }
+    } catch (err) {
+      console.error("Error saving avatar:", err);
+    }
+  };
+
+  const [totalWorkouts, setTotalWorkouts] = useState("");
+
+  useEffect(() => {
+    const fetchTotalWorkouts = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.error("No token found! Please log in.");
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `${config.PROFILE_URL}/weekly-workouts`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          setTotalWorkouts(response.data.totalWorkouts);
+        }
+      } catch (error) {
+        console.error("Error fetching weekly workouts:", error);
+      }
+    };
+
+    fetchTotalWorkouts();
+  }, []);
+
+  const [achievements, setAchievements] = useState<{ title: string; description: string; completed: boolean }[]>([]);
+
+  useEffect(() => {
+    const fetchAchievements = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.error("No token found! Please log in.");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`${config.PROFILE_URL}/achievements`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 200) {
+          setAchievements(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching achievements:", error);
+      }
+    };
+
+    fetchAchievements();
+  }, []);
+
+  useEffect(() => {
+    console.log(achievements);
+  });
+
   return (
     <div className="container px-4 py-6 md:py-10 pb-20 max-w-5xl mx-auto">
       <div className="flex flex-col gap-6">
@@ -120,7 +364,7 @@ export default function ProfilePage() {
               <DialogTrigger asChild>
                 <div className="relative cursor-pointer group">
                   <Avatar className="w-20 h-20 border">
-                    <AvatarImage src={selectedAvatar} alt="User" />
+                    <AvatarImage src={userData.avatar} alt="User" />
                     <AvatarFallback>SA</AvatarFallback>
                   </Avatar>
                   <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -167,13 +411,15 @@ export default function ProfilePage() {
                   ))}
                 </div>
                 <DialogClose asChild>
-                  <Button type="button">Save Avatar</Button>
+                  <Button type="button" onClick={saveAvatar}>
+                    Save Avatar
+                  </Button>
                 </DialogClose>
               </DialogContent>
             </Dialog>
             <div className="flex-1 text-center md:text-left">
               <h1 className="text-2xl font-bold tracking-tight">
-                Sarah Anderson
+                {userData.username}
               </h1>
             </div>
           </div>
@@ -192,11 +438,11 @@ export default function ProfilePage() {
                     <CardTitle>Personal Information</CardTitle>
                     <CardDescription>Your personal details</CardDescription>
                   </div>
-                  {!isEditing ? (
+                  {!isEditingUserDetails ? (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setIsEditing(true)}
+                      onClick={() => setIsEditingUserDetails(true)}
                     >
                       <EditIcon className="h-4 w-4 mr-2" />
                       Edit
@@ -206,12 +452,15 @@ export default function ProfilePage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setIsEditing(false)}
+                        onClick={() => setIsEditingUserDetails(false)}
                       >
                         <XIcon className="h-4 w-4 mr-2" />
                         Cancel
                       </Button>
-                      <Button size="sm" onClick={() => setIsEditing(false)}>
+                      <Button
+                        size="sm"
+                        onClick={handleUpdateUserPersonalDetails}
+                      >
                         <CheckIcon className="h-4 w-4 mr-2" />
                         Save
                       </Button>
@@ -219,42 +468,49 @@ export default function ProfilePage() {
                   )}
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {isEditing ? (
+                  {isEditingUserDetails ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input id="name" defaultValue={userData.name} />
+                        <Label htmlFor="name">username</Label>
+                        <Input
+                          id="username"
+                          value={userFormData.username}
+                          onChange={handleUserFormInputChange}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="email">Email</Label>
                         <Input
                           id="email"
-                          defaultValue={userData.email}
                           type="email"
+                          value={userFormData.email}
+                          onChange={handleUserFormInputChange}
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="height">Height (cm)</Label>
                         <Input
-                          id="height"
-                          defaultValue={userData.height}
                           type="number"
+                          value={userFormData.height}
+                          onChange={handleUserFormInputChange}
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="weight">Weight (kg)</Label>
                         <Input
                           id="weight"
-                          defaultValue={userData.weight}
                           type="number"
+                          value={userFormData.weight}
+                          onChange={handleUserFormInputChange}
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="birthdate">Date of Birth</Label>
                         <Input
-                          id="birthdate"
-                          defaultValue={userData.birthdate}
+                          id="dob"
                           type="date"
+                          value={userFormData.dob}
+                          onChange={handleUserFormInputChange}
                         />
                       </div>
                     </div>
@@ -262,9 +518,9 @@ export default function ProfilePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">
-                          Full Name
+                          Username
                         </p>
-                        <p>{userData.name}</p>
+                        <p>{userData.username}</p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">
@@ -288,7 +544,11 @@ export default function ProfilePage() {
                         <p className="text-sm font-medium text-muted-foreground">
                           Date of Birth
                         </p>
-                        <p>{userData.birthdate}</p>
+                        <p>
+                          {userData.dob
+                            ? new Date(userData.dob).toISOString().split("T")[0]
+                            : "N/A"}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -312,77 +572,103 @@ export default function ProfilePage() {
                       <EditIcon className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
-                  ) : null}
+                  ) : (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsEditing(false)}
+                      >
+                        <XIcon className="h-4 w-4 mr-2" />
+                        Cancel
+                      </Button>
+                      <Button size="sm" onClick={handleUpdateUserGoal}>
+                        <CheckIcon className="h-4 w-4 mr-2" />
+                        Save
+                      </Button>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <Label>Weekly Workout Goal</Label>
                       <span className="text-sm text-muted-foreground">
-                        4/5 days
+                        {totalWorkouts}/{userData.workoutDays} days
                       </span>
                     </div>
-                    <Progress value={80} className="bg-muted h-2" />
+                    <Progress
+                      value={
+                        userData.workoutDays
+                          ? Math.min(
+                              (Number(totalWorkouts) /
+                                Number(userData.workoutDays)) *
+                                100,
+                              100
+                            )
+                          : 0
+                      }
+                      className="bg-muted h-2"
+                    />
                   </div>
 
                   {isEditing ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="goal">Primary Goal</Label>
-                        <select
-                          id="goal"
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        <Select
+                          value={goalDisplayMap[userGoalData.workoutGoal] || ""}
+                          onValueChange={(value) => {
+                            // Find the key in goalDisplayMap that matches the selected value
+                            const goalKey = Object.keys(goalDisplayMap).find(
+                              (key) => goalDisplayMap[key] === value
+                            );
+
+                            setUserGoalData((prevData) => ({
+                              ...prevData,
+                              workoutGoal: goalKey || "", // Store the backend key
+                            }));
+                          }}
                         >
-                          <option selected={userData.goal === "Stay fit"}>
-                            Stay fit
-                          </option>
-                          <option selected={userData.goal === "Lose weight"}>
-                            Lose weight
-                          </option>
-                          <option selected={userData.goal === "Build strength"}>
-                            Build strength
-                          </option>
-                          <option
-                            selected={userData.goal === "Improve flexibility"}
-                          >
-                            Improve flexibility
-                          </option>
-                        </select>
+                          <SelectTrigger className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                            <SelectValue placeholder="Select your primary goal" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(goalDisplayMap).map(
+                              ([key, value]) => (
+                                <SelectItem key={key} value={value}>
+                                  {value}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </Select>
                       </div>
+
                       <div className="space-y-2">
                         <Label htmlFor="workouts-per-week">
                           Workouts Per Week
                         </Label>
-                        <select
-                          id="workouts-per-week"
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        <Select
+                          value={String(userGoalData.workoutDaysPerWeekGoal)}
+                          onValueChange={(value) => {
+                            setUserGoalData((prevData) => ({
+                              ...prevData,
+                              workoutDaysPerWeekGoal: Number(value),
+                            }));
+                          }}
                         >
-                          <option
-                            selected={userData.workoutsPerWeek === "3 days"}
-                          >
-                            3 days
-                          </option>
-                          <option
-                            selected={userData.workoutsPerWeek === "4 days"}
-                          >
-                            4 days
-                          </option>
-                          <option
-                            selected={userData.workoutsPerWeek === "5 days"}
-                          >
-                            5 days
-                          </option>
-                          <option
-                            selected={userData.workoutsPerWeek === "6 days"}
-                          >
-                            6 days
-                          </option>
-                          <option
-                            selected={userData.workoutsPerWeek === "7 days"}
-                          >
-                            7 days
-                          </option>
-                        </select>
+                          <SelectTrigger className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                            <SelectValue placeholder="Select number of days" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="3">3 days</SelectItem>
+                            <SelectItem value="4">4 days</SelectItem>
+                            <SelectItem value="5">5 days</SelectItem>
+                            <SelectItem value="6">6 days</SelectItem>
+                            <SelectItem value="7">7 days</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   ) : (
@@ -391,24 +677,20 @@ export default function ProfilePage() {
                         <p className="text-sm font-medium text-muted-foreground">
                           Primary Goal
                         </p>
-                        <p>{userData.goal}</p>
+                        <p>
+                          {goalDisplayMap[userData.workoutGoal] ||
+                            userData.workoutGoal}
+                        </p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-muted-foreground">
                           Workouts Per Week
                         </p>
-                        <p>{userData.workoutsPerWeek}</p>
+                        <p>{userData.workoutDays} days</p>
                       </div>
                     </div>
                   )}
                 </CardContent>
-                {isEditing && (
-                  <CardFooter>
-                    <Button onClick={() => setIsEditing(false)}>
-                      Update Goals
-                    </Button>
-                  </CardFooter>
-                )}
               </Card>
             </TabsContent>
 
@@ -422,36 +704,42 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {achievements.map((achievement, index) => (
-                      <div
-                        key={index}
-                        className="flex flex-col items-center p-4 border rounded-lg"
-                      >
-                        <div className={`bg-muted rounded-full p-3 mb-2`}>
-                          <TrophyIcon
-                            className={`h-6 w-6 ${
-                              achievement.isCompleted
-                                ? "text-primary"
-                                : "text-muted-foreground"
-                            }`}
-                          />
+                    {achievements?.length > 0 ? (
+                      achievements.map((achievement, index) => (
+                        <div
+                          key={index}
+                          className="flex flex-col items-center p-4 border rounded-lg"
+                        >
+                          <div className="bg-muted rounded-full p-3 mb-2">
+                            <TrophyIcon
+                              className={`h-6 w-6 ${
+                                achievement.completed
+                                  ? "text-primary"
+                                  : "text-muted-foreground"
+                              }`}
+                            />
+                          </div>
+                          <h3 className="font-medium text-center">
+                            {achievement.title}
+                          </h3>
+                          <p className="text-xs text-muted-foreground text-center">
+                            {achievement.description}
+                          </p>
+                          {!achievement.completed && (
+                            <Badge variant="outline" className="mt-2">
+                              In Progress
+                            </Badge>
+                          )}
+                          {achievement.completed && (
+                            <CheckIcon className="mt-2 h-5 w-5 text-primary" />
+                          )}
                         </div>
-                        <h3 className="font-medium text-center">
-                          {achievement.title}
-                        </h3>
-                        <p className="text-xs text-muted-foreground text-center">
-                          {achievement.description}
-                        </p>
-                        {!achievement.isCompleted && (
-                          <Badge variant="outline" className="mt-2">
-                            In Progress
-                          </Badge>
-                        )}
-                        {achievement.isCompleted && (
-                          <CheckIcon className="mt-2 h-5 w-5 text-primary" />
-                        )}
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-center text-muted-foreground">
+                        No achievements found.
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -635,7 +923,11 @@ export default function ProfilePage() {
                   <Button className="w-full">Update Password</Button>
 
                   <div className="pt-4">
-                    <Button variant="destructive" className="w-full" onClick={handleSignOut}>
+                    <Button
+                      variant="destructive"
+                      className="w-full"
+                      onClick={handleSignOut}
+                    >
                       <LogOutIcon className="h-4 w-4 mr-2" />
                       Sign Out
                     </Button>
