@@ -38,6 +38,7 @@ import {
   DialogClose,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useRouter } from "next/navigation";
 
 const fetchUserData = async () => {
   const response = await fetch("/api/user"); // Replace with your API endpoint
@@ -48,6 +49,14 @@ const fetchUserData = async () => {
 };
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+
+    router.push("/auth/login");
+  };
+
   // Sample user data - in a real app this would come from a database
   const userData = {
     name: "Sarah Anderson",
@@ -626,12 +635,10 @@ export default function ProfilePage() {
                   <Button className="w-full">Update Password</Button>
 
                   <div className="pt-4">
-                    <Link href="/auth/login">
-                      <Button variant="destructive" className="w-full">
-                        <LogOutIcon className="h-4 w-4 mr-2" />
-                        Sign Out
-                      </Button>
-                    </Link>
+                    <Button variant="destructive" className="w-full" onClick={handleSignOut}>
+                      <LogOutIcon className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

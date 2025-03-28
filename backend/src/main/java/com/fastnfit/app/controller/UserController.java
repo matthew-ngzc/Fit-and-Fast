@@ -19,9 +19,9 @@ public class UserController {
     private final AuthUtils authUtils;
 
     @Autowired
-    public UserController(UserService userService,AuthUtils authUtils) {
+    public UserController(UserService userService, AuthUtils authUtils) {
         this.userService = userService;
-        this.authUtils=authUtils;
+        this.authUtils = authUtils;
     }
 
     @GetMapping("/details")
@@ -40,6 +40,10 @@ public class UserController {
             @RequestBody QuestionnaireDTO questionnaireData) {
         try {
             Long userId = authUtils.getCurrentUserId();
+
+            // ✅ Log the incoming request to check if the frontend is sending valid data
+            System.out.println("Received questionnaire data: " + questionnaireData);
+
             QuestionnaireDTO userDetailsDTO = userService.completeUserQuestionnaire(userId, questionnaireData);
             return ResponseEntity.status(HttpStatus.CREATED).body(userDetailsDTO);
         } catch (RuntimeException e) {

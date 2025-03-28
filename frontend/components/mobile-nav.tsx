@@ -19,7 +19,7 @@ export function MobileNav() {
   return (
     <div className="md:hidden fixed bottom-0 left-0 z-50 w-full h-16 bg-background border-t">
       <div className="grid h-full max-w-lg grid-cols-4 mx-auto">
-        <NavItem href="/" icon={<HomeIcon className="w-6 h-6" />} label="Home" isActive={pathname === "/"} />
+        <NavItem href="/home" icon={<HomeIcon className="w-6 h-6" />} label="Home" isActive={pathname === "/home"} />
         <NavItem
           href="/activity"
           icon={<LineChartIcon className="w-6 h-6" />}

@@ -11,9 +11,7 @@ import {
 import { FlameIcon, TimerIcon } from "lucide-react";
 import { ActivityLineChart } from "@/components/activity-line-chart";
 import { ActivityLog } from "@/components/activity-log";
-import data from "./data.json";
-
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import config from "../../config";
 
 interface TodayActivity {
@@ -62,15 +60,15 @@ export default function ActivityPage() {
     async function loadActivityData() {
       try {
         const token = localStorage.getItem("token");
-  
+
         if (!token) {
           setError("No authentication token found. Please log in.");
           setIsLoading(false);
           return;
         }
-  
+
         setIsLoading(true);
-  
+
         const response = await axios.get<ActivityData>(
           `${config.HISTORY_URL}/activity/overview`,
           {
@@ -79,19 +77,17 @@ export default function ActivityPage() {
             },
           }
         );
-  
+
         const { today, weekly, recentWorkouts } = response.data;
 
-  
-  
         const validWeeklyData: WeeklyActivity[] = weekly.map((item) => {
           return {
-            date: item.date, 
+            date: item.date,
             caloriesBurned: item.caloriesBurned,
             durationInMinutes: item.durationInMinutes,
           };
         });
-  
+
         setTodayCalories(today.caloriesBurned);
         setTodayMinutes(today.durationInMinutes);
         setWeeklyData(validWeeklyData);
@@ -100,7 +96,10 @@ export default function ActivityPage() {
         console.log(recentWorkouts);
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          setError(error.response?.data?.message || "An error occurred while fetching activity data");
+          setError(
+            error.response?.data?.message ||
+              "An error occurred while fetching activity data"
+          );
           console.error("API error:", error);
         } else {
           setError("An unexpected error occurred");
@@ -110,7 +109,7 @@ export default function ActivityPage() {
         setIsLoading(false);
       }
     }
-  
+
     loadActivityData();
   }, []);
 
@@ -169,7 +168,7 @@ export default function ActivityPage() {
               <CardDescription>Your workout history</CardDescription>
             </CardHeader>
             <CardContent>
-              <ActivityLog recentWorkouts={recentWorkouts}/>
+              <ActivityLog recentWorkouts={recentWorkouts} />
             </CardContent>
           </Card>
         </section>

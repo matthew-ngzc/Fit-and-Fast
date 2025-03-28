@@ -19,28 +19,23 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  // Email regex pattern for validation
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const handleLogin = async () => {
-    // Step 1: Validate inputs before calling the API
-
     if (!email || !password) {
       setError("Email and password are required.");
-      return; // Don't proceed if any field is empty
+      return; 
     }
 
-    // Step 2: Validate email format using regex
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email address.");
-      return; // Don't proceed if email format is incorrect
+      return;
     }
 
     try {
       setIsLoading(true);
-      setError(""); // Reset any previous error messages
+      setError(""); 
 
-      // Make the API call
       const response = await axios.post(`${config.AUTH_URL}/login`, {
         email,
         password,
@@ -51,7 +46,7 @@ export default function LoginPage() {
       if (response.status === 200) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
-        router.replace("/"); // Redirect to home after login
+        router.replace("/home"); 
       }
     } catch (error) {
       console.error("Error during login:", error);

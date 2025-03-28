@@ -33,8 +33,6 @@ export default function QuestionnairePage() {
   const totalSteps = 4;
 
   const [formData, setFormData] = useState({
-    userId: "",
-    username: "",
     height: "",
     weight: "",
     birthdate: "",
@@ -48,8 +46,6 @@ export default function QuestionnairePage() {
     cycleLength: "",
     periodLength: "",
     lastPeriodDate: "",
-    currentStreak: 0,
-    longestStreak: 0,
   });
 
   const nextStep = () => {
@@ -90,8 +86,6 @@ export default function QuestionnairePage() {
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
-      const userId = localStorage.getItem("userId");
-      const userIdLong = userId ? parseInt(userId, 10) : null; 
 
       if (!token) {
         alert("Unauthorised Action");
@@ -100,8 +94,6 @@ export default function QuestionnairePage() {
       }
 
       const requestData = {
-        userId: userIdLong, // tmp to change once backend updates
-        username: formData.username,
         height: parseFloat(formData.height),
         weight: parseFloat(formData.weight),
         dob: formData.birthdate,
@@ -110,17 +102,15 @@ export default function QuestionnairePage() {
         pregnancyStatus: formData.pregnancyStatus?.toUpperCase(),
         cycleBasedRecommendations: formData.cycleBasedRecommendations === "yes",
         workoutType: formData.workoutType,
-        workoutDays: parseInt(formData.workoutDays) || 0,
-        fitnessGoal: formData.fitnessGoal,
-        cycleLength: parseInt(formData.cycleLength) || 28,
-        periodLength: parseInt(formData.periodLength) || 5,
-        lastPeriodDate: formData.lastPeriodDate || null,
-        currentStreak: 0,
-        longestStreak: 0,
+        workoutDays: parseInt(formData.workoutDays),
+        workoutGoal: formData.fitnessGoal,
+        cycleLength: parseInt(formData.cycleLength),
+        periodLength: parseInt(formData.periodLength),
+        lastPeriodDate: formData.lastPeriodDate,
       };
 
-      console.log("Submitting request:", requestData); // Debugging log
-      console.log(token)
+      console.log("Submitting request:", requestData);
+      console.log(token);
       const response = await fetch(`${config.USER_URL}/questionnaire`, {
         method: "POST",
         headers: {
@@ -130,7 +120,11 @@ export default function QuestionnairePage() {
         body: JSON.stringify(requestData),
       });
 
-      // window.location.href = "/";
+      if (response.status === 201) {
+        window.location.href = "/home";
+      } else {
+        alert("Failed to submit form. Please try again.");
+      }
     } catch (error) {
       alert(`Error submitting form`);
       console.error(error);
@@ -174,17 +168,6 @@ export default function QuestionnairePage() {
               <CardDescription>Tell us about yourself</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  placeholder="Alice"
-                />
-              </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="height">Height (cm)</Label>
