@@ -96,7 +96,6 @@ public class HistoryControllerIntegrationTest {
     public void testCreateHistory_Success() throws Exception {
         // Create HistoryDTO for request
         HistoryDTO historyDTO = new HistoryDTO();
-        historyDTO.setName("Test History Entry");
         historyDTO.setCaloriesBurned(150);
         historyDTO.setDurationInMinutes(25);
 
@@ -116,7 +115,7 @@ public class HistoryControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(historyDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("Test History Entry"))
+                .andExpect(jsonPath("$.name").value("Test Workout"))
                 .andExpect(jsonPath("$.caloriesBurned").value(150))
                 .andExpect(jsonPath("$.durationInMinutes").value(25))
                 .andReturn();
@@ -129,7 +128,7 @@ public class HistoryControllerIntegrationTest {
         // Verify history entry exists in database
         History savedHistory = historyRepository.findById(response.getHistoryId()).orElse(null);
         assertNotNull(savedHistory, "History entry should be saved in database");
-        assertEquals("Test History Entry", savedHistory.getWorkoutName(), "History name should match");
+        assertEquals("Test Workout", savedHistory.getWorkout().getName(), "History name should match");
         assertEquals(testUser.getUserId(), savedHistory.getUser().getUserId(), "User should match");
     }
 
@@ -257,7 +256,6 @@ public class HistoryControllerIntegrationTest {
             History history = new History();
             history.setUser(testUser);
             history.setWorkout(testWorkout);
-            history.setWorkoutName("Test History " + i);
             history.setCaloriesBurned(100 + i);
             history.setDurationInMinutes(20 + i);
 
@@ -273,7 +271,6 @@ public class HistoryControllerIntegrationTest {
         History history = new History();
         history.setUser(testUser);
         history.setWorkout(testWorkout);
-        history.setWorkoutName("Test History with date " + dateStr);
         history.setCaloriesBurned(100);
         history.setDurationInMinutes(20);
 

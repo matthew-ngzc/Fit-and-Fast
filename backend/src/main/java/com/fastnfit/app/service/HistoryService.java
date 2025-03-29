@@ -92,8 +92,6 @@ public class HistoryService {
             history.setWorkoutDateTime(new Timestamp(historyDTO.getWorkoutDateTime().getTime()));
         }
 
-        history.setWorkoutName(historyDTO.getName());
-
         Optional<Workout> workout = workoutRepository.findById(historyDTO.getWorkout().getWorkoutId());
         if (workout.isPresent()) {
             history.setWorkout(workout.get());
@@ -214,7 +212,7 @@ public class HistoryService {
     public HistoryDTO convertToDTO(History history) {
         HistoryDTO dto = new HistoryDTO();
         dto.setHistoryId(history.getHistoryId());
-        dto.setName(history.getWorkoutName());
+        dto.setName(history.getWorkout().getName());
         dto.setCaloriesBurned(history.getCaloriesBurned());
         dto.setDurationInMinutes(history.getDurationInMinutes());
         dto.setWorkoutDateTime(history.getWorkoutDateTime());

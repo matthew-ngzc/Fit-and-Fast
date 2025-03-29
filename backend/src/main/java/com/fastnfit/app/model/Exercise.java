@@ -30,6 +30,6 @@ public class Exercise {
     @Column(length = 500)
     private String tips;
     
-    @ManyToMany(mappedBy = "exercises", fetch = FetchType.LAZY)
-    private List<Workout> workout;
+    // @ManyToMany(mappedBy = "exercises", fetch = FetchType.LAZY)
+    // private List<Workout> workout;
 }
