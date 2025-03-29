@@ -81,7 +81,7 @@ public class CalendarService {
         LocalDate lastPeriodStart = Optional.ofNullable(details.getLastPeriodStartDate()).orElse(LocalDate.now().minusDays(20)); // fallback default
 
         if (details.getDob() != null) {
-            lastPeriodStart = details.getDob().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            lastPeriodStart = details.getDob();
         }
 
         LocalDate lastPeriodEnd = lastPeriodStart.plusDays(periodLength - 1);

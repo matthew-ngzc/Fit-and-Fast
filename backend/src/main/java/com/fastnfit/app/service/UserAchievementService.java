@@ -5,7 +5,6 @@ import com.fastnfit.app.model.User;
 import com.fastnfit.app.model.UserAchievement;
 import com.fastnfit.app.repository.AchievementRepository;
 import com.fastnfit.app.repository.UserAchievementRepository;
-import com.fastnfit.app.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import java.util.Optional;
 public class UserAchievementService {
     
     private final UserAchievementRepository userAchievementRepository;
-    //private final UserRepository userRepository;
     private final AchievementRepository achievementRepository;
     
     @Autowired
@@ -27,7 +25,6 @@ public class UserAchievementService {
             //UserRepository userRepository,
             AchievementRepository achievementRepository) {
         this.userAchievementRepository = userAchievementRepository;
-        //this.userRepository = userRepository;
         this.achievementRepository = achievementRepository;
     }
     
@@ -92,5 +89,9 @@ public class UserAchievementService {
     //  */
     public List<UserAchievement> getIncompleteAchievements(Long userId) {
         return userAchievementRepository.findByUserUserIdAndCompletedFalse(userId);
+    }
+
+    public Optional<UserAchievement> getIncompleteUserAchievementById(Long userId,Long AchievementId){
+        return userAchievementRepository.findByUserUserIdAndAchievementAchievementId(userId, AchievementId);
     }
 }

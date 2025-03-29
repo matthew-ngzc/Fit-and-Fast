@@ -47,6 +47,7 @@ public class UserController {
             QuestionnaireDTO userDetailsDTO = userService.completeUserQuestionnaire(userId, questionnaireData);
             return ResponseEntity.status(HttpStatus.CREATED).body(userDetailsDTO);
         } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }

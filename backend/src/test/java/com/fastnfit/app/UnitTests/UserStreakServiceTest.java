@@ -9,6 +9,7 @@ import com.fastnfit.app.repository.AchievementRepository;
 import com.fastnfit.app.repository.HistoryRepository;
 import com.fastnfit.app.repository.UserDetailsRepository;
 import com.fastnfit.app.repository.UserRepository;
+import com.fastnfit.app.service.AchievementService;
 import com.fastnfit.app.service.UserAchievementService;
 import com.fastnfit.app.service.UserStreakService;
 
@@ -46,6 +47,9 @@ public class UserStreakServiceTest {
 
     @Mock
     private UserDetailsRepository userDetailsRepository;
+
+    @Mock
+    private AchievementService achievementService;
 
     @InjectMocks
     private UserStreakService userStreakService;
@@ -130,6 +134,7 @@ public class UserStreakServiceTest {
                 any(Timestamp.class)))
                 .thenReturn(workouts) // First call for today
                 .thenReturn(workouts); // Second call for yesterday
+        when(achievementService.getAchievementByTitle("5 Day Streak")).thenReturn(Optional.empty());
 
         // Act
         userStreakService.updateStreak(userId);
@@ -186,7 +191,7 @@ public class UserStreakServiceTest {
         Achievement fiveDayAchievement = new Achievement();
         fiveDayAchievement.setAchievementId(1L);
         fiveDayAchievement.setTitle("5 Day Streak");
-        when(achievementRepository.findByTitle("5 Day Streak")).thenReturn(Optional.of(fiveDayAchievement));
+        when(achievementService.getAchievementByTitle("5 Day Streak")).thenReturn(Optional.of(fiveDayAchievement));
 
         // Act
         userStreakService.updateStreak(userId);

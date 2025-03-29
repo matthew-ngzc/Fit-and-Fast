@@ -11,13 +11,16 @@ import com.fastnfit.app.dto.ActivityOverviewDTO;
 import com.fastnfit.app.dto.DailySummaryDTO;
 import com.fastnfit.app.dto.HistoryDTO;
 import com.fastnfit.app.dto.WorkoutDTO;
+import com.fastnfit.app.model.Achievement;
 import com.fastnfit.app.model.History;
 import com.fastnfit.app.model.User;
 import com.fastnfit.app.model.Workout;
 import com.fastnfit.app.repository.HistoryRepository;
 import com.fastnfit.app.repository.UserRepository;
 import com.fastnfit.app.repository.WorkoutRepository;
+import com.fastnfit.app.service.AchievementService;
 import com.fastnfit.app.service.HistoryService;
+import com.fastnfit.app.service.UserAchievementService;
 import com.fastnfit.app.service.UserStreakService;
 import com.fastnfit.app.service.WorkoutService;
 
@@ -34,8 +37,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -57,6 +59,12 @@ class HistoryServiceTest {
     @Mock
     private UserStreakService userStreakService;
 
+    @Mock
+    private AchievementService achievementService;
+
+    @Mock
+    private UserAchievementService userAchievementService;
+
     private HistoryService historyService;
     
     private User testUser;
@@ -75,7 +83,9 @@ class HistoryServiceTest {
             userRepository,
             workoutRepository,
             workoutService,
-            userStreakService
+            userStreakService,
+            achievementService,
+            userAchievementService
         );
         
         // Setup test data
@@ -474,7 +484,101 @@ class HistoryServiceTest {
         return dto;
     }
     
+    @Test
+    void getTotalHistoryCountByUser_shouldReturnCount() {
+        // Given
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(historyRepository.countByUser(testUser)).thenReturn(10);
+        
+        // When
+        int count = historyService.getTotalHistoryCountByUser(1L);
+        
+        // Then
+        assertEquals(10, count);
+        verify(historyRepository).countByUser(testUser);
+    }
     
+    @Test
+    void getTotalHistoryCountByUser_shouldReturnNegativeOneWhenUserNotFound() {
+        // Given
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+        
+        // When
+        int count = historyService.getTotalHistoryCountByUser(1L);
+        
+        // Then
+        assertEquals(-1, count);
+        verify(historyRepository, never()).countByUser(any(User.class));
+    }
+
+        @Test
+    void recordWorkoutCompletion_shouldUnlockAchievementFor10Workouts() {
+        Achievement testAchievement = new Achievement();
+        testAchievement.setAchievementId(1L);
+        testAchievement.setTitle("10 Workouts");
+        testAchievement.setDescription("Complete 10 workouts");
+        // Given
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(workoutRepository.findById(1L)).thenReturn(Optional.of(testWorkout));
+        when(historyRepository.save(any(History.class))).thenReturn(testHistory);
+        when(workoutService.convertToDTO(any(Workout.class))).thenReturn(testWorkoutDTO);
+        when(historyRepository.countByUser(testUser)).thenReturn(10); // 10th workout completed
+        when(achievementService.getAchievementByTitle("10 Workouts")).thenReturn(Optional.of(testAchievement));
+        
+        // When
+        HistoryDTO result = historyService.recordWorkoutCompletion(1L, testWorkoutDTO);
+        
+        // Then
+        assertNotNull(result);
+        verify(userStreakService).updateStreak(1L);
+        verify(achievementService).getAchievementByTitle("10 Workouts");
+        verify(userAchievementService).completeAchievement(1L, 1L);
+    }
+
+    @Test
+    void recordWorkoutCompletion_shouldNotUnlockAchievementBelow10Workouts() {
+        // Given
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(workoutRepository.findById(1L)).thenReturn(Optional.of(testWorkout));
+        when(historyRepository.save(any(History.class))).thenReturn(testHistory);
+        when(workoutService.convertToDTO(any(Workout.class))).thenReturn(testWorkoutDTO);
+        when(historyRepository.countByUser(testUser)).thenReturn(9); // 9th workout (not yet at 10)
+        
+        // When
+        HistoryDTO result = historyService.recordWorkoutCompletion(1L, testWorkoutDTO);
+        
+        // Then
+        assertNotNull(result);
+        verify(userStreakService).updateStreak(1L);
+        verify(achievementService, never()).getAchievementByTitle(any());
+        verify(userAchievementService, never()).completeAchievement(anyLong(), anyLong());
+    }
+    
+    @Test
+    void getTotalCaloriesBurnedByUser_shouldReturnTotalCalories() {
+        // Given
+        when(historyRepository.sumCaloriesBurnedByUserId(1L)).thenReturn(1500);
+        
+        // When
+        int calories = historyService.getTotalCaloriesBurnedByUser(1L);
+        
+        // Then
+        assertEquals(1500, calories);
+        verify(historyRepository).sumCaloriesBurnedByUserId(1L);
+    }
+    
+    @Test
+    void getTotalDurationByUser_shouldReturnTotalMinutes() {
+        // Given
+        when(historyRepository.sumTimeExercisedByUserId(1L)).thenReturn(300);
+        
+        // When
+        int minutes = historyService.getTotalDurationByUser(1L);
+        
+        // Then
+        assertEquals(300, minutes);
+        verify(historyRepository).sumTimeExercisedByUserId(1L);
+    }
     
 
 }

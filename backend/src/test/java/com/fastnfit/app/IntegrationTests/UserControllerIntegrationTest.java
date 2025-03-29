@@ -77,7 +77,7 @@ public class UserControllerIntegrationTest {
                 // Create sample UserDetailsDTO for testing
                 userDetailsDTO = new UserDetailsDTO();
                 userDetailsDTO.setUsername("testuser");
-                userDetailsDTO.setDob(new Date(System.currentTimeMillis() - 365L * 24 * 60 * 60 * 1000)); // 1 year ago
+                userDetailsDTO.setDob(new Date(System.currentTimeMillis() - 365L * 24 * 60 * 60 * 1000).toLocalDate()); // 1 year ago
                 userDetailsDTO.setHeight(170.0);
                 userDetailsDTO.setWeight(65.0);
                 userDetailsDTO.setPregnancyStatus(PregnancyStatus.NO.getValue());
@@ -96,7 +96,7 @@ public class UserControllerIntegrationTest {
         public void testCompleteQuestionnaire_Success() throws Exception {
                 // Perform POST request
                 QuestionnaireDTO dto = new QuestionnaireDTO();
-                dto.setDob(new Date(System.currentTimeMillis() - 365L * 24 * 60 * 60 * 1000)); // 1 year ago
+                dto.setDob(new Date(System.currentTimeMillis() - 365L * 24 * 60 * 60 * 1000).toLocalDate()); // 1 year ago
                 dto.setHeight(170.0);
                 dto.setWeight(65.0);
                 dto.setPregnancyStatus(PregnancyStatus.NO.getValue());
@@ -142,7 +142,7 @@ public class UserControllerIntegrationTest {
                 // Create user details first
                 UserDetails userDetails = userDetailsRepository.findByUser(testUser).get();
                 userDetails.setUsername("testuser");
-                userDetails.setDob(new Date(System.currentTimeMillis() - 365L * 24 * 60 * 60 * 1000));
+                userDetails.setDob(new Date(System.currentTimeMillis() - 365L * 24 * 60 * 60 * 1000).toLocalDate());
                 userDetails.setHeight(170.0);
                 userDetails.setWeight(65.0);
                 userDetails.setPregnancyStatus(PregnancyStatus.NO);
@@ -161,7 +161,7 @@ public class UserControllerIntegrationTest {
                                 .andExpect(jsonPath("$.username").value("testuser"))
                                 .andExpect(jsonPath("$.height").value(170.0))
                                 .andExpect(jsonPath("$.weight").value(65.0))
-                                .andExpect(jsonPath("$.workoutGoal").value("weight-loss"))
+                                .andExpect(jsonPath("$.workoutGoal").value("weight loss"))
                                 .andExpect(jsonPath("$.workoutDays").value(4));
         }
 

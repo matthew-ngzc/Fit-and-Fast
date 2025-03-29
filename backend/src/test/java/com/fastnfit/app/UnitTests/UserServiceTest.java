@@ -77,7 +77,7 @@ class UserServiceTest {
         testUserDetails.setUserDetailsId(1L);
         testUserDetails.setUser(testUser);
         testUserDetails.setUsername("testuser");
-        testUserDetails.setDob(Date.valueOf("1990-01-01"));
+        testUserDetails.setDob(Date.valueOf("1990-01-01").toLocalDate());
         testUserDetails.setHeight(170.0);
         testUserDetails.setWeight(70.0);
         testUserDetails.setWorkoutDays(5);
@@ -210,7 +210,7 @@ class UserServiceTest {
     void completeUserQuestionnaire_shouldCreateDetailsWhenNotExists() {
         // Given
         QuestionnaireDTO detailsDTO = new QuestionnaireDTO();
-        detailsDTO.setDob(Date.valueOf("1992-05-15"));
+        detailsDTO.setDob(Date.valueOf("1992-05-15").toLocalDate());
         detailsDTO.setHeight(175.0);
         detailsDTO.setWeight(75.0);
         detailsDTO.setWorkoutDays(4);
@@ -248,7 +248,7 @@ class UserServiceTest {
     void completeUserQuestionnaire_shouldUpdateExistingDetails() {
         // Given
         QuestionnaireDTO detailsDTO = new QuestionnaireDTO();
-        detailsDTO.setDob(Date.valueOf("1992-05-15"));
+        detailsDTO.setDob(Date.valueOf("1992-05-15").toLocalDate());
         detailsDTO.setHeight(175.0);
         detailsDTO.setWeight(75.0);
         detailsDTO.setWorkoutDays(4);
@@ -310,7 +310,7 @@ class UserServiceTest {
         profileDTO.setEmail("updated@example.com");
         profileDTO.setHeight(180.0);
         profileDTO.setWeight(80.0);
-        profileDTO.setDob(Date.valueOf("1995-10-10"));
+        profileDTO.setDob(Date.valueOf("1995-10-10").toLocalDate());
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
         when(userDetailsRepository.findByUser(testUser)).thenReturn(Optional.of(testUserDetails));
