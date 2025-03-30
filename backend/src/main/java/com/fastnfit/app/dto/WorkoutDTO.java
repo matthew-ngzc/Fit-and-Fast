@@ -11,7 +11,7 @@ import com.fastnfit.app.enums.WorkoutLevel;
 @Data
 @ToString
 public class WorkoutDTO {
-    private Long workoutId;
+    private Long workoutId = 0L;
     private String category;
     private String name;
     private String description;
@@ -20,7 +20,5 @@ public class WorkoutDTO {
     private Integer durationInMinutes;
     private String image;
     private List<WorkoutExerciseDTO> workoutExercise;
-
-
 
 }
