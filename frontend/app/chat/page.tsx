@@ -304,7 +304,7 @@ Would you like to add this challenging workout to your routine?`;
   return (
     <div className="container px-4 py-6 md:py-10 max-w-2xl mx-auto flex flex-col h-[calc(100vh-80px)]">
       <div className="flex items-center gap-2 mb-4">
-        <Link href="/" className="text-muted-foreground hover:text-foreground">
+        <Link href="/home" className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="text-2xl font-bold">Fitness AI Assistant</h1>
@@ -346,14 +346,6 @@ Would you like to add this challenging workout to your routine?`;
                           onClick={() => handleWorkoutAction(true, message.workoutId || "")}
                         >
                           <Check className="h-4 w-4" /> Accept
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="flex items-center gap-1 text-destructive"
-                          onClick={() => handleWorkoutAction(false, message.workoutId || "")}
-                        >
-                          <X className="h-4 w-4" /> Reject
                         </Button>
                       </div>
                     )}

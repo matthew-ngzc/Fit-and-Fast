@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { MainNav } from "@/components/main-nav";
 import { MobileNav } from "@/components/mobile-nav";
+import { AuthProvider } from "./providers"; 
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,27 +26,27 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="flex min-h-screen flex-col">
-            <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-              <div className="container flex h-14 items-center">
-                <MainNav />
-                <div className="flex flex-1 items-center justify-end">
+        <AuthProvider> {/* Wrap everything with AuthProvider */}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div className="flex min-h-screen flex-col">
+              <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div className="container flex h-14 items-center">
+                  <MainNav />
+                  <div className="flex flex-1 items-center justify-end">
+                  </div>
                 </div>
-              </div>
-            </header>
-            <main className="flex-1">{children}</main>
-            <MobileNav />
-          </div>
-        </ThemeProvider>
+              </header>
+              <main className="flex-1">{children}</main>
+              <MobileNav />
+            </div>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
 }
-
-import "./globals.css";
