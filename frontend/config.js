@@ -4,7 +4,7 @@ const config = {
   AUTH_URL: `${API_BASE}/api/auth`,
   CHATBOT_URL: `${API_BASE}/api/chatbot`,
   HISTORY_URL: `${API_BASE}/api/history`,
-  HISTORY_URL: `${API_BASE}/api/history`,
+  CALENDAR_URL: `${API_BASE}/api/calendar`,
   HOME_URL: `${API_BASE}/api/home`,
   USER_URL: `${API_BASE}/api/users`,
   PROFILE_URL: `${API_BASE}/api/profile`,
