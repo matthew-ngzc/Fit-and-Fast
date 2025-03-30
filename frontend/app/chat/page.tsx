@@ -1,43 +1,73 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { ArrowLeft, Bot, Send, User, Check, X } from "lucide-react"
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, Bot, Send, User, Check } from "lucide-react";
+import config from "@/config";
 
 type Message = {
-  id: string
-  content: string
-  sender: "user" | "bot"
-  timestamp: Date
-  showActions?: boolean
-  workoutId?: string
-}
+  id: string;
+  content: string;
+  sender: "user" | "bot";
+  timestamp: Date;
+  showActions?: boolean;
+  workoutId?: string;
+};
 
 type Exercise = {
-  id: string
-  name: string
-  sets: number
-  reps: number
-  duration?: string
+  id: string;
+  name: string;
+  sets: number;
+  reps: number;
+  duration?: string;
+};
+
+interface WorkoutExercise {
+  name: string;
+  duration: number;
+  rest: number;
+}
+
+interface WorkoutData {
+  calories: number | null;
+  category: string;
+  description: string;
+  durationInMinutes: number;
+  image: string | null;
+  level: string;
+  name: string;
+  workoutExercise: WorkoutExercise[];
 }
 
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "Hi there! I'm your Fit&Fast AI assistant. How can I help you with your fitness journey today?",
+      content:
+        "Hi there! I'm your Fit&Fast AI assistant. How can I help you with your fitness journey today?",
       sender: "bot",
       timestamp: new Date(),
     },
-  ])
-  const [inputValue, setInputValue] = useState("")
-  const [loading, setLoading] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  ]);
+  const [inputValue, setInputValue] = useState("");
+  const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Sample quick questions 
+  const saveWorkoutToLocalStorage = (workoutData: WorkoutData): void => {
+    localStorage.setItem("workout", JSON.stringify(workoutData));
+  };
+
+  // Sample quick questions
   const quickQuestions = [
     "Can you lower the difficulty because it's my period?",
     "How can I make the workout more intense?",
@@ -45,15 +75,23 @@ export default function ChatPage() {
   ];
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const getCurrentWorkout = () => {
+    if (typeof window !== "undefined") {
+      const currentWorkoutStr = localStorage.getItem("currentWorkout");
+      return currentWorkoutStr ? JSON.parse(currentWorkoutStr) : null;
+    }
+    return null;
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
-  const handleSend = () => {
-    if (inputValue.trim() === "" || loading) return
+  const handleSend = async () => {
+    if (inputValue.trim() === "" || loading) return;
 
     // Add user message
     const userMessage: Message = {
@@ -61,70 +99,52 @@ export default function ChatPage() {
       content: inputValue,
       sender: "user",
       timestamp: new Date(),
+    };
+
+    setMessages([...messages, userMessage]);
+    setInputValue("");
+    setLoading(true);
+
+    try {
+      const botResponse = await getBotResponse(inputValue);
+      setMessages((prev) => [...prev, botResponse]);
+    } catch (error) {
+      console.error("Error in handleSend:", error);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setMessages([...messages, userMessage])
-    setInputValue("")
-    setLoading(true)
+  const handleQuickQuestion = async (question: string) => {
+    if (loading) return;
 
-    /* simulating API call to the Chatbot, in the format Matthew wants
-    * two keys: message (user message) and exercises: array of objects
-    * exercises will be obtained from the user's current state
-    {
-      "message": "What workout should I do today?",
-      "exercises:" [
-        { "name": "Jumping Jacks", "duration": 40, "rest": 20 },
-        { "name": "Bodyweight Squats", "duration": 40, "rest": 20 }
-      ]
-    }
-
-    * then, what is received back from the chatbot:
-    * two parts: first, JSON segment. Second, natural language segment.
-    * JSON segment is hidden from the user, keep in the state to replace workout, send back to BackEnd
-    * second segment: natural language, will be displayed to user
-    * "Here's a great workout for improving posture and...
-    * **Warm-up (3 minutes)**
-    * * Arm Circles - 1 minute
-    * * ...
-    * * Would you like to try this workout?
-    * 
-    * So, the JSON segment will be sent in the accept POST endpoint,
-    */
-
-    // Simulate bot response after a short delay
-    setTimeout(() => {
-      const botResponse = getBotResponse(inputValue)
-      setMessages((prev) => [...prev, botResponse])
-      setLoading(false)
-    }, 1000)
-  }
-
-  const handleQuickQuestion = (question: string) => {
-    if (loading) return
-    
     const userMessage: Message = {
       id: Date.now().toString(),
       content: question,
       sender: "user",
       timestamp: new Date(),
+    };
+
+    setMessages([...messages, userMessage]);
+    setLoading(true);
+
+    try {
+      const botResponse = await getBotResponse(question);
+      setMessages((prev) => [...prev, botResponse]);
+    } catch (error) {
+      console.error("Error in handleQuickQuestion:", error);
+    } finally {
+      setLoading(false);
     }
-
-    setMessages([...messages, userMessage])
-    setLoading(true)
-
-    // Simulate bot response after a short delay
-    setTimeout(() => {
-      const botResponse = getBotResponse(question)
-      setMessages((prev) => [...prev, botResponse])
-      setLoading(false)
-    }, 1000)
-  }
+  };
 
   const handleWorkoutAction = async (accept: boolean, workoutId: string) => {
     // Remove action buttons from the message
-    setMessages(messages.map(msg => 
-      msg.workoutId === workoutId ? {...msg, showActions: false} : msg
-    ))
+    setMessages(
+      messages.map((msg) =>
+        msg.workoutId === workoutId ? { ...msg, showActions: false } : msg
+      )
+    );
 
     if (accept) {
       // Add user acceptance message
@@ -133,48 +153,64 @@ export default function ChatPage() {
         content: "I'll try this workout!",
         sender: "user",
         timestamp: new Date(),
-      }
-      setMessages(prev => [...prev, userMessage])
-      
+      };
+      setMessages((prev) => [...prev, userMessage]);
+
       // Show loading state
-      setLoading(true)
-      
-      // Simulate API call to get exercise IDs
+      setLoading(true);
+
       try {
-        // In a real app, this would be an actual API call:
-        // const response = await fetch('/api/workouts/accept', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ workoutId })
-        // });
-        // const data = await response.json();
-        
-        // Simulate API response with exercise IDs
-        setTimeout(() => {
-          const exerciseIds = ["ex123", "ex456", "ex789", "ex101", "ex202"] 
-          
-          // Show confirmation message from bot
-          const confirmationMessage: Message = {
-            id: Date.now().toString(),
-            content: `Great! I've added this workout to your routine. The exercises (IDs: ${exerciseIds.join(", ")}) are now available in your workout plan. Would you like me to explain any of these exercises in detail?`,
-            sender: "bot",
-            timestamp: new Date(),
-          }
-          
-          setMessages(prev => [...prev, confirmationMessage])
-          setLoading(false)
-        }, 1000)
-      } catch (error) {
-        // Handle any errors
-        const errorMessage: Message = {
+        const userId = localStorage.getItem("userId") || "default";
+        const token = localStorage.getItem("token") || "";
+        const workoutData = JSON.parse(localStorage.getItem("workout") || "{}");
+        console.log("Returning: " + JSON.stringify(workoutData, null, 2));
+        // Make API call to save the workout (you'll need to implement this endpoint)
+        const response = await fetch(`${config.BOT_URL}/${userId}/accept`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(workoutData),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to save workout");
+        }
+
+        const data = await response.json();
+
+        localStorage.removeItem("workout"); // Clear previous workout
+        localStorage.setItem("currentWorkout", JSON.stringify(workoutData));
+
+        // Show confirmation message from bot
+        const confirmationMessage: Message = {
           id: Date.now().toString(),
-          content: "Sorry, there was an error saving your workout. Please try again later.",
+          content: `Great! I've added this workout to your routine. Redirecting you to your personalised workout plan...`,
           sender: "bot",
           timestamp: new Date(),
-        }
-        
-        setMessages(prev => [...prev, errorMessage])
-        setLoading(false)
+        };
+
+        setMessages((prev) => [...prev, confirmationMessage]);
+
+        // Redirect to workout page after a short delay
+        setTimeout(() => {
+          window.location.href = "/workout/0";
+        }, 2000); // 2 seconds delay before redirection
+
+      } catch (error) {
+        console.error("Error saving workout:", error);
+        const errorMessage: Message = {
+          id: Date.now().toString(),
+          content:
+            "Sorry, there was an error saving your workout. Please try again later.",
+          sender: "bot",
+          timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, errorMessage]);
+      } finally {
+        setLoading(false);
       }
     } else {
       // Add rejection message
@@ -183,128 +219,92 @@ export default function ChatPage() {
         content: "I'd like a different workout.",
         sender: "user",
         timestamp: new Date(),
-      }
-      
-      setMessages(prev => [...prev, userMessage])
-      
-      // Bot asks for feedback
-      setTimeout(() => {
+      };
+
+      setMessages((prev) => [...prev, userMessage]);
+
+      // Get bot response for the rejection
+      setLoading(true);
+      try {
+        const botResponse = await getBotResponse(
+          "I'd like a different workout. Can you suggest an alternative?"
+        );
+        setMessages((prev) => [...prev, botResponse]);
+      } catch (error) {
+        console.error("Error getting alternative workout:", error);
         const feedbackMessage: Message = {
           id: Date.now().toString(),
-          content: "No problem! Could you tell me what you'd like to change about the workout? Would you prefer something less intense, different exercises, or a different focus area?",
+          content:
+            "No problem! Could you tell me what you'd like to change about the workout? Would you prefer something less intense, different exercises, or a different focus area?",
           sender: "bot",
           timestamp: new Date(),
-        }
-        
-        setMessages(prev => [...prev, feedbackMessage])
-      }, 800)
+        };
+        setMessages((prev) => [...prev, feedbackMessage]);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
+  };
 
   // Enhanced bot response logic with workout generation
-  const getBotResponse = (message: string): Message => {
-    const lowerMessage = message.toLowerCase();
-    let responseContent = "";
-    let showActions = false;
-    let workoutId = "";
+  const getBotResponse = async (message: string): Promise<Message> => {
+    try {
+      const userId = localStorage.getItem("userId") || "default";
+      const token = localStorage.getItem("token") || "";
+      const currentWorkout = getCurrentWorkout();
 
-    if (lowerMessage.includes("generate") || lowerMessage.includes("workout") || lowerMessage.includes("routine") || lowerMessage.includes("exercise")) {
-      // Generate a sample workout routine
-      workoutId = "workout-" + Date.now().toString();
-      responseContent = `Here's a personalized 20-minute workout routine for you:
+      const response = await fetch(`${config.BOT_URL}/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          message: message,
+          exercises: currentWorkout?.workoutExercise || [],
+        }),
+      });
 
-**Warm-up (3 minutes)**
-• Jumping jacks - 30 seconds
-• Arm circles - 30 seconds
-• High knees - 30 seconds
-• Torso twists - 30 seconds
-• Light jogging in place - 1 minute
+      if (!response.ok) {
+        throw new Error("Failed to get response from chatbot");
+      }
 
-**Main Workout (15 minutes)**
-• Bodyweight squats - 3 sets of 12 reps
-• Push-ups (modified if needed) - 3 sets of 10 reps
-• Alternating lunges - 3 sets of 10 reps per leg
-• Plank - 3 sets of 30 seconds
-• Mountain climbers - 3 sets of 20 reps
+      const data = await response.json();
+      console.log("Bot response data:", data);
+      const workoutData = data.workout;
+      saveWorkoutToLocalStorage(workoutData);
 
-**Cool Down (2 minutes)**
-• Gentle stretching for major muscle groups
+      // Check if response includes a workout
+      const showActions = !!data.workout;
+      const workoutId = data.workout?.workoutId?.toString() || "";
 
-Would you like to add this workout to your routine?`;
-      showActions = true;
-    } else if (lowerMessage.includes("modify") || lowerMessage.includes("lower impact")) {
-      responseContent = "I can help modify your workout! I recommend replacing jumping exercises with marching in place, and high-impact movements with their low-impact alternatives. Would you like me to create a custom low-impact workout for you?"
-    } else if (lowerMessage.includes("knee pain") || lowerMessage.includes("avoid")) {
-      responseContent = "With knee pain, it's best to avoid deep squats, lunges, and high-impact exercises like jumping. Instead, focus on swimming, cycling, and upper body workouts. Always consult with a healthcare provider for persistent pain."
-    } else if (lowerMessage.includes("period") || lowerMessage.includes("menstrual")) {
-      // Generate a period-friendly workout
-      workoutId = "workout-" + Date.now().toString();
-      responseContent = `Here's a gentle workout that's more suitable during your period:
-
-**Warm-up (5 minutes)**
-• Gentle walking in place - 2 minutes
-• Shoulder rolls - 1 minute
-• Gentle side stretches - 2 minutes
-
-**Main Workout (10 minutes)**
-• Modified cat-cow stretches - 2 minutes
-• Seated overhead stretches - 3 sets of 30 seconds
-• Gentle core engagement (seated) - 3 sets of 10 reps
-• Light arm raises with or without light weights - 3 sets of 12 reps
-• Seated leg extensions - 3 sets of 10 reps
-
-**Cool Down (5 minutes)**
-• Deep breathing exercises
-• Gentle full-body stretching
-
-This workout avoids intense abdominal exercises and high-impact movements. Would you like to try this workout?`;
-      showActions = true;
-    } else if (lowerMessage.includes("intense") || lowerMessage.includes("harder") || lowerMessage.includes("challenge")) {
-      // Generate a more intense workout
-      workoutId = "workout-" + Date.now().toString();
-      responseContent = `Here's a more intense 25-minute HIIT workout:
-
-**Warm-up (5 minutes)**
-• Jumping jacks - 1 minute
-• High knees - 1 minute
-• Butt kicks - 1 minute
-• Dynamic stretches - 2 minutes
-
-**HIIT Circuit (15 minutes) - 30 seconds work, 15 seconds rest**
-• Burpees
-• Mountain climbers
-• Jump squats
-• Push-up to side plank
-• Speed skaters
-• Repeat circuit 3 times
-
-**Finisher (3 minutes)**
-• Plank challenge - hold as long as possible
-• 20 jumping lunges
-
-**Cool Down (2 minutes)**
-• Full-body stretching
-
-Would you like to add this challenging workout to your routine?`;
-      showActions = true;
-    } else {
-      responseContent = "I understand you're asking about \"" + message + "\". Is there a specific type of workout you're interested in? I can create personalized routines for different goals and fitness levels."
+      return {
+        id: Date.now().toString(),
+        content: data.response,
+        sender: "bot",
+        timestamp: new Date(),
+        showActions,
+        workoutId,
+      };
+    } catch (error) {
+      console.error("Error getting bot response:", error);
+      return {
+        id: Date.now().toString(),
+        content:
+          "Sorry, I'm having trouble connecting right now. Please try again later.",
+        sender: "bot",
+        timestamp: new Date(),
+      };
     }
-
-    return {
-      id: Date.now().toString(),
-      content: responseContent,
-      sender: "bot",
-      timestamp: new Date(),
-      showActions,
-      workoutId,
-    }
-  }
+  };
 
   return (
     <div className="container px-4 py-6 md:py-10 max-w-2xl mx-auto flex flex-col h-[calc(100vh-80px)]">
       <div className="flex items-center gap-2 mb-4">
-        <Link href="/home" className="text-muted-foreground hover:text-foreground">
+        <Link
+          href="/home"
+          className="text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <h1 className="text-2xl font-bold">Fitness AI Assistant</h1>
@@ -316,34 +316,51 @@ Would you like to add this challenging workout to your routine?`;
             <Bot className="h-5 w-5 text-primary" />
             FitBuddy
           </CardTitle>
-          <CardDescription>Ask questions about your workouts or get personalized workouts</CardDescription>
+          <CardDescription>
+            Ask questions about your workouts or get personalized workouts
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex-1 p-0 overflow-hidden">
           <div className="h-[calc(100vh-280px)] overflow-y-auto px-4">
             <div className="space-y-4 py-4">
               {messages.map((message) => (
-                <div key={message.id} className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}>
+                <div
+                  key={message.id}
+                  className={`flex ${
+                    message.sender === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
                   <div
                     className={`
                       max-w-[80%] rounded-lg p-3 
-                      ${message.sender === "user" ? "bg-primary text-primary-foreground" : "bg-muted/80 border"}
+                      ${
+                        message.sender === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted/80 border"
+                      }
                     `}
                   >
                     <div className="flex items-center gap-2 mb-1">
-                      {message.sender === "bot" ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
+                      {message.sender === "bot" ? (
+                        <Bot className="h-4 w-4" />
+                      ) : (
+                        <User className="h-4 w-4" />
+                      )}
                       <span className="text-xs opacity-70">
                         {message.sender === "bot" ? "FitBuddy" : "You"}
                       </span>
                     </div>
                     <p className="whitespace-pre-line">{message.content}</p>
-                    
+
                     {message.showActions && (
                       <div className="flex gap-2 mt-3 justify-end">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
+                        <Button
+                          size="sm"
+                          variant="outline"
                           className="flex items-center gap-1"
-                          onClick={() => handleWorkoutAction(true, message.workoutId || "")}
+                          onClick={() =>
+                            handleWorkoutAction(true, message.workoutId || "")
+                          }
                         >
                           <Check className="h-4 w-4" /> Accept
                         </Button>
@@ -378,7 +395,7 @@ Would you like to add this challenging workout to your routine?`;
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !loading) {
-                  handleSend()
+                  handleSend();
                 }
               }}
               disabled={loading}
@@ -390,5 +407,5 @@ Would you like to add this challenging workout to your routine?`;
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

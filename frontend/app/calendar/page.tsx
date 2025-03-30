@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/dialog";
 import { EditIcon } from "lucide-react";
 import { CycleInfo } from "@/components/cycle-info";
-import data from "./data.json";
 import config from "@/config";
 
 export default function CalendarPage() {

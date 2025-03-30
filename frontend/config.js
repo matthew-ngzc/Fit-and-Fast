@@ -2,7 +2,7 @@ const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:8080";
 const config = {
   API_URL: API_BASE,
   AUTH_URL: `${API_BASE}/api/auth`,
-  CHATBOT_URL: `${API_BASE}/api/chatbot`,
+  BOT_URL: `${API_BASE}/api/chatbot`,
   HISTORY_URL: `${API_BASE}/api/history`,
   CALENDAR_URL: `${API_BASE}/api/calendar`,
   HOME_URL: `${API_BASE}/api/home`,

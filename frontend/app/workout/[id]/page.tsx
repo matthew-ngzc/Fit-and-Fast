@@ -51,6 +51,7 @@ interface WorkoutProgramType {
   level: string;
   category: string;
   exercises: { name: string; duration: number; rest: number }[];
+  workoutExercise: { name: string; duration: number; rest: number }[];
 }
 
 interface ExerciseDetailType {
@@ -122,26 +123,68 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
   }, []);
 
   useEffect(() => {
+    // Fetch the workout data from localStorage
     const storedWorkout = localStorage.getItem("currentWorkout");
+    console.log("Stored workout from localStorage:", storedWorkout);
+
     if (storedWorkout) {
       const workoutData: WorkoutProgramType = JSON.parse(storedWorkout);
+      console.log("Parsed workout data:", workoutData);
       setWorkout(workoutData);
     }
+  }, []);
+
+  useEffect(() => {
+    if (!workout) {
+      console.log("Workout is still not available.");
+      return; // Avoid running fetchWorkoutExercises if workout is not set
+    }
+
     async function fetchWorkoutExercises() {
       try {
-        const token = localStorage.getItem("token");
+        console.log("Workout detected:", workout);
 
+        if (params.id === "0") {
+          console.log(
+            "AI-generated workout detected. Fetching from local storage..."
+          );
+
+          if (!workout) {
+            console.error("Workout or workout.exercises is undefined");
+            setLoading(false);
+            return;
+          }
+
+          // AI-generated exercises logic
+          const aiGeneratedExercises = workout.workoutExercise.map(({ name, duration, rest }: Exercise) => {
+            const workoutDetails = (workoutsData as WorkoutsData).workouts[name];
+            return {
+              name,
+              description: workoutDetails?.description || "No description available",
+              image: workoutDetails?.image || "",
+              duration,
+              rest,
+              tips: workoutDetails?.tip || "No tips available",
+            };
+          });
+
+          console.log("Final AI-generated exercises:", aiGeneratedExercises);
+          setExerciseDetails(aiGeneratedExercises);
+          return;
+        }
+
+        // If id !== "0", make API call (existing logic)
+        const token = localStorage.getItem("token");
         const response = await axios.get(
           `${config.WORKOUT_URL}/${params.id}/exercises`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
+
         const formattedExercises = response.data.map(
           ({ name, duration, rest }: Exercise) => {
-            // Fetch the details from workoutsData based on the exercise name
             const workoutDetails = (workoutsData as WorkoutsData).workouts[
               name
             ];
-
             return {
               name,
               description: workoutDetails?.description || "",
@@ -152,6 +195,7 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
             };
           }
         );
+
         setExerciseDetails(formattedExercises);
       } catch (error) {
         console.error("Error fetching workout exercises:", error);
@@ -161,7 +205,7 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
     }
 
     fetchWorkoutExercises();
-  }, [params.id]);
+  }, [workout, params.id]);
 
   const postWorkoutCompletion = async () => {
     try {
