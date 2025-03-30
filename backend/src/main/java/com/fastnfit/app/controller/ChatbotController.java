@@ -54,6 +54,7 @@ public class ChatbotController {
             ChatbotResponseDTO response = chatbotService.getResponse(request, userDetails);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            System.out.println("Error in ChatbotController: " + e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
