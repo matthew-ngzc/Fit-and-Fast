@@ -57,34 +57,32 @@ public class UserStreakService {
                 LocalDate today = LocalDate.now();
                 LocalDate yesterday = today.minusDays(1);
                 
-                // Check if user worked out today
-                boolean workedOutToday = hasWorkoutOnDate(userId, today);
+                // Check number of times user worked out today
+                int workedOutToday = hasWorkoutOnDate(userId, today);
                 
-                // Check if user worked out yesterday
-                boolean workedOutYesterday = hasWorkoutOnDate(userId, yesterday);
+                // Check number of times user worked out yesterday
+                int workedOutYesterday = hasWorkoutOnDate(userId, yesterday);
                 
                 // Update streak
                 int currentStreak = userDetails.getCurrentStreak();
-                
-                if (workedOutToday) {
-                    if (workedOutYesterday || currentStreak == 0) {
-                        // Increment streak if worked out yesterday or starting a new streak
-                        currentStreak = currentStreak + 1;
-                        userDetails.setCurrentStreak(currentStreak);
-                        
-                        // Update longest streak if needed
-                        if (currentStreak > userDetails.getLongestStreak()) {
-                            userDetails.setLongestStreak(currentStreak);
-                        }
-                        
-                        // Check for streak-based achievements
-                        checkStreakAchievements(userId, currentStreak);
+
+                if (workedOutYesterday == 0){
+                    // Reset streak if missed yesterday
+                    currentStreak = 0;
+                }          
+                if (workedOutToday == 1) {
+                    // Increment streak if worked out yesterday or starting a new streak
+                    currentStreak = currentStreak + 1;
+                    userDetails.setCurrentStreak(currentStreak);
+                    
+                    // Update longest streak if needed
+                    if (currentStreak > userDetails.getLongestStreak()) {
+                        userDetails.setLongestStreak(currentStreak);
                     }
-                } else if (!workedOutYesterday) {
-                    // Reset streak if missed two days in a row
-                    userDetails.setCurrentStreak(0);
+                    
+                    // Check for streak-based achievements
+                    checkStreakAchievements(userId, currentStreak);
                 }
-                
                 userRepository.save(user);
             }
         }
@@ -93,7 +91,7 @@ public class UserStreakService {
     // /
     //  * Check if a user has a workout on a specific date
     //  */
-    private boolean hasWorkoutOnDate(Long userId, LocalDate date) {
+    private int hasWorkoutOnDate(Long userId, LocalDate date) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User details not found"));
         
@@ -107,7 +105,7 @@ public class UserStreakService {
         
         // Use the updated repository method with Timestamp parameters
         List<History> workouts = historyRepository.findByUserAndWorkoutDateTimeBetween(user, startTimestamp, endTimestamp);
-        return !workouts.isEmpty();
+        return workouts.size();
     }
 
     // * Check and update streak-based achievements
