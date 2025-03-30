@@ -1,20 +1,28 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CalendarIcon } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { CalendarIcon } from "lucide-react";
 
 interface CycleData {
-  periodStart: Date
-  periodEnd: Date
-  nextPeriodStart: Date
-  cycleLength: number
-  periodLength: number
+  lastPeriodStartDate: Date;
+  lastPeriodEndDate: Date;
+  nextPeriodStart: Date;
+  cycleLength: number;
+  periodLength: number;
+  nextPeriodStartDate: Date;
+  daysUntilNextPeriod: number;
+  currentPhase: string;
 }
 
 interface CycleInfoProps {
-  cycleData: CycleData
+  cycleData: CycleData;
 }
 
 export function CycleInfo({ cycleData }: CycleInfoProps) {
-  // Ensure cycleData exists before proceeding
   if (!cycleData) {
     return (
       <Card>
@@ -24,38 +32,49 @@ export function CycleInfo({ cycleData }: CycleInfoProps) {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Please add your cycle information to see predictions and recommendations.
+            Please add your cycle information to see predictions and
+            recommendations.
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   // Format date to display in a readable format
   const formatDate = (date: Date) => {
     if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-      return "Unknown date"
+      return "Unknown date";
     }
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-  }
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  };
 
   // Calculate days until next period
-  const today = new Date()
-  const daysUntilNextPeriod = Math.ceil((cycleData.nextPeriodStart.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+  const today = new Date();
 
   // Determine current phase
-  const isInPeriod = today >= cycleData.periodStart && today <= cycleData.periodEnd
-  const isInFollicularPhase = today > cycleData.periodEnd && today < cycleData.nextPeriodStart
+  const isInPeriod =
+    today >= cycleData.lastPeriodStartDate &&
+    today <= cycleData.lastPeriodEndDate;
+  const isInFollicularPhase =
+    today > cycleData.lastPeriodEndDate && today < cycleData.nextPeriodStart;
 
-  let currentPhase = "Unknown"
-  let phaseColor = "bg-muted"
+  let phaseColor = "bg-muted";
 
-  if (isInPeriod) {
-    currentPhase = "Menstrual Phase"
-    phaseColor = "bg-pink-100"
-  } else if (isInFollicularPhase) {
-    currentPhase = "Follicular Phase"
-    phaseColor = "bg-blue-100"
+  switch (cycleData.currentPhase) {
+    case "Menstrual Phase":
+      phaseColor = "bg-pink-100";
+      break;
+    case "Follicular Phase":
+      phaseColor = "bg-blue-100";
+      break;
+    case "Ovulation Phase":
+      phaseColor = "bg-green-100";
+      break;
+    case "Luteal Phase":
+      phaseColor = "bg-yellow-100";
+      break;
+    default:
+      phaseColor = "bg-muted";
   }
 
   return (
@@ -66,9 +85,13 @@ export function CycleInfo({ cycleData }: CycleInfoProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className={`p-3 rounded-lg ${phaseColor}`}>
-          <h3 className="font-medium">Current Phase: {currentPhase}</h3>
+          <h3 className="font-medium">
+            Current Phase: {cycleData.currentPhase}
+          </h3>
           <p className="text-sm text-muted-foreground">
-            {daysUntilNextPeriod > 0 ? `${daysUntilNextPeriod} days until next period` : "Your period is due today"}
+            {cycleData.daysUntilNextPeriod > 0
+              ? `${cycleData.daysUntilNextPeriod} days until next period`
+              : "Your period is due today"}
           </p>
         </div>
 
@@ -77,13 +100,13 @@ export function CycleInfo({ cycleData }: CycleInfoProps) {
             <CalendarIcon className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Last Period:</span>
           </div>
-          <div>{formatDate(cycleData.periodStart)}</div>
+          <div>{formatDate(cycleData.lastPeriodStartDate)}</div>
 
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 text-muted-foreground" />
             <span className="text-muted-foreground">Next Period:</span>
           </div>
-          <div>{formatDate(cycleData.nextPeriodStart)}</div>
+          <div>{formatDate(cycleData.nextPeriodStartDate)}</div>
 
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 text-muted-foreground" />
@@ -99,6 +122,5 @@ export function CycleInfo({ cycleData }: CycleInfoProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
-

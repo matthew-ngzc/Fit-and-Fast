@@ -229,8 +229,10 @@ export default function ProfilePage() {
   const [cycleData, setCycleData] = useState({
     cycleLength: 28,
     periodLength: 5,
-    periodStart: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+    lastPeriodStartDate: new Date(),
   });
+
+  const [periodDialogOpen, setPeriodDialogOpen] = useState(false);
 
   // Predefined avatars
   const avatars = [
@@ -321,7 +323,9 @@ export default function ProfilePage() {
     fetchTotalWorkouts();
   }, []);
 
-  const [achievements, setAchievements] = useState<{ title: string; description: string; completed: boolean }[]>([]);
+  const [achievements, setAchievements] = useState<
+    { title: string; description: string; completed: boolean }[]
+  >([]);
 
   useEffect(() => {
     const fetchAchievements = async () => {
@@ -349,6 +353,105 @@ export default function ProfilePage() {
 
     fetchAchievements();
   }, []);
+
+  useEffect(() => {
+    async function fetchCycleData() {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`${config.CALENDAR_URL}/cycle-info`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch cycle data");
+        }
+
+        const data = await response.json();
+        const parsedCycleData = {
+          ...data,
+          lastPeriodStartDate: new Date(data.lastPeriodStartDate),
+          lastPeriodEndDate: new Date(data.lastPeriodEndDate),
+          nextPeriodStartDate: new Date(data.nextPeriodStartDate),
+        };
+
+        setCycleData(parsedCycleData);
+      } catch (error) {
+        console.error("Error fetching cycle data:", error);
+      }
+    }
+
+    fetchCycleData();
+  }, []);
+
+  const [updatedCycleData, setUpdatedCycleData] = useState({
+    cycleLength: cycleData.cycleLength || "",
+    periodLength: cycleData.periodLength || "",
+    lastPeriodStartDate: cycleData.lastPeriodStartDate
+      ? cycleData.lastPeriodStartDate.toISOString().split("T")[0]
+      : "",
+  });
+
+  async function updateCycleData() {
+    try {
+      const token = localStorage.getItem("token"); // Retrieve token from local storage
+      const filteredData = {
+        cycleLength: updatedCycleData.cycleLength,
+        periodLength: updatedCycleData.periodLength,
+        lastPeriodStartDate: updatedCycleData.lastPeriodStartDate,
+      };
+
+      const response = await fetch(`${config.CALENDAR_URL}/update-cycle`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Include token in request
+        },
+        body: JSON.stringify(filteredData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update cycle data");
+      }
+      setPeriodDialogOpen(false);
+
+      async function fetchCycleData() {
+        try {
+          const token = localStorage.getItem("token");
+          const response = await fetch(`${config.CALENDAR_URL}/cycle-info`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch cycle data");
+          }
+
+          const data = await response.json();
+          const parsedCycleData = {
+            ...data,
+            lastPeriodStartDate: new Date(data.lastPeriodStartDate),
+            lastPeriodEndDate: new Date(data.lastPeriodEndDate),
+            nextPeriodStartDate: new Date(data.nextPeriodStartDate),
+          };
+
+          setCycleData(parsedCycleData);
+        } catch (error) {
+          console.error("Error fetching cycle data:", error);
+        }
+      }
+
+      fetchCycleData();
+    } catch (error) {
+      console.error("Error updating cycle data:", error);
+    }
+  }
 
   return (
     <div className="container px-4 py-6 md:py-10 pb-20 max-w-5xl mx-auto">
@@ -795,7 +898,7 @@ export default function ProfilePage() {
                       Manage your period cycle information
                     </CardDescription>
                   </div>
-                  <Dialog>
+                  <Dialog open={periodDialogOpen} onOpenChange={setPeriodDialogOpen}>
                     <DialogTrigger asChild>
                       <Button variant="outline" size="sm">
                         <EditIcon className="h-4 w-4 mr-2" />
@@ -816,12 +919,12 @@ export default function ProfilePage() {
                             <Label htmlFor="cycle-length">Cycle Length</Label>
                             <Input
                               id="cycle-length"
-                              defaultValue={cycleData.cycleLength.toString()}
+                              defaultValue={updatedCycleData.cycleLength.toString()}
                               onChange={(e) =>
-                                setCycleData({
-                                  ...cycleData,
+                                setUpdatedCycleData((prev) => ({
+                                  ...prev,
                                   cycleLength: Number.parseInt(e.target.value),
-                                })
+                                }))
                               }
                             />
                           </div>
@@ -829,12 +932,12 @@ export default function ProfilePage() {
                             <Label htmlFor="period-length">Period Length</Label>
                             <Input
                               id="period-length"
-                              defaultValue={cycleData.periodLength.toString()}
+                              defaultValue={updatedCycleData.periodLength.toString()}
                               onChange={(e) =>
-                                setCycleData({
-                                  ...cycleData,
+                                setUpdatedCycleData((prev) => ({
+                                  ...prev,
                                   periodLength: Number.parseInt(e.target.value),
-                                })
+                                }))
                               }
                             />
                           </div>
@@ -847,23 +950,23 @@ export default function ProfilePage() {
                             <Input
                               id="last-period"
                               defaultValue={
-                                cycleData.periodStart
-                                  .toISOString()
-                                  .split("T")[0]
+                                updatedCycleData.lastPeriodStartDate
                               }
                               type="date"
                               onChange={(e) =>
-                                setCycleData({
-                                  ...cycleData,
-                                  periodStart: new Date(e.target.value),
-                                })
+                                setUpdatedCycleData((prev) => ({
+                                  ...prev,
+                                  lastPeriodStartDate: e.target.value,
+                                }))
                               }
                             />
                           </div>
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button type="submit">Save changes</Button>
+                        <Button type="submit" onClick={() => updateCycleData()}>
+                          Save changes
+                        </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -874,19 +977,25 @@ export default function ProfilePage() {
                       <p className="text-sm font-medium text-muted-foreground">
                         Cycle Length
                       </p>
-                      <p>{cycleData.cycleLength} days</p>
+                      <p>{cycleData?.cycleLength ?? "N/A"} days</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-muted-foreground">
                         Period Length
                       </p>
-                      <p>{cycleData.periodLength} days</p>
+                      <p>{cycleData?.periodLength ?? "N/A"} days</p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-muted-foreground">
                         Last Period Start Date
                       </p>
-                      <p>{cycleData.periodStart.toISOString().split("T")[0]}</p>
+                      <p>
+                        {cycleData?.lastPeriodStartDate
+                          ? cycleData.lastPeriodStartDate
+                              .toISOString()
+                              .split("T")[0]
+                          : "N/A"}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -899,24 +1008,6 @@ export default function ProfilePage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Change Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="New password"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      placeholder="Confirm new password"
-                    />
-                  </div>
-                  <Button className="w-full">Update Password</Button>
-
                   <div className="pt-4">
                     <Button
                       variant="destructive"

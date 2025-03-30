@@ -1,8 +1,8 @@
-import Image from "next/image"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ClockIcon, FlameIcon } from "lucide-react"
-import Link from "next/link"
+import Image from "next/image";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ClockIcon, FlameIcon } from "lucide-react";
+import Link from "next/link";
 
 interface WorkoutData {
   workoutId: number;
@@ -22,31 +22,36 @@ interface WorkoutCardProps {
 }
 
 export function WorkoutCard({ workoutData, href }: WorkoutCardProps) {
-  const { workoutId, durationInMinutes, level, calories, image } = workoutData;
 
   const handleClick = () => {
-    // Store the full workout data in localStorage before navigating
-    localStorage.setItem('currentWorkout', JSON.stringify(workoutData));
+    localStorage.setItem("currentWorkout", JSON.stringify(workoutData));
   };
 
   const content = (
     <Card className="overflow-hidden">
       <div className="relative h-48">
-        <Image src={image || "/placeholder.svg"} alt={workoutData.name} fill className="object-cover" />
+        <Image
+          src={workoutData.image || "/placeholder.svg"}
+          alt={workoutData.name}
+          fill
+          className="object-cover"
+        />
       </div>
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-2">
           <h3 className="font-semibold">{workoutData.name}</h3>
           <div className="flex items-center text-xs text-muted-foreground">
             <ClockIcon className="h-3 w-3 mr-1" />
-            {durationInMinutes}
+            {workoutData.durationInMinutes}
           </div>
         </div>
         <div className="flex justify-between items-center">
-          <div className="text-xs text-muted-foreground">{level}</div>
+          <div className="text-xs text-muted-foreground">
+            {workoutData.level}
+          </div>
           <div className="flex items-center text-xs text-muted-foreground">
             <FlameIcon className="h-3 w-3 mr-1" />
-            {calories} cal
+            {workoutData.calories} cal
           </div>
         </div>
       </CardContent>
@@ -56,16 +61,15 @@ export function WorkoutCard({ workoutData, href }: WorkoutCardProps) {
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 
   if (href) {
     return (
       <Link href={href} className="block" onClick={handleClick}>
         {content}
       </Link>
-    )
+    );
   }
 
-  return content
+  return content;
 }
-

@@ -38,13 +38,15 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import workoutsData from "../../../public/workouts.json"; // Import the workout exercises data
+import config from "@/config";
+import axios from "axios";
 
 interface WorkoutProgramType {
   id: string;
-  title: string;
+  name: string;
   description: string;
   image: string;
-  duration: string;
+  durationInMinutes: string;
   calories: string;
   level: string;
   category: string;
@@ -74,36 +76,54 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
   );
   const [loading, setLoading] = useState(true);
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [workoutCompletionData, setWorkoutCompletionData] = useState(null);
+  const [streak, setStreak] = useState<number>(0);
 
-  const markWorkoutAsComplete = async (userId: string, workoutId: string) => {
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    async function fetchStreak() {
+      try {
+        const response = await axios.get(`${config.HOME_URL}/streak`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setStreak(response.data.days);
+      } catch (error) {
+        console.error("Error fetching streak:", error);
+      }
+    }
+
+    fetchStreak();
+  }, []);
+
+  const postWorkoutCompletion = async () => {
     try {
-      const response = await fetch("/api/complete-workout", {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${config.PROGRESS_URL}/complete`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          userId: userId, // Pass the user ID
-          workoutId: workoutId, // Pass the workout ID
+          workoutId: workout?.id,
         }),
       });
-  
-      if (!response.ok) {
-        throw new Error("Failed to mark workout as complete");
-      }
+
+      const data = await response.json();
+      setWorkoutCompletionData(data);
     } catch (error) {
-      console.error("Error in marking workout completion:", error);
+      console.error("Error posting workout completion data:", error);
     }
   };
 
-  // useEffect(() => {
-  //   if (workoutState === "completed" && workout) {
-  //     const userId = "user123"; // Replace with actual user ID from your context or localStorage
-  
-  //     // Send the workout completion data to the API
-  //     markWorkoutAsComplete(userId, workout.id);
-  //   }
-  // }, [workoutState, workout]);
+  useEffect(() => {
+    if (workoutState === "completed") {
+      postWorkoutCompletion();
+    }
+  }, [workoutState]);
 
   useEffect(() => {
     async function loadWorkout() {
@@ -254,7 +274,7 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
       <div className="container px-4 py-6 md:py-10 max-w-5xl mx-auto">
         <div className="flex items-center gap-2">
           <Link
-            href="/"
+            href="/home"
             className="text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-5 w-5" />
@@ -288,24 +308,24 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-2">
             <Link
-              href="/"
+              href="/home"
               className="text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-5 w-5" />
             </Link>
-            <h1 className="text-2xl font-bold">{workout.title}</h1>
+            <h1 className="text-2xl font-bold">{workout.name}</h1>
           </div>
 
           <div className="relative rounded-lg overflow-hidden h-48 md:h-64">
             <Image
               src={workout.image || "/placeholder.svg"}
-              alt={workout.title}
+              alt={workout.name}
               fill
               className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-4">
               <div className="text-white">
-                <h2 className="text-xl font-bold">{workout.title}</h2>
+                <h2 className="text-xl font-bold">{workout.name}</h2>
                 <p className="text-sm opacity-90">{workout.description}</p>
               </div>
             </div>
@@ -316,7 +336,9 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
               <CardContent className="p-4 flex flex-row items-center gap-3">
                 <Clock className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="text-sm font-medium">{workout.duration}</p>
+                  <p className="text-sm font-medium">
+                    {workout.durationInMinutes}
+                  </p>
                   <p className="text-xs text-muted-foreground">Duration</p>
                 </div>
               </CardContent>
@@ -343,7 +365,10 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
               <CardContent className="p-4 flex flex-row items-center gap-3">
                 <Heart className="h-5 w-5 text-primary" />
                 <div>
-                  <p className="text-sm font-medium">{workout.category}</p>
+                  <p className="text-sm font-medium">
+                    {workout.category.charAt(0).toUpperCase() +
+                      workout.category.slice(1)}
+                  </p>
                   <p className="text-xs text-muted-foreground">Category</p>
                 </div>
               </CardContent>
@@ -395,12 +420,12 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <Link
-              href="/"
+              href="/home"
               className="text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-5 w-5" />
             </Link>
-            <h1 className="text-xl font-bold">{workout.title}</h1>
+            <h1 className="text-xl font-bold">{workout.name}</h1>
             <Button
               variant="ghost"
               size="icon"
@@ -494,16 +519,16 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
 
       {workoutState === "completed" && (
         <WorkoutCompletionScreen
-          duration={workout.duration}
+          duration={workout.durationInMinutes}
           calories={workout.calories}
           exerciseCount={exerciseDetails.length}
-          streakDays={6}
-          onFinish={() => (window.location.href = "/")}
+          streakDays={streak}
+          onFinish={() => (window.location.href = "/home")}
         />
       )}
 
-      {/* When workout is completed, POST request here: /api/history/user/{userId} 
-        * Provide all the information required to create a history */}
+      {/* When workout is completed, POST request here: /api/history/user/{userId}
+       * Provide all the information required to create a history */}
 
       <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
         <AlertDialogContent>
