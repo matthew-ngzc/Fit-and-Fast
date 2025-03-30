@@ -66,8 +66,8 @@ public class WorkoutServiceTest {
         assertEquals(2, result.size());
         assertEquals("Push-ups", result.get(0).getName());
         assertEquals("Running", result.get(1).getName());
-        assertEquals("Strength", result.get(0).getCategory());
-        assertEquals("high-energy", result.get(1).getCategory());
+        assertEquals("strength", result.get(0).getCategory());
+        assertEquals("low-impact", result.get(1).getCategory());
         verify(workoutRepository, times(1)).findAll();
     }
     
@@ -84,7 +84,7 @@ public class WorkoutServiceTest {
         assertEquals(1L, result.getWorkoutId());
         assertEquals("Push-ups", result.getName());
         assertEquals("Basic upper body exercise", result.getDescription());
-        assertEquals("Strength", result.getCategory());
+        assertEquals("strength", result.getCategory());
         assertEquals(WorkoutLevel.Beginner, result.getLevel());
         assertEquals(100, result.getCalories());
         verify(workoutRepository, times(1)).findById(1L);
@@ -115,7 +115,7 @@ public class WorkoutServiceTest {
         // Assert
         assertEquals(1, result.size());
         assertEquals("Push-ups", result.get(0).getName());
-        assertEquals("Strength", result.get(0).getCategory());
+        assertEquals("strength", result.get(0).getCategory());
         verify(workoutRepository, times(1)).findByCategory(WorkoutType.STRENGTH);
     }
     
@@ -144,7 +144,7 @@ public class WorkoutServiceTest {
         assertEquals(1L, result.getWorkoutId());
         assertEquals("Push-ups", result.getName());
         assertEquals("Basic upper body exercise", result.getDescription());
-        assertEquals("Strength", result.getCategory());
+        assertEquals("strength", result.getCategory());
         assertEquals(WorkoutLevel.Beginner, result.getLevel());
         assertEquals(100, result.getCalories());
     }

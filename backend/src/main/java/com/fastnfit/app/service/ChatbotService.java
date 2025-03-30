@@ -314,17 +314,18 @@ public class ChatbotService {
 
     }
 
-    private int calculateAge(Date dob) {
-        if (dob == null) return -1;
+    private int calculateAge(LocalDate dob) {
+    if (dob == null) return -1;
 
-        // Always convert to java.util.Date before using toInstant
-        java.util.Date safeDate = new java.util.Date(dob.getTime());
+    // Always convert to java.util.Date before using toInstant
+    // java.util.Date safeDate = new java.util.Date(dob.getTime());
 
-        LocalDate birthDate = safeDate.toInstant()
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate();
+    // LocalDate birthDate = safeDate.toInstant()
+    //     .atZone(ZoneId.systemDefault())
+    //     .toLocalDate();
 
-        return Period.between(birthDate, LocalDate.now()).getYears();
-    }
+    return Period.between(dob, LocalDate.now()).getYears();
+}
 
+    
 }

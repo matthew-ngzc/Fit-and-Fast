@@ -33,8 +33,8 @@ public class Workout {
     private Integer calories;
     private Integer durationInMinutes;
     
-    @OneToMany(mappedBy = "workout",fetch=FetchType.LAZY)
-    private List<History> historyWorkoutList;
+    // @OneToMany(mappedBy = "workout",fetch=FetchType.LAZY)
+    // private List<History> historyWorkoutList;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

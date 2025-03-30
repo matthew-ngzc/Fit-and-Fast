@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.security.test.context.support.WithMockUser;
 
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
 
@@ -40,11 +41,10 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 import org.springframework.test.context.ActiveProfiles;
 
-
 @WebMvcTest(ChatbotController.class)
 @ImportAutoConfiguration(exclude = {
-    DataSourceAutoConfiguration.class,
-    HibernateJpaAutoConfiguration.class
+        DataSourceAutoConfiguration.class,
+        HibernateJpaAutoConfiguration.class
 })
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -62,7 +62,6 @@ public class ChatbotControllerTest {
     @MockBean
     private WorkoutService workoutService;
 
-
     @MockBean
     private JwtConfig jwtConfig;
     @MockBean
@@ -78,7 +77,8 @@ public class ChatbotControllerTest {
         mockUserDetails = new UserDetailsDTO();
         mockUserDetails.setUserId(1L);
         mockUserDetails.setUsername("TestUser");
-        mockUserDetails.setDob(new Date(946684800000L)); // 2000-01-01
+        mockUserDetails.setDob(new Date(946684800000L).toInstant().atZone(ZoneId.systemDefault())
+                .toLocalDate()); // 2000-01-01
         mockUserDetails.setHeight(160.0);
         mockUserDetails.setWeight(55.0);
         mockUserDetails.setFitnessLevel(FitnessLevel.Beginner);
@@ -90,7 +90,7 @@ public class ChatbotControllerTest {
         Mockito.when(jwtConfig.getExpiration()).thenReturn(3600000L); // mock expiration
     }
 
-    @WithMockUser(username = "testuser", roles = {"USER"})
+    @WithMockUser(username = "testuser", roles = { "USER" })
     @Test
     void testChatbot_ReturnsExpectedMessage() throws Exception {
         String expectedReply = "**Here is your modified routine**\n- Jumping Jacks\n- Squats";
@@ -100,20 +100,19 @@ public class ChatbotControllerTest {
                 .thenReturn(expectedReply);
 
         String requestJson = """
-        {
-            "message": "Make it easier",
-            "exercises": [
-                { "name": "Jumping Jacks", "duration": 40, "rest": 20 },
-                { "name": "Push Ups", "duration": 40, "rest": 20 }
-                ],
-            "exercises_supported": [
-                { "name": "Jumping Jacks" },
-                { "name": "Push Ups" },
-                { "name": "Squats" }
-            ]
-        }
-        """;
-
+                {
+                    "message": "Make it easier",
+                    "exercises": [
+                        { "name": "Jumping Jacks", "duration": 40, "rest": 20 },
+                        { "name": "Push Ups", "duration": 40, "rest": 20 }
+                        ],
+                    "exercises_supported": [
+                        { "name": "Jumping Jacks" },
+                        { "name": "Push Ups" },
+                        { "name": "Squats" }
+                    ]
+                }
+                """;
 
         MvcResult result = mockMvc.perform(post("/api/chatbot/1")
                 .with(csrf()) // ✅ Disable CSRF blocking

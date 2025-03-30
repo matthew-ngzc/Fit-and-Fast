@@ -5,7 +5,6 @@ import com.fastnfit.app.model.Achievement;
 import com.fastnfit.app.model.History;
 import com.fastnfit.app.model.User;
 import com.fastnfit.app.model.UserDetails;
-import com.fastnfit.app.repository.AchievementRepository;
 import com.fastnfit.app.repository.HistoryRepository;
 import com.fastnfit.app.repository.UserDetailsRepository;
 import com.fastnfit.app.repository.UserRepository;
@@ -24,7 +23,7 @@ import java.util.Optional;
 public class UserStreakService {
     private UserRepository userRepository;
     private HistoryRepository historyRepository;
-    private AchievementRepository achievementRepository;
+    private AchievementService achievementService;
     private UserAchievementService userAchievementService;
     private UserDetailsRepository userDetailsRepository;
     
@@ -32,12 +31,12 @@ public class UserStreakService {
     public UserStreakService(
             UserRepository userRepository,
             HistoryRepository historyRepository,
-            AchievementRepository achievementRepository,
+            AchievementService achievementService,
             UserAchievementService userAchievementService,
             UserDetailsRepository userDetailsRepository) {
         this.userRepository = userRepository;
         this.historyRepository = historyRepository;
-        this.achievementRepository = achievementRepository;
+        this.achievementService = achievementService;
         this.userAchievementService = userAchievementService;
         this.userDetailsRepository=userDetailsRepository;
     }
@@ -116,7 +115,7 @@ public class UserStreakService {
     private void checkStreakAchievements(Long userId, int streak) {
         // Check for 5-day streak achievement
         if (streak >= 5) {
-            Optional<Achievement> achievement = achievementRepository.findByTitle("5 Day Streak");
+            Optional<Achievement> achievement = achievementService.getAchievementByTitle("5 Day Streak");
             if (achievement.isPresent()) {
                 userAchievementService.completeAchievement(userId, achievement.get().getAchievementId());
             }
@@ -124,7 +123,7 @@ public class UserStreakService {
         
         // Check for 30-day streak achievement
         if (streak >= 30) {
-            Optional<Achievement> achievement = achievementRepository.findByTitle("30 Day Streak");
+            Optional<Achievement> achievement = achievementService.getAchievementByTitle("30 Day Streak");
             if (achievement.isPresent()) {
                 userAchievementService.completeAchievement(userId, achievement.get().getAchievementId());
             }

@@ -11,7 +11,7 @@ import com.fastnfit.app.enums.*;
 public class UserDetailsDTO {
     private Long userId;
     private String username;
-    private Date dob;
+    private LocalDate dob;
     private Double height;
     private Double weight;
     private String pregnancyStatus;

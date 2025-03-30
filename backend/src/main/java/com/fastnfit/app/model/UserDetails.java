@@ -20,7 +20,7 @@ public class UserDetails {
 
     
     private String username;
-    private Date dob;
+    private LocalDate dob;
     private Double height;
     private Double weight;
     @Enumerated(EnumType.STRING)
@@ -96,11 +96,11 @@ public class UserDetails {
         this.username = username;
     }
 
-    public Date getDob() {
+    public LocalDate getDob() {
         return dob;
     }
 
-    public void setDob(Date dob) {
+    public void setDob(LocalDate dob) {
         this.dob = dob;
     }
 

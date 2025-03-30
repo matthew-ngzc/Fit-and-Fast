@@ -11,7 +11,6 @@ import com.fastnfit.app.dto.WorkoutCompletionRequest;
 import com.fastnfit.app.dto.WorkoutCompletionResponse;
 import com.fastnfit.app.service.HistoryService;
 import com.fastnfit.app.service.WorkoutService;
-import com.fastnfit.app.service.WorkoutTrackerService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -24,19 +23,16 @@ public class WorkoutProgressController {
 
     private final WorkoutService workoutService;
     private final HistoryService historyService;
-    private final WorkoutTrackerService workoutTrackerService;
     private final AuthUtils authUtils;
 
     @Autowired
     public WorkoutProgressController(
             WorkoutService workoutService,
             HistoryService historyService,
-            WorkoutTrackerService workoutTrackerService,
             AuthUtils authUtils
             ) {
         this.workoutService = workoutService;
         this.historyService = historyService;
-        this.workoutTrackerService = workoutTrackerService;
         this.authUtils=authUtils;
     }
 
@@ -73,9 +69,9 @@ public class WorkoutProgressController {
         HistoryDTO historyDTO = historyService.recordWorkoutCompletion(userId, workout);
         
         // Get updated stats for the response
-        int totalWorkouts = workoutTrackerService.getTotalWorkoutCount(userId);
-        int totalCaloriesBurned = workoutTrackerService.getTotalCaloriesBurned(userId);
-        int totalDurationInMinutes=workoutTrackerService.getTotalDuration(userId);
+        int totalWorkouts = historyService.getTotalHistoryCountByUser(userId);
+        int totalCaloriesBurned = historyService.getTotalCaloriesBurnedByUser(userId);
+        int totalDurationInMinutes=historyService.getTotalDurationByUser(userId);
         
         // Create response with updated user stats
         WorkoutCompletionResponse response = new WorkoutCompletionResponse();

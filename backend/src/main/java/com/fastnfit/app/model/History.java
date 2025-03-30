@@ -16,7 +16,7 @@ public class History {
 
     @Column(name = "workout_date_time")
     private Timestamp workoutDateTime;
-    private String workoutName;
+    // private String workoutName;
 
     @ManyToOne
     @JoinColumn(name = "workout_id")

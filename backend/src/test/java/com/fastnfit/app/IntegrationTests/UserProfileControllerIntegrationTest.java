@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -51,13 +52,13 @@ public class UserProfileControllerIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private UserDetailsRepository userDetailsRepository;
-    
+
     @Autowired
     private AchievementRepository achievementRepository;
-    
+
     @Autowired
     private UserAchievementRepository userAchievementRepository;
 
@@ -66,7 +67,7 @@ public class UserProfileControllerIntegrationTest {
 
     private static final String TEST_EMAIL = "profile_test@example.com";
     private static final String TEST_USERNAME = "profiletester";
-    
+
     private User testUser;
     private UserDetails testUserDetails;
     private String authToken;
@@ -77,38 +78,40 @@ public class UserProfileControllerIntegrationTest {
         userRepository.deleteAll();
         achievementRepository.deleteAll();
         userAchievementRepository.deleteAll();
-        
+
         // Create test user
         testUser = new User();
         testUser.setEmail(TEST_EMAIL);
         testUser.setPassword("password123");
         testUser = userRepository.save(testUser);
-        
+
         // Create user details
         testUserDetails = new UserDetails();
         testUserDetails.setUser(testUser);
         testUserDetails.setUsername(TEST_USERNAME);
         testUserDetails.setHeight(175.0);
         testUserDetails.setWeight(70.0);
-        testUserDetails.setDob(new Date());
+        testUserDetails.setDob(new Date().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate());
         testUserDetails.setWorkoutGoal(WorkoutGoal.WEIGHT_LOSS);
         testUserDetails.setWorkoutDays(5);
         testUserDetails.setAvatar("default-avatar.png");
         testUserDetails = userDetailsRepository.save(testUserDetails);
-        
+
         // Create test achievement
         Achievement testAchievement = new Achievement();
         testAchievement.setTitle("First Workout");
         testAchievement.setDescription("Complete your first workout");
         testAchievement = achievementRepository.save(testAchievement);
-        
+
         // Link achievement to user
         UserAchievement userAchievement = new UserAchievement();
         userAchievement.setUser(testUser);
         userAchievement.setAchievement(testAchievement);
         userAchievement.setCompleted(false);
         userAchievementRepository.save(userAchievement);
-        
+
         // Generate auth token
         authToken = jwtService.generateToken(testUser.getUserId());
     }
@@ -141,7 +144,7 @@ public class UserProfileControllerIntegrationTest {
         profileDTO.setEmail("updated_" + TEST_EMAIL);
         profileDTO.setHeight(180.0);
         profileDTO.setWeight(75.0);
-        
+
         mockMvc.perform(put("/api/profile/")
                 .header("Authorization", "Bearer " + authToken)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -151,7 +154,7 @@ public class UserProfileControllerIntegrationTest {
                 .andExpect(jsonPath("$.email").value("updated_" + TEST_EMAIL))
                 .andExpect(jsonPath("$.height").value(180.0))
                 .andExpect(jsonPath("$.weight").value(75.0));
-        
+
         // Verify changes in database
         UserDetails updatedDetails = userDetailsRepository.findByUser(testUser).orElse(null);
         assertNotNull(updatedDetails);
@@ -166,7 +169,7 @@ public class UserProfileControllerIntegrationTest {
         GoalsDTO goalsDTO = new GoalsDTO();
         goalsDTO.setWorkoutGoal(WorkoutGoal.STRENGTH_BUILDING);
         goalsDTO.setWorkoutDaysPerWeekGoal(4);
-        
+
         mockMvc.perform(put("/api/profile/goals")
                 .header("Authorization", "Bearer " + authToken)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -174,7 +177,7 @@ public class UserProfileControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.workoutGoal").value(WorkoutGoal.STRENGTH_BUILDING.toString()))
                 .andExpect(jsonPath("$.workoutDaysPerWeekGoal").value(4));
-        
+
         // Verify changes in database
         UserDetails updatedDetails = userDetailsRepository.findByUser(testUser).orElse(null);
         assertNotNull(updatedDetails);
@@ -187,14 +190,14 @@ public class UserProfileControllerIntegrationTest {
         // Create avatar DTO
         AvatarDTO avatarDTO = new AvatarDTO();
         avatarDTO.setAvatarLink("new-avatar-link.png");
-        
+
         mockMvc.perform(put("/api/profile/avatar")
                 .header("Authorization", "Bearer " + authToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(avatarDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.avatarLink").value("new-avatar-link.png"));
-        
+
         // Verify changes in database
         UserDetails updatedDetails = userDetailsRepository.findByUser(testUser).orElse(null);
         assertNotNull(updatedDetails);
@@ -207,11 +210,11 @@ public class UserProfileControllerIntegrationTest {
                 .header("Authorization", "Bearer " + authToken))
                 .andExpect(status().isOk())
                 .andReturn();
-        
+
         WeeklyWorkoutsDTO responseDTO = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
                 WeeklyWorkoutsDTO.class);
-        
+
         // Since we haven't added any workouts, total should be 0
         assertEquals(0, responseDTO.getTotalWorkouts());
     }
@@ -222,11 +225,11 @@ public class UserProfileControllerIntegrationTest {
                 .header("Authorization", "Bearer " + authToken))
                 .andExpect(status().isOk())
                 .andReturn();
-        
+
         List<AchievementResponseDTO> achievements = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
                 objectMapper.getTypeFactory().constructCollectionType(List.class, AchievementResponseDTO.class));
-        
+
         assertFalse(achievements.isEmpty());
         assertEquals("First Workout", achievements.get(0).getTitle());
         assertEquals("Complete your first workout", achievements.get(0).getDescription());
@@ -243,7 +246,7 @@ public class UserProfileControllerIntegrationTest {
         profileDTO.setEmail("updated_" + TEST_EMAIL);
         profileDTO.setHeight(180.0);
         profileDTO.setWeight(75.0);
-        
+
         mockMvc.perform(put("/api/profile/")
                 .header("Authorization", "Bearer " + wrongToken)
                 .contentType(MediaType.APPLICATION_JSON)

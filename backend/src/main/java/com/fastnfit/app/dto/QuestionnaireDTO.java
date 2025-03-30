@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 public class QuestionnaireDTO {
-    private Date dob;
+    private LocalDate dob;
     private Double height;
     private Double weight;
     private String pregnancyStatus;
