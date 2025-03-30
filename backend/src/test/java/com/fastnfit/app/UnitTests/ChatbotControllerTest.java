@@ -5,6 +5,7 @@ package com.fastnfit.app.UnitTests;
 import com.fastnfit.app.config.AwsConfig;
 import com.fastnfit.app.config.JwtConfig;
 import com.fastnfit.app.controller.ChatbotController;
+import com.fastnfit.app.dto.ChatbotResponseDTO;
 import com.fastnfit.app.dto.UserDetailsDTO;
 import com.fastnfit.app.enums.FitnessLevel;
 import com.fastnfit.app.service.ChatbotService;
@@ -34,6 +35,7 @@ import java.util.Date;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -94,10 +96,13 @@ public class ChatbotControllerTest {
     @Test
     void testChatbot_ReturnsExpectedMessage() throws Exception {
         String expectedReply = "**Here is your modified routine**\n- Jumping Jacks\n- Squats";
+        ChatbotResponseDTO mockResponse = new ChatbotResponseDTO();
+        mockResponse.setResponse(expectedReply);
+        mockResponse.setWorkout(null);
 
         Mockito.when(userService.getUserDetails(1L)).thenReturn(mockUserDetails);
         Mockito.when(chatbotService.getResponse(any(org.json.JSONObject.class), any()))
-                .thenReturn(expectedReply);
+                .thenReturn(mockResponse);
 
         String requestJson = """
                 {

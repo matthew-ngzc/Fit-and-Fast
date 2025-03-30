@@ -161,13 +161,15 @@ public class ChatbotService {
 
         // Convert JSON into DTO
         WorkoutDTO workout = null;
-        try {
-            workout = mapper.readValue(jsonPart, WorkoutDTO.class);
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
-            System.err.println("Failed to parse workout JSON: " + e.getMessage());
-            e.printStackTrace();
+        if (jsonPart != null) {
+            try {
+                workout = mapper.readValue(jsonPart, WorkoutDTO.class);
+            } catch (JsonMappingException e) {
+                e.printStackTrace();
+            } catch (JsonProcessingException e) {
+                System.err.println("Failed to parse workout JSON: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
 
         // Wrap into chatbot response DTO
@@ -240,7 +242,7 @@ public class ChatbotService {
                 "calories": 180,
                 "level": "Beginner",
                 "category": "strength",
-                "exercises": [
+                "workoutExercise": [
                     { "name": "Jumping Jacks", "duration": 40, "rest": 20 },
                     { "name": "Bodyweight Squats", "duration": 40, "rest": 20 }
                 ]

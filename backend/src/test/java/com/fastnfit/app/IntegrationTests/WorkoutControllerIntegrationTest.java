@@ -8,6 +8,7 @@ import com.fastnfit.app.enums.WorkoutType;
 import com.fastnfit.app.model.Exercise;
 import com.fastnfit.app.model.User;
 import com.fastnfit.app.model.Workout;
+import com.fastnfit.app.model.WorkoutExercise;
 import com.fastnfit.app.repository.UserRepository;
 import com.fastnfit.app.repository.WorkoutRepository;
 import com.fastnfit.app.service.JwtService;
@@ -79,11 +80,11 @@ public class WorkoutControllerIntegrationTest {
         testUser = userRepository.save(testUser);
 
         Workout testWorkout=new Workout();
-        List<Exercise> exercises=new ArrayList<Exercise>();
+        List<WorkoutExercise> exercises=new ArrayList<WorkoutExercise>();
         testWorkout.setName("Test workout name");
         testWorkout.setWorkoutTips("Test workout tips");
         testWorkout.setLevel(WorkoutLevel.Advanced);
-        testWorkout.setExercises(exercises);
+        testWorkout.setWorkoutExercises(exercises);
         testWorkout.setDurationInMinutes(20);
         testWorkout.setDescription("Test workout");
         testWorkout.setCategory(WorkoutType.LOW_IMPACT);

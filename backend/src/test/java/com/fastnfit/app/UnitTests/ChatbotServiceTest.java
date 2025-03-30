@@ -1,8 +1,11 @@
 package com.fastnfit.app.UnitTests;
 
+import com.fastnfit.app.dto.ChatbotResponseDTO;
+
 //./mvnw test "-Dtest=ChatbotServiceTest"
 
 import com.fastnfit.app.dto.UserDetailsDTO;
+import com.fastnfit.app.dto.WorkoutDTO;
 import com.fastnfit.app.enums.FitnessLevel;
 import com.fastnfit.app.model.ChatHistory;
 import com.fastnfit.app.model.User;
@@ -96,7 +99,7 @@ public class ChatbotServiceTest {
         request.put("exercises_supported", List.of(Map.of("name", "Jumping Jacks")));
 
 
-        String reply = chatbotService.getResponse(request, testUserDetails);
+        String reply = chatbotService.getResponse(request, testUserDetails).getResponse();
 
         // Assert
         assertTrue(reply.contains("light workout"));
@@ -123,8 +126,9 @@ public class ChatbotServiceTest {
         request.put("exercises_supported", List.of(Map.of("name", "Jumping Jacks")));
 
 
-        String reply = chatbotService.getResponse(request, testUserDetails);
-        assertTrue(reply.contains("<BEGIN_JSON>"));
+        WorkoutDTO workout = chatbotService.getResponse(request, testUserDetails).getWorkout();
+        assertTrue(workout != null);
+        assertEquals("Full Body Blast", workout.getName());
     }
 
     @Test
@@ -147,7 +151,9 @@ public class ChatbotServiceTest {
         request.put("exercises_supported", List.of(Map.of("name", "Jumping Jacks")));
 
 
-        String reply = chatbotService.getResponse(request, testUserDetails);
+        ChatbotResponseDTO response = chatbotService.getResponse(request, testUserDetails);
+        String reply = response.getResponse();
+
         assertFalse(reply.contains("<BEGIN_JSON>"));
         assertTrue(reply.contains("Burpees"));
     }

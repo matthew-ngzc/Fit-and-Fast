@@ -65,7 +65,7 @@ public class ChatbotController {
             @RequestBody WorkoutDTO aiWorkout
     ) {
         try {
-            WorkoutDTO savedWorkout = workoutService.saveCustomWorkoutForUser(userId, aiWorkout);
+            WorkoutDTO savedWorkout = workoutService.saveCustomWorkoutForUser(aiWorkout);
             return ResponseEntity.ok(savedWorkout);
         } catch (Exception e) {
             return ResponseEntity.status(500).build();

@@ -5,10 +5,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fastnfit.app.dto.WorkoutDTO;
+import com.fastnfit.app.dto.WorkoutExerciseDTO;
 import com.fastnfit.app.enums.WorkoutLevel;
 import com.fastnfit.app.enums.WorkoutType;
 import com.fastnfit.app.model.Exercise;
 import com.fastnfit.app.model.Workout;
+import com.fastnfit.app.model.WorkoutExercise;
 import com.fastnfit.app.repository.ExerciseRepository;
 import com.fastnfit.app.repository.WorkoutRepository;
 
@@ -62,37 +64,45 @@ public class WorkoutService {
         dto.setLevel(workout.getLevel());
         dto.setCalories(workout.getCalories());
         dto.setDurationInMinutes(workout.getDurationInMinutes());
-        
-        // Include exercises in the DTO
-        if (workout.getExercises() != null) {
-            dto.setExercises(convertExercisesToDTO(workout.getExercises()));
-        }
+        dto.setWorkoutExercise(convertWorkoutExerciseToDTO(workout.getWorkoutExercises()));
         
         return dto;
     }
 
-    public List<Long> convertExercisesToDTO(List<Exercise> exerciseList) {
-        List<Long> exerciseIdList=new ArrayList<>();
+    public List<WorkoutExerciseDTO> convertWorkoutExerciseToDTO(List<WorkoutExercise> exerciseList) {
+        List<WorkoutExerciseDTO> workoutExerciseDTO = new ArrayList<>();
         for (int i=0;i<exerciseList.size();i++){
-            exerciseIdList.add(exerciseList.get(i).getExerciseId());
+            //create dto and set values
+            WorkoutExerciseDTO workoutExercise= new WorkoutExerciseDTO();
+            workoutExercise.setDuration(exerciseList.get(i).getDuration());
+            workoutExercise.setRest(exerciseList.get(i).getRest());
+            workoutExercise.setName(exerciseList.get(i).getExercise().getName());
+
+            workoutExerciseDTO.add(workoutExercise);
         }
-        return exerciseIdList;
+        return workoutExerciseDTO;
     }
 
-    public List<Exercise> convertDTOToExercises(List<Long> dtoList) {
-        List<Exercise> exerciseList=new ArrayList<>();
-        for (int i=0;i<dtoList.size();i++){
-            Long exerciseId=dtoList.get(i);
-            Exercise exercise=exerciseRepository.findById(exerciseId)
-                .orElseThrow(() -> new RuntimeException("Exercise not found: " + exerciseId));
-            exerciseList.add(exercise);
+    public List<WorkoutExercise> convertDTOToWorkoutExercise(List<WorkoutExerciseDTO> dtoList, Workout workout) {
+        List<WorkoutExercise> workoutExerciseList = new ArrayList<>();
+        for (WorkoutExerciseDTO dto : dtoList) {
+            WorkoutExercise workoutExercise = new WorkoutExercise();
+            workoutExercise.setDuration(dto.getDuration());
+            workoutExercise.setRest(dto.getRest());
+            workoutExercise.setWorkout(workout);
+    
+            Exercise exercise = exerciseRepository.findByName(dto.getName())
+                    .orElseThrow(() -> new RuntimeException("Exercise not found: " + dto.getName()));
+            workoutExercise.setExercise(exercise);
+    
+            workoutExerciseList.add(workoutExercise);
         }
-
-        return exerciseList;
+        return workoutExerciseList;
     }
+    
 
     @Transactional
-    public WorkoutDTO saveCustomWorkoutForUser(Long userId, WorkoutDTO workoutDTO) {
+    public WorkoutDTO saveCustomWorkoutForUser(WorkoutDTO workoutDTO) {
         Workout workout = new Workout();
         workout.setName(workoutDTO.getName());
         workout.setDescription(workoutDTO.getDescription());
@@ -100,17 +110,14 @@ public class WorkoutService {
         workout.setCalories(workoutDTO.getCalories());
         workout.setLevel(workoutDTO.getLevel());
         workout.setCategory(WorkoutType.fromString(workoutDTO.getCategory()));
-
-        // Handle exercises
-        if (workoutDTO.getExercises() != null && !workoutDTO.getExercises().isEmpty()) {
-            List<Exercise> exercises = convertDTOToExercises(workoutDTO.getExercises());
-            workout.setExercises(exercises);
-        }
+        workout.setWorkoutExercises(convertDTOToWorkoutExercise(workoutDTO.getWorkoutExercise(), workout));
 
         Workout savedWorkout = workoutRepository.save(workout);
 
         return convertToDTO(savedWorkout);
     }
+
+    
 
     @Transactional
     public WorkoutDTO updateWorkout(Long workoutId, WorkoutDTO workoutDTO) {
@@ -126,13 +133,7 @@ public class WorkoutService {
         existingWorkout.setCategory(WorkoutType.fromString(workoutDTO.getCategory()));
 
         // Update exercises
-        if (workoutDTO.getExercises() != null && !workoutDTO.getExercises().isEmpty()) {
-            List<Exercise> updatedExercises = convertDTOToExercises(workoutDTO.getExercises());
-            existingWorkout.setExercises(updatedExercises);
-        } else {
-            // Clear exercises if no exercises are provided
-            existingWorkout.setExercises(null);
-        }
+        existingWorkout.setWorkoutExercises(convertDTOToWorkoutExercise(workoutDTO.getWorkoutExercise(), existingWorkout));
 
         Workout savedWorkout = workoutRepository.save(existingWorkout);
         return convertToDTO(savedWorkout);
@@ -143,11 +144,6 @@ public class WorkoutService {
         Workout workout = workoutRepository.findById(workoutId)
             .orElseThrow(() -> new RuntimeException("Workout not found"));
         
-        // Remove associations with exercises
-        if (workout.getExercises() != null) {
-            workout.getExercises().clear();
-        }
-
         workoutRepository.delete(workout);
     }
 }

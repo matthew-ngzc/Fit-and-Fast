@@ -1,8 +1,6 @@
 // Exercise.java
 package com.fastnfit.app.model;
 
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -11,19 +9,23 @@ import lombok.Data;
 @Table(name = "exercises")
 public class Exercise {
     
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long exerciseId;
+    // @Id
+    // @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // private Long exerciseId;
     
-    @Column(nullable = false)
+    @Id
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
+    
     
     @Column(length = 1000)
     private String description;
     
-    private Integer duration;
+    //removed cos we dw each exercise to have a fixed duration and rest time, it should be set in the workout
     
-    private Integer rest;
+    // private Integer duration;
+    
+    // private Integer rest;
     
     private String image;
     
