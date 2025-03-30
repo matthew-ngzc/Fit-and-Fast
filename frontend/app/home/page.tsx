@@ -162,6 +162,7 @@ export default function HomePage() {
         });
 
         setWorkoutsData(response.data);
+        console.log(response.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching workouts:", error);
