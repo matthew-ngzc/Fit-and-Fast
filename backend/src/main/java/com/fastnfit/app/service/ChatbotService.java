@@ -124,13 +124,16 @@ public class ChatbotService {
                 apiUrl,
                 HttpMethod.POST,
                 new HttpEntity<>(requestBody.toString(), headers),
-                String.class);
-
+                String.class
+        );
+    
         String chatbotReply = new JSONObject(response.getBody())
                 .getJSONArray("choices")
                 .getJSONObject(0)
                 .getJSONObject("message")
                 .getString("content");
+
+        System.out.println("\n\n\nChatbot reply: " + chatbotReply + "\n\n");
 
         // extract the JSON and Natural Language segments
         Pattern jsonPattern = Pattern.compile("<BEGIN_JSON>\\s*([\\s\\S]*?)\\s*<END_JSON>");
@@ -214,6 +217,10 @@ public class ChatbotService {
                 Do not invent new exercises or suggest ones outside the supported list.
                 By default, the total duration of the workout should be 7 minutes. This is because our main target audience is busy women professionals who do not have time for a longer workout.
 
+                🧠 If the user message contains ANY indication that they want a workout — such as words like "suggest a workout", "routine", "exercise plan", "workout for today", or "gentle session" — you MUST interpret it as a workout request and follow the two-section response format: a JSON block inside <BEGIN_JSON> and <END_JSON>, and a natural language section.
+                Do NOT wait for the user to use the word “plan”. Treat any phrasing like “workout for today” or “something gentle” as a valid request for a workout plan.
+
+                ⚠️ You must ALWAYS output <BEGIN_JSON>...</END_JSON> if recommending a workout.
                 If the user is asking for a workout plan, respond in TWO clearly separated sections:
 
                 ---
