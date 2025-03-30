@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 //one shot give response, not streamed
 @Service
@@ -76,13 +77,18 @@ public class ChatbotService {
         List<String> exerciseList = exerciseRepository.findAllExerciseNames();
         // fullRequest.getJSONArray("exercises_supported")
         //         .toList().stream().map(Object::toString).toList();
-        List<String> workoutExercises = fullRequest.getJSONArray("exercises")
-                .toList().stream().map(obj -> {
+        String workoutSummary = fullRequest.getJSONArray("exercises")
+                .toList().stream()
+                .map(obj -> {
                     JSONObject o = new JSONObject((Map<?, ?>) obj);
-                    return o.getString("name");
-                }).toList();
+                    String name = o.getString("name");
+                    int duration = o.optInt("duration", 0);
+                    int rest = o.optInt("rest", 0);
+                    return String.format("%s (%ds work, %ds rest)", name, duration, rest);
+                })
+                .collect(Collectors.joining(", "));
 
-        String systemPrompt = buildSystemPrompt(userDetailsDTO, exerciseList, workoutExercises);
+        String systemPrompt = buildSystemPrompt(userDetailsDTO, exerciseList, workoutSummary);
 
         JSONArray messages = new JSONArray();
         messages.put(new JSONObject().put("role", "system").put("content", systemPrompt));
@@ -131,6 +137,9 @@ public class ChatbotService {
                 new HttpEntity<>(requestBody.toString(), headers),
                 String.class
         );
+
+        System.out.println("\n\n=== OpenAI Request JSON ===\n" + requestBody.toString(2) + "\n\n");
+
     
         String chatbotReply = new JSONObject(response.getBody())
                 .getJSONArray("choices")
@@ -153,20 +162,6 @@ public class ChatbotService {
         }
 
         ObjectMapper mapper = new ObjectMapper();
-        // String[] parts = chatbotReply.split("---", 2);
-
-        // String jsonBlock = "";
-        // String responseText = "";
-
-        // if (parts.length == 2) {
-        // int start = parts[0].indexOf("<BEGIN_JSON>");
-        // int end = parts[0].indexOf("<END_JSON>");
-        // if (start != -1 && end != -1) {
-        // jsonBlock = parts[0].substring(start + "<BEGIN_JSON>".length(), end).trim();
-        // }
-        // responseText = parts[1].trim();
-        // }
-
         // Convert JSON into DTO
         WorkoutDTO workout = null;
         if (jsonPart != null) {
@@ -196,7 +191,7 @@ public class ChatbotService {
         return result;
     }
 
-    private String buildSystemPrompt(UserDetailsDTO dto, List<String> exerciseList, List<String> workoutExercises) {
+    private String buildSystemPrompt(UserDetailsDTO dto, List<String> exerciseList, String workoutSummary) {
         String ageStr = dto.getDob() != null ? String.valueOf(calculateAge(dto.getDob())) : "N/A";
         String heightStr = dto.getHeight() != null ? String.format("%.1f", dto.getHeight()) : "N/A";
         String weightStr = dto.getWeight() != null ? String.format("%.1f", dto.getWeight()) : "N/A";
@@ -332,8 +327,7 @@ public class ChatbotService {
                         dto.getWorkoutType(),
                         dto.getMenstrualCramps() ? "Yes" : "No",
                         String.join(", ", exerciseList),
-                        String.join(", ", workoutExercises));
-
+                        workoutSummary);
     }
 
     private int calculateAge(LocalDate dob) {
