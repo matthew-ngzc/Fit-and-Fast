@@ -28,10 +28,11 @@ public class CalendarController {
     }
 
     // 1. Get workout dates for a specific month
-    @GetMapping("/workout-dates/")
+    @GetMapping("/workout-dates")
     public ResponseEntity<List<LocalDate>> getWorkoutDatesForMonth(
             @RequestParam("year") int year,
             @RequestParam("month") int month) {
+        System.out.println("Reached");
         Long userId = authUtils.getCurrentUserId();
         List<LocalDate> dates = calendarService.getWorkoutDatesForMonth(userId, year, month);
         return ResponseEntity.ok(dates);
