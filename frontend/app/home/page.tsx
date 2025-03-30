@@ -36,7 +36,6 @@ interface Workout {
   image: string;
   category: string;
   description: string;
-  exercises: string[];
 }
 
 interface WorkoutsByCategory {

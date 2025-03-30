@@ -10,6 +10,9 @@ interface WorkoutCompletionScreenProps {
   calories: string
   exerciseCount: number
   streakDays: number
+  totalWorkouts: number
+  totalDurationInMinutes: number
+  totalCaloriesBurned: number
   onFinish: () => void
 }
 
@@ -18,6 +21,9 @@ export function WorkoutCompletionScreen({
   calories,
   exerciseCount,
   streakDays,
+  totalWorkouts,
+  totalDurationInMinutes,
+  totalCaloriesBurned,
   onFinish,
 }: WorkoutCompletionScreenProps) {
   useEffect(() => {
@@ -77,11 +83,15 @@ export function WorkoutCompletionScreen({
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm">Total Workouts</span>
-              <span className="font-medium">16</span>
+              <span className="font-medium">{totalWorkouts}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-sm">Weekly Goal</span>
-              <span className="font-medium">4/5 days</span>
+              <span className="text-sm">Total Calories Burned</span>
+              <span className="font-medium">{totalCaloriesBurned}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Total Exercise Duration</span>
+              <span className="font-medium">{totalDurationInMinutes}</span>
             </div>
           </div>
         </CardContent>

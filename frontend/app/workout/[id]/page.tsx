@@ -37,12 +37,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import workoutsData from "../../../public/workouts.json"; // Import the workout exercises data
+import workoutsData from "../../../public/workouts.json";
 import config from "@/config";
 import axios from "axios";
 
 interface WorkoutProgramType {
-  id: string;
+  workoutId: number;
   name: string;
   description: string;
   image: string;
@@ -50,7 +50,7 @@ interface WorkoutProgramType {
   calories: string;
   level: string;
   category: string;
-  exercises: string[];
+  exercises: { name: string; duration: number; rest: number }[];
 }
 
 interface ExerciseDetailType {
@@ -60,6 +60,28 @@ interface ExerciseDetailType {
   duration: number;
   rest: number;
   tips: string;
+}
+
+interface Exercise {
+  name: string;
+  duration: number;
+  rest: number;
+}
+
+type Workout = {
+  description: string;
+  tip: string;
+  image: string;
+};
+
+type WorkoutsData = {
+  workouts: Record<string, Workout>;
+};
+
+interface WorkoutCompletionData {
+  totalWorkouts: number;
+  totalDurationInMinutes: number;
+  totalCaloriesBurned: number;
 }
 
 export default function WorkoutPage({ params }: { params: { id: string } }) {
@@ -76,8 +98,9 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
   );
   const [loading, setLoading] = useState(true);
   const [showExitDialog, setShowExitDialog] = useState(false);
-  const [workoutCompletionData, setWorkoutCompletionData] = useState(null);
   const [streak, setStreak] = useState<number>(0);
+  const [workoutCompletionData, setWorkoutCompletionData] =
+    useState<WorkoutCompletionData | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -98,18 +121,63 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
     fetchStreak();
   }, []);
 
+  useEffect(() => {
+    const storedWorkout = localStorage.getItem("currentWorkout");
+    if (storedWorkout) {
+      const workoutData: WorkoutProgramType = JSON.parse(storedWorkout);
+      setWorkout(workoutData);
+    }
+    async function fetchWorkoutExercises() {
+      try {
+        const token = localStorage.getItem("token");
+
+        const response = await axios.get(
+          `${config.WORKOUT_URL}/${params.id}/exercises`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const formattedExercises = response.data.map(
+          ({ name, duration, rest }: Exercise) => {
+            // Fetch the details from workoutsData based on the exercise name
+            const workoutDetails = (workoutsData as WorkoutsData).workouts[
+              name
+            ];
+
+            return {
+              name,
+              description: workoutDetails?.description || "",
+              image: workoutDetails?.image || "",
+              duration,
+              rest,
+              tips: workoutDetails?.tip || "",
+            };
+          }
+        );
+        setExerciseDetails(formattedExercises);
+      } catch (error) {
+        console.error("Error fetching workout exercises:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchWorkoutExercises();
+  }, [params.id]);
+
   const postWorkoutCompletion = async () => {
     try {
       const token = localStorage.getItem("token");
+
+      const requestBody = {
+        workoutId: workout?.workoutId,
+      };
+
       const response = await fetch(`${config.PROGRESS_URL}/complete`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          workoutId: workout?.id,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
@@ -124,61 +192,6 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
       postWorkoutCompletion();
     }
   }, [workoutState]);
-
-  useEffect(() => {
-    async function loadWorkout() {
-      try {
-        setLoading(true);
-
-        // Get the workout from localStorage instead of creating a mock workout
-        const storedWorkout = localStorage.getItem("currentWorkout");
-
-        if (!storedWorkout) {
-          console.error("No workout found in localStorage");
-          setLoading(false);
-          return;
-        }
-
-        // Parse the JSON string into an object
-        const workoutData: WorkoutProgramType = JSON.parse(storedWorkout);
-        setWorkout(workoutData);
-
-        // Load exercise details from workouts.json based on the exercises in the stored workout
-        const exerciseDetailsArray = workoutData.exercises
-          .map((exerciseId: string) => {
-            const exerciseData =
-              workoutsData.workouts[
-                exerciseId as keyof typeof workoutsData.workouts
-              ];
-
-            if (!exerciseData) {
-              console.error(
-                `Exercise with ID ${exerciseId} not found in workouts.json`
-              );
-              return null;
-            }
-
-            return {
-              name: exerciseData.name,
-              description: exerciseData.description,
-              image: exerciseData.image,
-              duration: exerciseData.duration,
-              rest: exerciseData.rest,
-              tips: exerciseData.tip,
-            };
-          })
-          .filter(Boolean) as ExerciseDetailType[];
-
-        setExerciseDetails(exerciseDetailsArray);
-      } catch (error) {
-        console.error("Failed to load workout:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadWorkout();
-  }, []);
 
   // Timer effect for workout
   useEffect(() => {
@@ -517,12 +530,15 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      {workoutState === "completed" && (
+      {workoutState === "completed" && workoutCompletionData != null && (
         <WorkoutCompletionScreen
           duration={workout.durationInMinutes}
           calories={workout.calories}
           exerciseCount={exerciseDetails.length}
           streakDays={streak}
+          totalWorkouts={workoutCompletionData.totalWorkouts}
+          totalDurationInMinutes={workoutCompletionData.totalDurationInMinutes}
+          totalCaloriesBurned={workoutCompletionData.totalCaloriesBurned}
           onFinish={() => (window.location.href = "/home")}
         />
       )}

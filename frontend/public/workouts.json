@@ -1,185 +1,389 @@
+
 {
-    "workouts": {
-      "plank": {
-        "id": "plank",
-        "name": "Plank",
-        "description": "Hold a plank position to strengthen your core.",
-        "tip": "Keep your back straight and engage your core.",
-        "image": "/images/plank.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "squat": {
-        "id": "squat",
-        "name": "Squats",
-        "description": "A great lower-body exercise for strength and endurance.",
-        "tip": "Keep your knees aligned with your toes.",
-        "image": "/images/squat.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "push_up": {
-        "id": "push_up",
-        "name": "Push-ups",
-        "description": "Strengthen your chest, shoulders, and triceps.",
-        "tip": "Keep your body in a straight line and lower yourself with control.",
-        "image": "/images/push_up.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "jumping_jacks": {
-        "id": "jumping_jacks",
-        "name": "Jumping Jacks",
-        "description": "A full-body cardiovascular exercise.",
-        "tip": "Keep a steady pace and land softly on your feet.",
-        "image": "/images/jumping_jacks.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "burpee": {
-        "id": "burpee",
-        "name": "Burpees",
-        "description": "A full-body explosive movement for endurance and strength.",
-        "tip": "Engage your core and land softly to protect your knees.",
-        "image": "/animations/burpees.gif",
-        "duration": 40,
-        "rest": 20
-      },
-      "lunge": {
-        "id": "lunge",
-        "name": "Lunges",
-        "description": "Strengthen and tone your legs and glutes.",
-        "tip": "Keep your chest lifted and ensure your knee doesn’t pass your toes.",
-        "image": "/images/lunge.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "mountain_climber": {
-        "id": "mountain_climber",
-        "name": "Mountain Climbers",
-        "description": "A core and cardio movement for endurance.",
-        "tip": "Keep your back straight and engage your abs.",
-        "image": "/images/mountain_climber.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "high_knees": {
-        "id": "high_knees",
-        "name": "High Knees",
-        "description": "Improve agility and cardio fitness.",
-        "tip": "Lift your knees high and keep a fast pace.",
-        "image": "/images/high_knees.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "bicycle_crunch": {
-        "id": "bicycle_crunch",
-        "name": "Bicycle Crunches",
-        "description": "A great core workout to strengthen your abs.",
-        "tip": "Twist your torso and engage your obliques.",
-        "image": "/images/bicycle_crunch.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "downward_dog": {
-        "id": "downward_dog",
-        "name": "Downward Dog",
-        "description": "An inversion pose that stretches the hamstrings and strengthens the arms.",
-        "tip": "Press your heels toward the floor and lift your hips high.",
-        "image": "/images/downward_dog.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "warrior_1": {
-        "id": "warrior_1",
-        "name": "Warrior I",
-        "description": "A standing pose that strengthens the legs and opens the hips and chest.",
-        "tip": "Keep your front knee aligned with your ankle.",
-        "image": "/images/warrior_1.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "childs_pose": {
-        "id": "childs_pose",
-        "name": "Child's Pose",
-        "description": "A resting pose that gently stretches the lower back and hips.",
-        "tip": "Breathe deeply and relax your shoulders away from your ears.",
-        "image": "/images/childs_pose.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "cat_cow": {
-        "id": "cat_cow",
-        "name": "Cat-Cow Stretch",
-        "description": "A gentle yoga stretch for spinal flexibility.",
-        "tip": "Move with your breath, inhale on the arch, exhale on the round.",
-        "image": "/images/cat_cow.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "glute_bridge": {
-        "id": "glute_bridge",
-        "name": "Glute Bridge",
-        "description": "Strengthen your glutes and lower back.",
-        "tip": "Squeeze your glutes at the top of the movement.",
-        "image": "/images/glute_bridge.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "leg_raise": {
-        "id": "leg_raise",
-        "name": "Leg Raises",
-        "description": "A great lower abs exercise.",
-        "tip": "Keep your lower back pressed against the floor.",
-        "image": "/images/leg_raise.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "arm_circles": {
-        "id": "arm_circles",
-        "name": "Arm Circles",
-        "description": "Strengthen your shoulders with this simple movement.",
-        "tip": "Keep your arms straight and make controlled circles.",
-        "image": "/images/arm_circles.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "seated_twist": {
-        "id": "seated_twist",
-        "name": "Seated Spinal Twist",
-        "description": "A yoga pose for spinal mobility and digestion.",
-        "tip": "Sit tall and twist gently without forcing the movement.",
-        "image": "/images/seated_twist.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "triceps_dip": {
-        "id": "triceps_dip",
-        "name": "Triceps Dips",
-        "description": "Strengthen your triceps with this bodyweight exercise.",
-        "tip": "Keep your elbows pointed straight back, not out to the sides.",
-        "image": "/images/triceps_dip.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "prenatal_pelvic_tilt": {
-        "id": "prenatal_pelvic_tilt",
-        "name": "Prenatal Pelvic Tilt",
-        "description": "A gentle exercise to strengthen the lower back and core for pregnancy.",
-        "tip": "Move with control and avoid excessive arching.",
-        "image": "/images/prenatal_pelvic_tilt.jpg",
-        "duration": 40,
-        "rest": 20
-      },
-      "postnatal_kegels": {
-        "id": "postnatal_kegels",
-        "name": "Postnatal Kegels",
-        "description": "Strengthen the pelvic floor postpartum.",
-        "tip": "Squeeze and hold, then relax slowly.",
-        "image": "/images/postnatal_kegels.jpg",
-        "duration": 40,
-        "rest": 20
-      }
+  "workouts": {
+    "Seated Leg Lifts": {
+      "name": "Seated Leg Lifts",
+      "description": "Sit in a chair and lift your legs one at a time to work your lower body.",
+      "tip": "Engage your core while lifting your legs.",
+      "image": "/images/seated_leg_lifts.jpg"
+    },
+    "Standing Side Leg Lifts": {
+      "name": "Standing Side Leg Lifts",
+      "description": "Stand and lift your leg to the side to strengthen your hips and thighs.",
+      "tip": "Keep your posture straight and avoid leaning.",
+      "image": "/images/standing_side_leg_lifts.jpg"
+    },
+    "Chair Squats": {
+      "name": "Chair Squats",
+      "description": "Sit and stand up from a chair repeatedly to work your thighs and glutes.",
+      "tip": "Keep your knees behind your toes as you squat.",
+      "image": "/images/chair_squats.jpg"
+    },
+    "Wall Push-ups": {
+      "name": "Wall Push-ups",
+      "description": "Perform push-ups against a wall to build upper body strength.",
+      "tip": "Engage your core and keep your body in a straight line.",
+      "image": "/images/wall_push_ups.jpg"
+    },
+    "Step Touch": {
+      "name": "Step Touch",
+      "description": "Step side to side, touching your feet together.",
+      "tip": "Maintain a slight bend in your knees as you move.",
+      "image": "/images/step_touch.jpg"
+    },
+    "Toe Taps": {
+      "name": "Toe Taps",
+      "description": "Tap your toes on the ground in a rhythmic motion.",
+      "tip": "Keep your core engaged while performing this move.",
+      "image": "/images/toe_taps.jpg"
+    },
+    "Arm Circles": {
+      "name": "Arm Circles",
+      "description": "Make small circles with your arms to work your shoulders.",
+      "tip": "Start with small circles and gradually increase the size.",
+      "image": "/images/arm_circles.jpg"
+    },
+    "Marching in Place": {
+      "name": "Marching in Place",
+      "description": "Lift your knees one at a time as if you're marching in place.",
+      "tip": "Use your arms to increase intensity.",
+      "image": "/images/marching_in_place.jpg"
+    },
+    "Jumping Jacks": {
+      "name": "Jumping Jacks",
+      "description": "Jump with your arms and legs wide, then return to standing.",
+      "tip": "Engage your core and keep a steady rhythm.",
+      "image": "/images/jumping_jacks.jpg"
+    },
+    "Burpees": {
+      "name": "Burpees",
+      "description": "Squat down, jump into a plank position, then jump up.",
+      "tip": "Make sure to land softly when you jump back up.",
+      "image": "/images/burpees.jpg"
+    },
+    "Mountain Climbers": {
+      "name": "Mountain Climbers",
+      "description": "In a plank position, alternate bringing your knees to your chest.",
+      "tip": "Keep your core tight and avoid letting your hips drop.",
+      "image": "/images/mountain_climbers.jpg"
+    },
+    "High Knees": {
+      "name": "High Knees",
+      "description": "Lift your knees high as you march or run in place.",
+      "tip": "Engage your core and maintain a brisk pace.",
+      "image": "/images/high_knees.jpg"
+    },
+    "Squat Jumps": {
+      "name": "Squat Jumps",
+      "description": "Perform a squat, then explode upwards into a jump.",
+      "tip": "Land softly and keep your knees behind your toes.",
+      "image": "/images/squat_jumps.jpg"
+    },
+    "Skater Jumps": {
+      "name": "Skater Jumps",
+      "description": "Jump laterally from one foot to the other, mimicking a skating motion.",
+      "tip": "Focus on balance and control as you land.",
+      "image": "/images/skater_jumps.jpg"
+    },
+    "Lateral Hops": {
+      "name": "Lateral Hops",
+      "description": "Hop side to side with both feet together.",
+      "tip": "Keep your knees slightly bent as you jump.",
+      "image": "/images/lateral_hops.jpg"
+    },
+    "Tuck Jumps": {
+      "name": "Tuck Jumps",
+      "description": "Jump up and bring your knees towards your chest.",
+      "tip": "Land softly and keep your back straight.",
+      "image": "/images/tuck_jumps.jpg"
+    },
+    "Deadlifts": {
+      "name": "Deadlifts",
+      "description": "Lift weights from the ground to standing, targeting your lower back and hamstrings.",
+      "tip": "Keep your back straight and hinge at your hips.",
+      "image": "/images/deadlifts.jpg"
+    },
+    "Bicep Curls": {
+      "name": "Bicep Curls",
+      "description": "Curl weights towards your shoulders to work your biceps.",
+      "tip": "Keep your elbows close to your sides.",
+      "image": "/images/bicep_curls.jpg"
+    },
+    "Triceps Dips": {
+      "name": "Triceps Dips",
+      "description": "Dip your body down while holding a bench or chair to work your triceps.",
+      "tip": "Keep your elbows pointing straight back.",
+      "image": "/images/triceps_dips.jpg"
+    },
+    "Lunges with Weights": {
+      "name": "Lunges with Weights",
+      "description": "Lunge forward while holding weights to work your legs and glutes.",
+      "tip": "Keep your knee aligned with your ankle.",
+      "image": "/images/lunges_with_weights.jpg"
+    },
+    "Bench Press": {
+      "name": "Bench Press",
+      "description": "Press weights away from your chest while lying on a bench.",
+      "tip": "Ensure your back remains flat against the bench.",
+      "image": "/images/bench_press.jpg"
+    },
+    "Overhead Shoulder Press": {
+      "name": "Overhead Shoulder Press",
+      "description": "Press weights overhead to target your shoulders.",
+      "tip": "Keep your core engaged and avoid arching your back.",
+      "image": "/images/overhead_shoulder_press.jpg"
+    },
+    "Dumbbell Rows": {
+      "name": "Dumbbell Rows",
+      "description": "Row dumbbells towards your torso to work your back muscles.",
+      "tip": "Maintain a flat back and squeeze your shoulder blades together.",
+      "image": "/images/dumbbell_rows.jpg"
+    },
+    "Goblet Squats": {
+      "name": "Goblet Squats",
+      "description": "Hold a weight close to your chest and perform squats.",
+      "tip": "Keep your chest upright and knees behind your toes.",
+      "image": "/images/goblet_squats.jpg"
+    },
+    "Push-ups": {
+      "name": "Push-ups",
+      "description": "Perform a push-up to strengthen your chest and arms.",
+      "tip": "Keep your body in a straight line from head to heels.",
+      "image": "/images/push_ups.jpg"
+    },
+    "Planks": {
+      "name": "Planks",
+      "description": "Hold a plank position to strengthen your core.",
+      "tip": "Keep your back straight and engage your core.",
+      "image": "/images/planks.jpg"
+    },
+    "Wall Sit": {
+      "name": "Wall Sit",
+      "description": "Sit against a wall with your knees at a 90-degree angle.",
+      "tip": "Engage your core and hold the position as long as possible.",
+      "image": "/images/wall_sit.jpg"
+    },
+    "Superman Hold": {
+      "name": "Superman Hold",
+      "description": "Lie on your stomach and lift your arms and legs off the ground.",
+      "tip": "Squeeze your lower back as you lift.",
+      "image": "/images/superman_hold.jpg"
+    },
+    "Bicycle Crunches": {
+      "name": "Bicycle Crunches",
+      "description": "Lie on your back and alternate bringing your knees towards your chest while twisting your torso.",
+      "tip": "Focus on engaging your core rather than rushing.",
+      "image": "/images/bicycle_crunches.jpg"
+    },
+    "Side Lunges": {
+      "name": "Side Lunges",
+      "description": "Lunge out to the side, alternating legs.",
+      "tip": "Keep your chest upright and knees behind your toes.",
+      "image": "/images/side_lunges.jpg"
+    },
+    "Donkey Kicks": {
+      "name": "Donkey Kicks",
+      "description": "Kick one leg up while keeping the other knee on the ground.",
+      "tip": "Squeeze your glutes at the top of the movement.",
+      "image": "/images/donkey_kicks.jpg"
+    },
+    "Flutter Kicks": {
+      "name": "Flutter Kicks",
+      "description": "Lie on your back and alternate kicking your legs up and down.",
+      "tip": "Keep your core engaged and legs straight.",
+      "image": "/images/flutter_kicks.jpg"
+    },
+    "Battle Ropes": {
+      "name": "Battle Ropes",
+      "description": "Swing heavy ropes in various patterns to engage your entire body.",
+      "tip": "Use your core to control the ropes.",
+      "image": "/images/battle_ropes.jpg"
+    },
+    "Kettlebell Swings": {
+      "name": "Kettlebell Swings",
+      "description": "Swing a kettlebell between your legs and up to chest height.",
+      "tip": "Use your hips to generate power for the swing.",
+      "image": "/images/kettlebell_swings.jpg"
+    },
+    "Medicine Ball Slams": {
+      "name": "Medicine Ball Slams",
+      "description": "Lift a medicine ball overhead and slam it to the ground.",
+      "tip": "Engage your core and use your full body to generate force.",
+      "image": "/images/medicine_ball_slam.jpg"
+    },
+    "Jump Rope": {
+      "name": "Jump Rope",
+      "description": "Jump over a rope as it swings beneath you.",
+      "tip": "Keep your jumps light and use your wrists to turn the rope.",
+      "image": "/images/jump_rope.jpg"
+    },
+    "Box Jumps": {
+      "name": "Box Jumps",
+      "description": "Jump onto a sturdy box or platform, then step down.",
+      "tip": "Land softly to protect your knees.",
+      "image": "/images/box_jumps.jpg"
+    },
+    "Sled Push": {
+      "name": "Sled Push",
+      "description": "Push a weighted sled to engage your legs and core.",
+      "tip": "Keep a low stance and drive with your legs.",
+      "image": "/images/sled_push.jpg"
+    },
+    "Tire Flips": {
+      "name": "Tire Flips",
+      "description": "Flip a large tire end over end for strength and conditioning.",
+      "tip": "Use your legs to lift, not just your back.",
+      "image": "/images/tire_flips.jpg"
+    },
+    "Sledgehammer Slams": {
+      "name": "Sledgehammer Slams",
+      "description": "Swing a sledgehammer onto a tire to build strength.",
+      "tip": "Engage your core and use your hips to generate power.",
+      "image": "/images/sledgehammer_slams.jpg"
+    },
+    "Cat-Cow Stretch": {
+      "name": "Cat-Cow Stretch",
+      "description": "Alternate arching and rounding your back to stretch the spine.",
+      "tip": "Move slowly and breathe deeply.",
+      "image": "/images/cat_cow_stretch.jpg"
+    },
+    "Side-Lying Leg Lifts": {
+      "name": "Side-Lying Leg Lifts",
+      "description": "Lie on your side and lift your leg up and down.",
+      "tip": "Keep your torso stable and leg straight.",
+      "image": "/images/side_lying_leg_lifts.jpg"
+    },
+    "Pelvic Tilts": {
+      "name": "Pelvic Tilts",
+      "description": "Lie on your back and tilt your pelvis upwards.",
+      "tip": "Focus on engaging your lower abs.",
+      "image": "/images/pelvic_tilts.jpg"
+    },
+    "Seated Forward Bend": {
+      "name": "Seated Forward Bend",
+      "description": "Sit and bend forward to stretch your hamstrings.",
+      "tip": "Reach for your toes and keep your back straight.",
+      "image": "/images/seated_forward_bend.jpg"
+    },
+    "Kegel Exercises": {
+      "name": "Kegel Exercises",
+      "description": "Contract and relax your pelvic floor muscles.",
+      "tip": "Focus on squeezing and holding the muscles for a few seconds.",
+      "image": "/images/kegel_exercises.jpg"
+    },
+    "Butterfly Stretch": {
+      "name": "Butterfly Stretch",
+      "description": "Sit and bring your feet together to stretch your inner thighs.",
+      "tip": "Gently press your knees towards the floor.",
+      "image": "/images/butterfly_stretch.jpg"
+    },
+    "Standing Hip Circles": {
+      "name": "Standing Hip Circles",
+      "description": "Stand and make circles with your hips to loosen up your body.",
+      "tip": "Engage your core and move slowly.",
+      "image": "/images/standing_hip_circles.jpg"
+    },
+    "Seated Side Stretch": {
+      "name": "Seated Side Stretch",
+      "description": "Sit and reach one arm overhead to stretch the side of your body.",
+      "tip": "Lean gently to one side to feel the stretch.",
+      "image": "/images/seated_side_stretch.jpg"
+    },
+    "Glute Bridges": {
+      "name": "Glute Bridges",
+      "description": "Lie on your back and lift your hips to engage your glutes and core.",
+      "tip": "Squeeze your glutes at the top of the movement.",
+      "image": "/images/glute_bridges.jpg"
+    },
+    "Pelvic Floor Exercises": {
+      "name": "Pelvic Floor Exercises",
+      "description": "Engage your pelvic floor muscles to strengthen them.",
+      "tip": "Focus on squeezing and holding for a few seconds.",
+      "image": "/images/pelvic_floor_exercises.jpg"
+    },
+    "Postnatal Yoga Twists": {
+      "name": "Postnatal Yoga Twists",
+      "description": "Sit and twist your torso to gently stretch your back.",
+      "tip": "Move slowly and listen to your body.",
+      "image": "/images/postnatal_yoga_twists.jpg"
+    },
+    "Side Planks": {
+      "name": "Side Planks",
+      "description": "Lie on your side and lift your hips off the ground to strengthen your core.",
+      "tip": "Keep your body in a straight line from head to heels.",
+      "image": "/images/side_planks.jpg"
+    },
+    "Dead Bug Exercise": {
+      "name": "Dead Bug Exercise",
+      "description": "Lie on your back and alternate extending your arm and leg.",
+      "tip": "Keep your core engaged and move slowly.",
+      "image": "/images/dead_bug_exercise.jpg"
+    },
+    "Bird-Dog": {
+      "name": "Bird-Dog",
+      "description": "From a hands and knees position, extend opposite arm and leg.",
+      "tip": "Engage your core and maintain a neutral spine.",
+      "image": "/images/bird_dog.jpg"
+    },
+    "Heel Slides": {
+      "name": "Heel Slides",
+      "description": "Slide one heel out while keeping your core engaged.",
+      "tip": "Keep your back flat on the floor.",
+      "image": "/images/heel_slides.jpg"
+    },
+    "Clamshells": {
+      "name": "Clamshells",
+      "description": "Lie on your side and open and close your legs like a clamshell.",
+      "tip": "Keep your feet together and engage your glutes.",
+      "image": "/images/clamshells.jpg"
+    },
+    "Downward Dog": {
+      "name": "Downward Dog",
+      "description": "Form an inverted V shape, stretching your back and legs.",
+      "tip": "Push through your heels and extend your spine.",
+      "image": "/images/downward_dog.jpg"
+    },
+    "Warrior Pose": {
+      "name": "Warrior Pose",
+      "description": "Stand with legs wide apart and bend one knee while keeping your arms extended.",
+      "tip": "Engage your core and maintain steady breathing.",
+      "image": "/images/warrior_pose.jpg"
+    },
+    "Child’s Pose": {
+      "name": "Child’s Pose",
+      "description": "Sit back on your heels and extend your arms forward to stretch.",
+      "tip": "Relax and breathe deeply.",
+      "image": "/images/childs_pose.jpg"
+    },
+    "Cobra Pose": {
+      "name": "Cobra Pose",
+      "description": "Lie on your stomach and lift your chest off the ground.",
+      "tip": "Keep your elbows close to your sides.",
+      "image": "/images/cobra_pose.jpg"
+    },
+    "Tree Pose": {
+      "name": "Tree Pose",
+      "description": "Stand on one leg and place the foot of the other leg against your thigh.",
+      "tip": "Engage your core and focus on a fixed point.",
+      "image": "/images/tree_pose.jpg"
+    },
+    "Triangle Pose": {
+      "name": "Triangle Pose",
+      "description": "Stand with legs wide apart and stretch your body towards one foot.",
+      "tip": "Keep your legs straight and engage your core.",
+      "image": "/images/triangle_pose.jpg"
+    },
+    "Seated Forward Fold": {
+      "name": "Seated Forward Fold",
+      "description": "Sit and fold forward, reaching for your toes.",
+      "tip": "Reach slowly and keep your back straight.",
+      "image": "/images/seated_forward_fold.jpg"
+    },
+    "Bridge Pose": {
+      "name": "Bridge Pose",
+      "description": "Lie on your back and lift your hips while keeping your feet flat on the floor.",
+      "tip": "Squeeze your glutes at the top",
+      "image": "/images/seated_forward_fold.jpg"
     }
   }
-  
+}

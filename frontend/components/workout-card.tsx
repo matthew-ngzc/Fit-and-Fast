@@ -13,7 +13,6 @@ interface WorkoutData {
   image: string;
   category: string;
   description: string;
-  exercises: string[];
 }
 
 interface WorkoutCardProps {
