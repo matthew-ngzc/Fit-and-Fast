@@ -38,13 +38,17 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/workouts/").permitAll()
+                        .requestMatchers("/error").permitAll()
 
                         // Protected endpoints
                         .requestMatchers("/api/users/").authenticated()
                         .requestMatchers("/api/history/").authenticated()
+                        .requestMatchers("/api/calender/").authenticated()
+                        .requestMatchers("/api/chatbot/").authenticated()
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
+                            System.out.println("Unauthorized request: " + request.getRequestURI());
                             response.setStatus(401); // Set status to 401 Unauthorized
                         }))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

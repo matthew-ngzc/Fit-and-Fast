@@ -73,6 +73,4 @@ public class HistoryController {
         List<HistoryDTO> moreHistory = historyService.loadMoreHistory(userId, after, limit);
         return ResponseEntity.ok(moreHistory);
     }
-
-
 }

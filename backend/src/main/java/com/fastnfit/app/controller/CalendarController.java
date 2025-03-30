@@ -15,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/calendar")
+@CrossOrigin(origins = "*")
 public class CalendarController {
 
     private final CalendarService calendarService;
