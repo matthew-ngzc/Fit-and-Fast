@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DumbbellIcon,
@@ -253,7 +254,17 @@ export default function HomePage() {
                       {recommendedWorkoutData?.description}
                     </p>
                   </div>
-                  <Button>Start Workout</Button>
+                  <Button asChild>
+                    <Link
+                      href={
+                        recommendedWorkoutData?.workoutId
+                          ? `/workout/${recommendedWorkoutData.workoutId}`
+                          : "#"
+                      }
+                    >
+                      Start Workout
+                    </Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
