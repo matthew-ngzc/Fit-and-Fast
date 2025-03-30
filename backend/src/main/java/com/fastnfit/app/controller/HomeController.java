@@ -83,6 +83,8 @@ public class HomeController {
                         return "low-impact";
                     if (category.equalsIgnoreCase("high-energy"))
                         return "high-energy";
+                    if (category.equalsIgnoreCase("body-weight"))
+                        return "body-weight";
                     return "others";
                 }));
         return ResponseEntity.ok(workoutsByCategory);
