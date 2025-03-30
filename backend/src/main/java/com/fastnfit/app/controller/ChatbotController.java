@@ -16,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/chatbot")
+@CrossOrigin(origins = "*")
 public class ChatbotController {
 
     @Autowired

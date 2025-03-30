@@ -80,9 +80,9 @@ public class CalendarService {
         int periodLength = Optional.ofNullable(details.getPeriodLength()).orElse(5); //default is 5 if not set yet
         LocalDate lastPeriodStart = Optional.ofNullable(details.getLastPeriodStartDate()).orElse(LocalDate.now().minusDays(20)); // fallback default
 
-        if (details.getDob() != null) {
-            lastPeriodStart = details.getDob();
-        }
+        // if (details.getDob() != null) {
+        //     lastPeriodStart = details.getDob();
+        // }
 
         LocalDate lastPeriodEnd = lastPeriodStart.plusDays(periodLength - 1);
         LocalDate nextPeriodStart = lastPeriodStart.plusDays(cycleLength);

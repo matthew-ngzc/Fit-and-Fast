@@ -15,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/calendar")
+@CrossOrigin(origins = "*")
 public class CalendarController {
 
     private final CalendarService calendarService;
@@ -31,6 +32,7 @@ public class CalendarController {
     public ResponseEntity<List<LocalDate>> getWorkoutDatesForMonth(
             @RequestParam("year") int year,
             @RequestParam("month") int month) {
+        System.out.println("Reached");
         Long userId = authUtils.getCurrentUserId();
         List<LocalDate> dates = calendarService.getWorkoutDatesForMonth(userId, year, month);
         return ResponseEntity.ok(dates);
