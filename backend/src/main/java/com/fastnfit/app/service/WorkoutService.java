@@ -84,6 +84,12 @@ public class WorkoutService {
         return workoutExerciseDTO;
     }
 
+    public List<WorkoutExerciseDTO> getWorkoutsWorkoutExercisesById(Long workoutId){
+        Workout workout = workoutRepository.findById(workoutId)
+            .orElseThrow(() -> new RuntimeException("Workout not found"));
+        return convertWorkoutExerciseToDTO(workout.getWorkoutExercises());
+    }
+
     public List<WorkoutExercise> convertDTOToWorkoutExercise(List<WorkoutExerciseDTO> dtoList, Workout workout) {
         List<WorkoutExercise> workoutExerciseList = new ArrayList<>();
         for (WorkoutExerciseDTO dto : dtoList) {
