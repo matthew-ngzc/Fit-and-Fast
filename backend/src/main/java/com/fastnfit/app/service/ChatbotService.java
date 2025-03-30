@@ -7,8 +7,10 @@ import com.fastnfit.app.dto.ChatbotResponseDTO;
 import com.fastnfit.app.dto.UserDetailsDTO;
 import com.fastnfit.app.dto.WorkoutDTO;
 import com.fastnfit.app.model.ChatHistory;
+import com.fastnfit.app.model.Exercise;
 import com.fastnfit.app.model.User;
 import com.fastnfit.app.repository.ChatHistoryRepository;
+import com.fastnfit.app.repository.ExerciseRepository;
 import com.fastnfit.app.repository.UserRepository;
 
 import org.json.JSONArray;
@@ -39,12 +41,14 @@ public class ChatbotService {
     private final ChatHistoryRepository chatHistoryRepository;
     private final UserRepository userRepository;
     private final RestTemplate restTemplate;
+    private final ExerciseRepository exerciseRepository;
 
     public ChatbotService(ChatHistoryRepository chatHistoryRepository, UserRepository userRepository,
-            RestTemplate restTemplate) {
+            RestTemplate restTemplate, ExerciseRepository exerciseRepository) {
         this.chatHistoryRepository = chatHistoryRepository;
         this.userRepository = userRepository;
         this.restTemplate = restTemplate;
+        this.exerciseRepository = exerciseRepository;
     }
 
     @Value("${openai.api.key}")
@@ -69,8 +73,9 @@ public class ChatbotService {
 
         // Extract parts from frontend JSON
         String userInput = fullRequest.getString("message");
-        List<String> exerciseList = fullRequest.getJSONArray("exercises_supported")
-                .toList().stream().map(Object::toString).toList();
+        List<String> exerciseList = exerciseRepository.findAllExerciseNames();
+        // fullRequest.getJSONArray("exercises_supported")
+        //         .toList().stream().map(Object::toString).toList();
         List<String> workoutExercises = fullRequest.getJSONArray("exercises")
                 .toList().stream().map(obj -> {
                     JSONObject o = new JSONObject((Map<?, ?>) obj);
