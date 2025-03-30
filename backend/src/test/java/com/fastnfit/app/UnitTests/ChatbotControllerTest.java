@@ -125,7 +125,7 @@ public class ChatbotControllerTest {
                 .content(requestJson))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().string(expectedReply))
+                .andExpect(jsonPath("$.response").value(expectedReply))
                 .andReturn();
 
         System.out.println("💬 Chatbot replied: " + result.getResponse().getContentAsString());

@@ -55,200 +55,202 @@ import com.fasterxml.jackson.databind.JsonNode;
 @Transactional
 public class ChatbotServiceIntegrationTest {
 
-    @Autowired
-    private ChatbotService chatbotService;
+        @Autowired
+        private ChatbotService chatbotService;
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Autowired
-    private UserDetailsRepository userDetailsRepository;
+        @Autowired
+        private UserDetailsRepository userDetailsRepository;
 
-    @Autowired
-    private ChatHistoryRepository chatHistoryRepository;
+        @Autowired
+        private ChatHistoryRepository chatHistoryRepository;
 
-    private User savedUser;
+        private User savedUser;
 
-    @BeforeEach
-    void setup() throws Exception {
-        String testEmail = "test@example.com";
+        @BeforeEach
+        void setup() throws Exception {
+                String testEmail = "test@example.com";
 
-        savedUser = userRepository.findByEmail(testEmail).orElseGet(() -> {
-            User newUser = new User();
-            newUser.setEmail(testEmail);
-            newUser.setPassword("password123");
-            return userRepository.save(newUser);
-        });
+                savedUser = userRepository.findByEmail(testEmail).orElseGet(() -> {
+                        User newUser = new User();
+                        newUser.setEmail(testEmail);
+                        newUser.setPassword("password123");
+                        return userRepository.save(newUser);
+                });
 
-        if (userDetailsRepository.findByUser(savedUser).isEmpty()) {
-            UserDetails details = new UserDetails();
-            details.setUser(savedUser);
-            details.setDob(new SimpleDateFormat("yyyy-MM-dd").parse("2000-01-01").toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate());
-            details.setHeight(165.0);
-            details.setWeight(60.0);
-            details.setFitnessLevel(FitnessLevel.Intermediate);
-            details.setWorkoutGoal(WorkoutGoal.WEIGHT_LOSS.getValue());
-            details.setWorkoutType("HIIT");
-            details.setMenstrualCramps(false);
-            userDetailsRepository.save(details);
+                if (userDetailsRepository.findByUser(savedUser).isEmpty()) {
+                        UserDetails details = new UserDetails();
+                        details.setUser(savedUser);
+                        details.setDob(new SimpleDateFormat("yyyy-MM-dd").parse("2000-01-01").toInstant()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toLocalDate());
+                        details.setHeight(165.0);
+                        details.setWeight(60.0);
+                        details.setFitnessLevel(FitnessLevel.Intermediate);
+                        details.setWorkoutGoal(WorkoutGoal.WEIGHT_LOSS.getValue());
+                        details.setWorkoutType("HIIT");
+                        details.setMenstrualCramps(false);
+                        userDetailsRepository.save(details);
+                }
+
+                // Clear chat history
+                chatHistoryRepository.deleteAllByUser(savedUser);
         }
 
-        // Clear chat history
-        chatHistoryRepository.deleteAllByUser(savedUser);
-    }
+        @Test
+        @Order(1)
+        @Transactional
+        public void testChatbotMemoryAndNonWorkoutHandling() throws Exception {
+                // Set up or retrieve user
+                User user = userRepository.findByEmail("test@example.com").orElseGet(() -> {
+                        User newUser = new User();
+                        newUser.setEmail("test@example.com");
+                        newUser.setPassword("password123");
+                        return userRepository.save(newUser);
+                });
 
-    @Test
-    @Order(1)
-    @Transactional
-    public void testChatbotMemoryAndNonWorkoutHandling() throws Exception {
-        // Set up or retrieve user
-        User user = userRepository.findByEmail("test@example.com").orElseGet(() -> {
-            User newUser = new User();
-            newUser.setEmail("test@example.com");
-            newUser.setPassword("password123");
-            return userRepository.save(newUser);
-        });
+                // Set up user details if missing
+                userDetailsRepository.findByUser(user).orElseGet(() -> {
+                        UserDetails details = new UserDetails();
+                        details.setUser(user);
+                        details.setDob(java.sql.Date.valueOf("2000-01-01").toInstant()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toLocalDate());
+                        details.setFitnessLevel(FitnessLevel.Beginner);
+                        details.setWorkoutGoal("Weight Loss");
+                        details.setWorkoutType("HIIT");
+                        details.setHeight(170.0);
+                        details.setWeight(60.0);
+                        details.setMenstrualCramps(false);
+                        return userDetailsRepository.save(details);
+                });
 
-        // Set up user details if missing
-        userDetailsRepository.findByUser(user).orElseGet(() -> {
-            UserDetails details = new UserDetails();
-            details.setUser(user);
-            details.setDob(java.sql.Date.valueOf("2000-01-01").toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate());
-            details.setFitnessLevel(FitnessLevel.Beginner);
-            details.setWorkoutGoal("Weight Loss");
-            details.setWorkoutType("HIIT");
-            details.setHeight(170.0);
-            details.setWeight(60.0);
-            details.setMenstrualCramps(false);
-            return userDetailsRepository.save(details);
-        });
+                // Add recent chat history
+                LocalDateTime now = LocalDateTime.now();
+                chatHistoryRepository.save(ChatHistory.builder()
+                                .user(user)
+                                .role("user")
+                                .content("Hello, I want to get fit.")
+                                .timestamp(now.minusMinutes(3))
+                                .build());
 
-        // Add recent chat history
-        LocalDateTime now = LocalDateTime.now();
-        chatHistoryRepository.save(ChatHistory.builder()
-                .user(user)
-                .role("user")
-                .content("Hello, I want to get fit.")
-                .timestamp(now.minusMinutes(3))
-                .build());
+                chatHistoryRepository.save(ChatHistory.builder()
+                                .user(user)
+                                .role("assistant")
+                                .content("Sure! How often do you exercise?")
+                                .timestamp(now.minusMinutes(2))
+                                .build());
 
-        chatHistoryRepository.save(ChatHistory.builder()
-                .user(user)
-                .role("assistant")
-                .content("Sure! How often do you exercise?")
-                .timestamp(now.minusMinutes(2))
-                .build());
+                chatHistoryRepository.save(ChatHistory.builder()
+                                .user(user)
+                                .role("user")
+                                .content("I exercise twice a week.")
+                                .timestamp(now.minusMinutes(1))
+                                .build());
 
-        chatHistoryRepository.save(ChatHistory.builder()
-                .user(user)
-                .role("user")
-                .content("I exercise twice a week.")
-                .timestamp(now.minusMinutes(1))
-                .build());
+                // Build user details DTO
+                UserDetails details = userDetailsRepository.findByUser(user).orElseThrow();
+                UserDetailsDTO dto = new UserDetailsDTO();
+                dto.setUserId(user.getUserId());
+                dto.setDob(details.getDob());
+                dto.setHeight(details.getHeight());
+                dto.setWeight(details.getWeight());
+                dto.setFitnessLevel(details.getFitnessLevel());
+                dto.setWorkoutGoal(details.getWorkoutGoal().getValue());
+                dto.setWorkoutType(details.getWorkoutType().getValue());
+                dto.setMenstrualCramps(details.getMenstrualCramps());
 
-        // Build user details DTO
-        UserDetails details = userDetailsRepository.findByUser(user).orElseThrow();
-        UserDetailsDTO dto = new UserDetailsDTO();
-        dto.setUserId(user.getUserId());
-        dto.setDob(details.getDob());
-        dto.setHeight(details.getHeight());
-        dto.setWeight(details.getWeight());
-        dto.setFitnessLevel(details.getFitnessLevel());
-        dto.setWorkoutGoal(details.getWorkoutGoal().getValue());
-        dto.setWorkoutType(details.getWorkoutType().getValue());
-        dto.setMenstrualCramps(details.getMenstrualCramps());
+                // Create fullRequest payload
+                JSONObject fullRequest = new JSONObject();
+                fullRequest.put("message", "How many times a week do I exercise?");
+                fullRequest.put("exercises", List.of()); // no active workout
+                fullRequest.put("exercises_supported", List.of(
+                                Map.of("name", "Jumping Jacks"),
+                                Map.of("name", "Push Ups"),
+                                Map.of("name", "Squats")));
 
-        // Create fullRequest payload
-        JSONObject fullRequest = new JSONObject();
-        fullRequest.put("message", "How many times a week do I exercise?");
-        fullRequest.put("exercises", List.of()); // no active workout
-        fullRequest.put("exercises_supported", List.of(
-                Map.of("name", "Jumping Jacks"),
-                Map.of("name", "Push Ups"),
-                Map.of("name", "Squats")));
+                // Invoke chatbot
+                ChatbotResponseDTO response = chatbotService.getResponse(fullRequest, dto);
+                System.out.println("\n=== Chatbot Response ===\n" + response);
 
-        // Invoke chatbot
-        ChatbotResponseDTO response = chatbotService.getResponse(fullRequest, dto);
-        System.out.println("\n=== Chatbot Response ===\n" + response);
+                // Check that response references past history
+                assertTrue(response.getResponse().toLowerCase().contains("twice"));
+                assertFalse(response.getWorkout() != null); // Not a workout response
+        }
 
-        // Check that response references past history
-        assertTrue(response.getResponse().toLowerCase().contains("twice"));
-        assertFalse(response.getWorkout() != null); // Not a workout response
-    }
+        @Test
+        @Order(2)
+        void testChatbotGeneratesWorkoutPlan() throws Exception {
+                UserDetails userDetails = userDetailsRepository.findByUser(savedUser)
+                                .orElseThrow(() -> new RuntimeException("UserDetails not found"));
 
-    @Test
-    @Order(2)
-    void testChatbotGeneratesWorkoutPlan() throws Exception {
-        UserDetails userDetails = userDetailsRepository.findByUser(savedUser)
-                .orElseThrow(() -> new RuntimeException("UserDetails not found"));
+                UserDetailsDTO dto = new UserDetailsDTO();
+                dto.setUserId(savedUser.getUserId());
+                dto.setDob(userDetails.getDob());
+                dto.setHeight(userDetails.getHeight());
+                dto.setWeight(userDetails.getWeight());
+                dto.setFitnessLevel(userDetails.getFitnessLevel());
+                dto.setWorkoutGoal(userDetails.getWorkoutGoal().getValue());
+                dto.setWorkoutType(userDetails.getWorkoutType().getValue());
+                dto.setMenstrualCramps(userDetails.getMenstrualCramps());
 
-        UserDetailsDTO dto = new UserDetailsDTO();
-        dto.setUserId(savedUser.getUserId());
-        dto.setDob(userDetails.getDob());
-        dto.setHeight(userDetails.getHeight());
-        dto.setWeight(userDetails.getWeight());
-        dto.setFitnessLevel(userDetails.getFitnessLevel());
-        dto.setWorkoutGoal(userDetails.getWorkoutGoal().getValue());
-        dto.setWorkoutType(userDetails.getWorkoutType().getValue());
-        dto.setMenstrualCramps(userDetails.getMenstrualCramps());
+                // create a full request
+                JSONObject fullRequest = new JSONObject();
+                fullRequest.put("message", "Make it easier");
+                fullRequest.put("exercises", List.of(
+                                Map.of("name", "Jumping Jacks", "duration", 40, "rest", 20),
+                                Map.of("name", "Push Ups", "duration", 40, "rest", 20)));
+                fullRequest.put("exercises_supported", List.of(
+                                Map.of("name", "Jumping Jacks"),
+                                Map.of("name", "Push Ups"),
+                                Map.of("name", "Squats")));
 
-        // create a full request
-        JSONObject fullRequest = new JSONObject();
-        fullRequest.put("message", "Make it easier");
-        fullRequest.put("exercises", List.of(
-                Map.of("name", "Jumping Jacks", "duration", 40, "rest", 20),
-                Map.of("name", "Push Ups", "duration", 40, "rest", 20)));
-        fullRequest.put("exercises_supported", List.of(
-                Map.of("name", "Jumping Jacks"),
-                Map.of("name", "Push Ups"),
-                Map.of("name", "Squats")));
+                // 🧠 Talk to AI
+                ChatbotResponseDTO response = chatbotService.getResponse(fullRequest, dto);
+                WorkoutDTO workout = response.getWorkout();
+                String responseText = response.getResponse();
+                // .replace("\n", " ")
+                // .replace("\r", " ");
 
-        // 🧠 Talk to AI
-        ChatbotResponseDTO response = chatbotService.getResponse(fullRequest, dto);
-        WorkoutDTO workout = response.getWorkout();
-        String responseText = response.getResponse();
-        // .replace("\n", " ")
-        // .replace("\r", " ");
+                // ✅ Always ensure a response was received
+                assertNotNull(response);
+                System.out.println("=== Full Chatbot Response ===\n" + response);
 
-        // ✅ Always ensure a response was received
-        assertNotNull(response);
-        System.out.println("=== Full Chatbot Response ===\n" + response);
+                // String[] parts = response.split("---");
+                // if (parts.length < 2) {
+                // fail("Expected JSON workout section but none was found.");
+                // }
 
-        // String[] parts = response.split("---");
-        // if (parts.length < 2) {
-        //     fail("Expected JSON workout section but none was found.");
-        // }
+                // 🔍 Extract JSON block between <BEGIN_JSON> and <END_JSON>
+                // Pattern jsonPattern =
+                // Pattern.compile("<BEGIN_JSON>\\s*([\\s\\S]*?)\\s*<END_JSON>");
+                // Matcher matcher = jsonPattern.matcher(response);
+                // assertTrue(matcher.find(), "Response should contain a JSON block enclosed by
+                // <BEGIN_JSON> and <END_JSON>");
 
-        // 🔍 Extract JSON block between <BEGIN_JSON> and <END_JSON>
-        //Pattern jsonPattern = Pattern.compile("<BEGIN_JSON>\\s*([\\s\\S]*?)\\s*<END_JSON>");
-        //Matcher matcher = jsonPattern.matcher(response);
-        //assertTrue(matcher.find(), "Response should contain a JSON block enclosed by <BEGIN_JSON> and <END_JSON>");
+                // String jsonPart = matcher.group(1).trim();
+                System.out.println("\n=== Extracted JSON Block ===\n" + workout);
 
-        // String jsonPart = matcher.group(1).trim();
-         System.out.println("\n=== Extracted JSON Block ===\n" + workout);
+                // 🧪 Parse into a WorkoutDTO or validate JSON keys
+                // ObjectMapper mapper = new ObjectMapper();
+                // JsonNode jsonNode = mapper.readTree(jsonPart);
 
-        // 🧪 Parse into a WorkoutDTO or validate JSON keys
-        // ObjectMapper mapper = new ObjectMapper();
-        // JsonNode jsonNode = mapper.readTree(jsonPart);
+                // assertTrue(jsonNode.has("name"));
+                // assertTrue(jsonNode.has("exercises"));
+                // assertTrue(jsonNode.get("exercises").isArray());
 
-        // assertTrue(jsonNode.has("name"));
-        // assertTrue(jsonNode.has("exercises"));
-        // assertTrue(jsonNode.get("exercises").isArray());
+                // // 🔍 Extract natural language section
+                // // String[] split = response.split("\\*\\*\\[Natural Language\\]\\*\\*");
+                // String[] split = response.split("(?m)^---\\s*$");
+                // String naturalSection = split[1].trim();
 
-        // // 🔍 Extract natural language section
-        // // String[] split = response.split("\\*\\*\\[Natural Language\\]\\*\\*");
-        // String[] split = response.split("(?m)^---\\s*$");
-        // String naturalSection = split[1].trim();
+                System.out.println("\n=== Natural Language Section ===\n" + responseText);
 
-        System.out.println("\n=== Natural Language Section ===\n" + responseText);
+                // ✅ Ensure the natural text looks like a workout
+                assertTrue(responseText.length() > 30);
 
-        // ✅ Ensure the natural text looks like a workout
-        assertTrue(responseText.length() > 30);
-
-    }
+        }
 
 }

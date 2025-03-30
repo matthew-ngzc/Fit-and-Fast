@@ -3,6 +3,8 @@ package com.fastnfit.app.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.ArrayList;
 import java.util.List;
 import com.fastnfit.app.enums.WorkoutLevel;
 import com.fastnfit.app.enums.WorkoutType;
@@ -46,6 +48,6 @@ public class Workout {
     // private List<Exercise> exercises;
 
     @OneToMany(mappedBy = "workout", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WorkoutExercise> workoutExercises;
+    private List<WorkoutExercise> workoutExercises=new ArrayList<>();
 
 }
