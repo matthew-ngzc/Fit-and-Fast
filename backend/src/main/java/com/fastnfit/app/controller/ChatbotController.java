@@ -55,6 +55,7 @@ public class ChatbotController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             System.out.println("Error in ChatbotController: " + e.getMessage());
+            System.out.println(e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }
@@ -70,6 +71,7 @@ public class ChatbotController {
             WorkoutDTO savedWorkout = workoutService.saveCustomWorkoutForUser(aiWorkout);
             return ResponseEntity.ok(savedWorkout);
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.status(500).build();
         }
     }

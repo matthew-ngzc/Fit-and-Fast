@@ -168,10 +168,10 @@ public class UserControllerIntegrationTest {
         @Test
         public void testGetUserDetails_NotFound() throws Exception {
                 // Don't create user details - should result in not found
-
+                String mockToken = jwtService.generateToken(testUser.getUserId()+1);
                 // Perform GET request
                 mockMvc.perform(get("/api/users/details")
-                                .header("Authorization", "Bearer " + authToken))
+                                .header("Authorization", "Bearer " + mockToken))
                                 .andExpect(status().isNotFound());
         }
 

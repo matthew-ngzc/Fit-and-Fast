@@ -58,6 +58,7 @@ public class WorkoutService {
     public WorkoutDTO convertToDTO(Workout workout) {
         WorkoutDTO dto = new WorkoutDTO();
         dto.setWorkoutId(workout.getWorkoutId());
+        dto.setImage(workout.getImage());
         dto.setCategory(workout.getCategory().getValue());
         dto.setName(workout.getName());
         dto.setDescription(workout.getDescription());

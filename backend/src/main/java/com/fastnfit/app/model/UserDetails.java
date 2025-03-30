@@ -26,15 +26,15 @@ public class UserDetails {
     @Enumerated(EnumType.STRING)
     private PregnancyStatus pregnancyStatus = PregnancyStatus.NO;
     @Enumerated(EnumType.STRING)
-    private WorkoutGoal workoutGoal;
+    private WorkoutGoal workoutGoal=WorkoutGoal.GENERAL;
     private Integer workoutDays;
 
     @Enumerated(EnumType.STRING)
-    private FitnessLevel fitnessLevel;
+    private FitnessLevel fitnessLevel=FitnessLevel.Beginner;
     private boolean menstrualCramps;
     private boolean cycleBasedRecommendations;
     @Enumerated(EnumType.STRING)
-    private WorkoutType workoutType;
+    private WorkoutType workoutType=WorkoutType.OTHERS;
     private String avatar= "/avatars/avatar.png";
 
     // Added field for tracking current streak
