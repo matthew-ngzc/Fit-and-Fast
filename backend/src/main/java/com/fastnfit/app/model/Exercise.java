@@ -18,19 +18,19 @@ public class Exercise {
     private String name;
     
     
-    @Column(length = 1000)
-    private String description;
+    // @Column(length = 1000)
+    // private String description;
     
-    //removed cos we dw each exercise to have a fixed duration and rest time, it should be set in the workout
+    // //removed cos we dw each exercise to have a fixed duration and rest time, it should be set in the workout
     
-    // private Integer duration;
+    // // private Integer duration;
     
-    // private Integer rest;
+    // // private Integer rest;
     
-    private String image;
+    // private String image;
     
-    @Column(length = 500)
-    private String tips;
+    // @Column(length = 500)
+    // private String tips;
     
     // @ManyToMany(mappedBy = "exercises", fetch = FetchType.LAZY)
     // private List<Workout> workout;
