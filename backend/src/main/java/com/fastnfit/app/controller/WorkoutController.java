@@ -6,11 +6,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.fastnfit.app.dto.WorkoutDTO;
+import com.fastnfit.app.dto.WorkoutExerciseDTO;
 import com.fastnfit.app.enums.WorkoutLevel;
 import com.fastnfit.app.enums.WorkoutType;
 import com.fastnfit.app.service.WorkoutService;
 
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api/workouts")
@@ -35,6 +39,12 @@ public class WorkoutController {
         WorkoutDTO workout = workoutService.getWorkoutById(id);
         return ResponseEntity.ok(workout);
     }
+
+    @GetMapping("/{id}/exercises")
+    public ResponseEntity<List<WorkoutExerciseDTO>> getWorkoutExercises(@PathVariable Long id) {
+        return ResponseEntity.ok(workoutService.getWorkoutsWorkoutExercisesById(id));
+    }
+    
 
     @GetMapping("/category/{category}")
     public ResponseEntity<List<WorkoutDTO>> getWorkoutsByCategory(@PathVariable String category) {
