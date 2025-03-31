@@ -51,6 +51,7 @@ public class ChatbotService {
     private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
     private static final String OPENAI_MODEL = "gpt-4o-mini";
     private static final double OPENAI_TEMPERATURE = 0.3;
+    public static final int MAX_RETRIES = 3;
     //private static final String correctionPromptExerciseNotInlist = "        You previously returned a workout plan, but some of the exercise names were NOT from the list of supported exercises provided. This backend check verifies that all exercise names match exactly with the approved list, and your previous reply did not pass that check.";
 
 
@@ -148,40 +149,115 @@ public class ChatbotService {
 
         System.out.println("\n\n\nChatbot reply: " + chatbotReply + "\n\n");
 
-        ChatbotResponseDTO result = parseResponse(chatbotReply);
+        boolean parseFailed = false;
+        String parseExceptionMsg = "";
+        
+        
+        ChatbotResponseDTO result = new ChatbotResponseDTO(null, chatbotReply); //default
+        try {
+            result = parseResponse(chatbotReply);
+        } catch (JsonProcessingException e) {
+            parseExceptionMsg = e.getMessage();
+            parseFailed = true;
+            System.err.println("\n\nFailed to parse chatbot response: " + parseExceptionMsg);
+        }
+        
 
-        if (result.getWorkout() != null){
-        //POST response checking to make sure all the exercises are valid
-                //If not valid reprompt with correction prompt
-            Set<String> exerciseSet = new HashSet<>(exerciseList); //convert exercise list to exercise set for faster lookup
-            List<String> invalidNames = checkExercisesValid(result.getWorkout().getWorkoutExercise(), exerciseSet);
-            while (invalidNames.size() > 0) {
+        Set<String> exerciseSet = new HashSet<>(exerciseList); // convert list to set for fast lookups
+        List<String> invalidNames = new ArrayList<>();
+        // Check for invalid exercises if JSON exists
+        if (result.getWorkout() != null) {
+            invalidNames = checkExercisesValid(result.getWorkout().getWorkoutExercise(), exerciseSet);
+        }
+        boolean needsRetry = false;
+        boolean missingJsonButLooksLikeWorkout = looksLikeWorkoutSuggestion(result.getResponse()) && result.getWorkout() == null;
+        // Retry condition
+        needsRetry = parseFailed || !invalidNames.isEmpty() || missingJsonButLooksLikeWorkout;
+
+        int attemptCount = 0;
+        while (needsRetry && attemptCount < MAX_RETRIES) {
+            if (needsRetry){
+                attemptCount++;
                 String correctionPrompt = """
-                    IMPORTANT: This message is from the backend server and not from the user.
-            
-                    You previously returned a workout plan, but some of the exercise names were NOT from the list of supported exercises provided. This backend check verifies that all exercise names match exactly with the approved list, and your previous reply did not pass that check.
-    
-                    The following names were invalid and not in the supported list:
-                    %s
-    
-                    The user will not see this message. In your next reply, act as if you're generating the response for the first time. Do not apologize, acknowledge any previous error, or hint that this is a second attempt. Simply follow the instructions strictly.
-            
-                    Reminder: You MUST use only the exercise names provided in the list. Do not make up new exercises, modify the names, or introduce variations.
-            
-                    Below is your previous response, shown only to you for reference:
-                    ---
-                    %s
-                    ---
-                    Now regenerate your reply with strict adherence to the supported exercise list.
-                    """.formatted(
-                        invalidNames.stream().map(name -> "- " + name).collect(Collectors.joining("\n")),
-                        chatbotReply);
-                    result = recallAI(correctionPrompt, userInput, systemPrompt, history, chatbotReply, messages);
-                    //recheck the exercises
+                        IMPORTANT: This message is from the backend server and not from the user.
+
+                        The user will not see this message. In your next reply, act as if you're generating the response for the first time. Do not apologize, acknowledge any previous error, or hint that this is a second attempt. Simply follow the instructions strictly.
+                        """;
+
+                if (parseFailed) {
+                    correctionPrompt +=  """       
+                        Your previous reply included a <BEGIN_JSON> block, but it could not be parsed correctly.
+        
+                        Please ensure the JSON format strictly follows the structure shown in the example. All required fields must be present.
+        
+                        Below is your previous response for reference:
+                        ---
+                        %s
+                        ---
+                        Please regenerate your reply with valid JSON.
+                        """.formatted(chatbotReply);
+                } else if (!invalidNames.isEmpty()) {
+                    correctionPrompt = """
+                        You previously returned a workout plan, but some of the exercise names were NOT from the list of supported exercises provided. This backend check verifies that all exercise names match exactly with the approved list, and your previous reply did not pass that check.
+        
+                        The following names were invalid and not in the supported list:
+                        %s
+        
+                        Reminder: You MUST use only the exercise names provided in the list. Do not make up new exercises, modify the names, or introduce variations.
+        
+                        Below is your previous response, shown only to you for reference:
+                        ---
+                        %s
+                        ---
+                        Now regenerate your reply with strict adherence to the supported exercise list.
+                        """.formatted(
+                            invalidNames.stream().map(name -> "- " + name).collect(Collectors.joining("\n")),
+                            chatbotReply);
+                } else { //looks like workout but no json segment
+                    correctionPrompt += """
+                        Your previous reply appeared to be a workout suggestion, but it was missing the required structured JSON between <BEGIN_JSON> and <END_JSON>.
+        
+                        Always include a JSON workout block when giving a workout. Follow the required response format strictly.
+        
+                        Below is your previous reply for reference:
+                        ---
+                        %s
+                        ---
+                        Please regenerate your reply and include the full JSON block this time.
+                        """.formatted(chatbotReply);
+                }
+                //get new response
+                chatbotReply = recallAI(correctionPrompt, userInput, systemPrompt, history, chatbotReply, messages);
+                //recheck the exercises
+                System.out.println("\n\n\nChatbot reply: " + chatbotReply + "\n\n");
+
+                // Retry parsing
+                parseFailed = false;
+                parseExceptionMsg = "";
+                try {
+                    result = parseResponse(chatbotReply);
+                } catch (JsonProcessingException e) {
+                    parseExceptionMsg = e.getMessage();
+                    parseFailed = true;
+                    result = new ChatbotResponseDTO(null, chatbotReply); // fallback DTO
+                    System.err.println("\n\nFailed to parse chatbot response: " + parseExceptionMsg);
+                }
+                // Reset invalidNames for next iteration
+                invalidNames = new ArrayList<>();
+                if (result.getWorkout() != null) {
                     invalidNames = checkExercisesValid(result.getWorkout().getWorkoutExercise(), exerciseSet);
+                }
+                //check if need to retry again
+                missingJsonButLooksLikeWorkout = looksLikeWorkoutSuggestion(result.getResponse()) && result.getWorkout() == null;
+                needsRetry = parseFailed || !invalidNames.isEmpty() || missingJsonButLooksLikeWorkout;
             }
         }
-
+        //if still invalid, return an error chatbotresponsedto
+        if (needsRetry) {
+            System.out.println("Failed to parse chatbot response after retries: " + parseExceptionMsg);
+            chatbotReply = "Error: Unable to generate a valid workout plan. Please try again later.";
+            result = new ChatbotResponseDTO(null, chatbotReply);
+        } 
         
         System.out.println("Saving chat content. Length: " + chatbotReply.length());
 
@@ -196,16 +272,14 @@ public class ChatbotService {
         return result;
     }
 
-    private ChatbotResponseDTO recallAI(String correctionPrompt, String userInput, String systemPrompt, List<ChatHistory> history, String chatbotReply, JSONArray messages) {
+    private String recallAI(String correctionPrompt, String userInput, String systemPrompt, List<ChatHistory> history, String chatbotReply, JSONArray messages) {
         //add correction prompt to the system prompt
         JSONArray newMessages = new JSONArray();
         newMessages.put(new JSONObject()
                     .put("role", "system")
                     .put("content", correctionPrompt));
         newMessages = buildMessages(newMessages, userInput, systemPrompt, history);
-        chatbotReply = callOpenAiApi(messages);
-        System.out.println("\n\n\nChatbot reply: " + chatbotReply + "\n\n");
-        return parseResponse(chatbotReply);
+        return callOpenAiApi(messages);
     }
 
     private String callOpenAiApi(JSONArray messages) {
@@ -266,7 +340,23 @@ public class ChatbotService {
         return invalidNames;
     }
 
-    private ChatbotResponseDTO parseResponse(String chatbotReply){
+    private boolean looksLikeWorkoutSuggestion(String naturalText) {
+        String[] triggerPhrases = {
+            "**Main Workout**", "seconds work", "seconds rest", "Cool Down",
+            "Here's a quick workout", "Would you like to try this workout?", "warm-up", "routine"
+        };
+    
+        for (String phrase : triggerPhrases) {
+            if (naturalText.toLowerCase().contains(phrase.toLowerCase())) {
+                return true;
+            }
+        }
+    
+        return false;
+    }
+    
+
+    private ChatbotResponseDTO parseResponse(String chatbotReply) throws JsonProcessingException {
         String jsonPart = null;
         String responsePart = chatbotReply;
 
@@ -279,20 +369,17 @@ public class ChatbotService {
             responsePart = chatbotReply.substring(matcher.end()).trim();
         }
 
-        ObjectMapper mapper = new ObjectMapper();
         // Convert JSON into DTO
         WorkoutDTO workout = null;
         if (jsonPart != null) {
+            ObjectMapper mapper = new ObjectMapper();
             try {
                 workout = mapper.readValue(jsonPart, WorkoutDTO.class);
-            } catch (JsonMappingException e) {
-                System.out.println("Failed to map JSON to WorkoutDTO: " + e.getMessage());
-                e.printStackTrace();
-                System.out.println("\n");
             } catch (JsonProcessingException e) {
                 System.err.println("\n\nFailed to parse workout JSON: " + e.getMessage());
                 e.printStackTrace();
                 System.out.println("\n");
+                throw e;
             }
         }
 
@@ -306,6 +393,8 @@ public class ChatbotService {
         String weightStr = dto.getWeight() != null ? String.format("%.1f", dto.getWeight()) : "N/A";
 
         return """
+                🚫 NEVER start with a greeting or motivational sentence WHEN generating a workout plan. ALWAYS start with a JSON block first in that case.
+
                 You are an AI fitness coach helping users get personalized workout routines based on their profile and preferences. Make sure to use information from the user profile and their chat history to provide the best possible workout suggestions. Your responses should be clear, concise, and motivational.
 
                 You are not a general purpose chatbot. Your main role is to assist with workouts, fitness plans, and exercise-related questions.
@@ -319,6 +408,10 @@ public class ChatbotService {
 
                 If a question is even slightly related to exercise, workouts, or fitness habits, always treat it seriously and respond appropriately.
 
+                📌 Output Format Instructions (Required):
+                - ONLY use the JSON + natural language format if the user is requesting a workout.
+                - When generating a workout plan, ALWAYS begin your reply with the JSON block between <BEGIN_JSON> and <END_JSON>.
+                - Do NOT start with greetings, motivational text, or explanations before the JSON block.
 
                 ---
 
@@ -435,8 +528,48 @@ public class ChatbotService {
                 This routine will boost your heart rate and help build strength in just 7 minutes. Would you like to try this workout?
 
                 ---
+                🧾 Full Example (Correct Order and Formatting):
+                <BEGIN_JSON>
+                {
+                "name": "Gentle Upper Body and Core Workout",
+                "description": "A low-impact workout focusing on upper body and core strength.",
+                "durationInMinutes": 7,
+                "calories": 70,
+                "level": "Beginner",
+                "category": "low-impact",
+                "workoutExercise": [
+                    { "name": "Plank", "duration": 40, "rest": 20 },
+                    { "name": "Push Ups", "duration": 40, "rest": 20 },
+                    { "name": "Plank", "duration": 40, "rest": 20 },
+                    { "name": "Push Ups", "duration": 40, "rest": 20 },
+                    { "name": "Plank", "duration": 40, "rest": 20 },
+                    { "name": "Push Ups", "duration": 40, "rest": 20 },
+                    { "name": "Plank", "duration": 40, "rest": 20 }
+                ]
+                }
+                <END_JSON>
 
-                Only use the JSON format when generating a workout plan. For general fitness questions, respond naturally and conversationally without any JSON or structured format.
+                It's great to hear that you want to stay active even with a leg injury! Let's focus on a gentle workout that minimizes strain on your leg while still allowing you to engage your upper body and core.
+
+                Here's a modified workout for you:
+
+                **Main Workout (7 minutes)**
+                •  Plank - 40 seconds work, 20 seconds rest
+                •  Push-ups - 40 seconds work, 20 seconds rest
+                •  Plank - 40 seconds work, 20 seconds rest
+                •  Push-ups - 40 seconds work, 20 seconds rest
+                •  Plank - 40 seconds work, 20 seconds rest
+                •  Push-ups - 40 seconds work, 20 seconds rest
+                •  Plank - 40 seconds work, 20 seconds rest
+
+                🧘  Cool Down (Optional): You may follow with light stretching and deep breathing for 1-2 minutes if time allows.
+
+                This routine focuses on your upper body and core, allowing you to stay active while being mindful of your leg. Always listen to your body and modify as needed. Are you ready to give this workout a try?
+
+                ---
+
+                ⚠️ Note:
+                - Only use the JSON format when generating a workout plan. For general fitness questions, respond naturally and conversationally without any JSON or structured format.
 
                 ---
 
