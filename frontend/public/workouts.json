@@ -5,25 +5,25 @@
       "name": "Seated Leg Lifts",
       "description": "Sit in a chair and lift your legs one at a time to work your lower body.",
       "tip": "Engage your core while lifting your legs.",
-      "image": "/images/seated_leg_lifts.jpg"
+      "image": "/images/seated_leg_lifts.png"
     },
     "Standing Side Leg Lifts": {
       "name": "Standing Side Leg Lifts",
       "description": "Stand and lift your leg to the side to strengthen your hips and thighs.",
       "tip": "Keep your posture straight and avoid leaning.",
-      "image": "/images/standing_side_leg_lifts.jpg"
+      "image": "/images/standing_side_leg_lifts.png"
     },
     "Chair Squats": {
       "name": "Chair Squats",
       "description": "Sit and stand up from a chair repeatedly to work your thighs and glutes.",
       "tip": "Keep your knees behind your toes as you squat.",
-      "image": "/images/chair_squats.jpg"
+      "image": "/animations/squats.gif"
     },
     "Wall Push-ups": {
       "name": "Wall Push-ups",
       "description": "Perform push-ups against a wall to build upper body strength.",
       "tip": "Engage your core and keep your body in a straight line.",
-      "image": "/images/wall_push_ups.jpg"
+      "image": "/images/wall_push_ups.png"
     },
     "Step Touch": {
       "name": "Step Touch",
@@ -35,31 +35,31 @@
       "name": "Toe Taps",
       "description": "Tap your toes on the ground in a rhythmic motion.",
       "tip": "Keep your core engaged while performing this move.",
-      "image": "/images/toe_taps.jpg"
+      "image": "/images/toe_taps.png"
     },
     "Arm Circles": {
       "name": "Arm Circles",
       "description": "Make small circles with your arms to work your shoulders.",
       "tip": "Start with small circles and gradually increase the size.",
-      "image": "/images/arm_circles.jpg"
+      "image": "/images/arm_circles.png"
     },
     "Marching in Place": {
       "name": "Marching in Place",
       "description": "Lift your knees one at a time as if you're marching in place.",
       "tip": "Use your arms to increase intensity.",
-      "image": "/images/marching_in_place.jpg"
+      "image": "/images/marching_in_place.png"
     },
     "Jumping Jacks": {
       "name": "Jumping Jacks",
       "description": "Jump with your arms and legs wide, then return to standing.",
       "tip": "Engage your core and keep a steady rhythm.",
-      "image": "/images/jumping_jacks.jpg"
+      "image": "/animations/jumpingjacks.gif"
     },
     "Burpees": {
       "name": "Burpees",
       "description": "Squat down, jump into a plank position, then jump up.",
       "tip": "Make sure to land softly when you jump back up.",
-      "image": "/images/burpees.jpg"
+      "image": "/animations/burpees.gif"
     },
     "Mountain Climbers": {
       "name": "Mountain Climbers",
@@ -71,37 +71,37 @@
       "name": "High Knees",
       "description": "Lift your knees high as you march or run in place.",
       "tip": "Engage your core and maintain a brisk pace.",
-      "image": "/images/high_knees.jpg"
+      "image": "/images/high_knees.png"
     },
     "Squat Jumps": {
       "name": "Squat Jumps",
       "description": "Perform a squat, then explode upwards into a jump.",
       "tip": "Land softly and keep your knees behind your toes.",
-      "image": "/images/squat_jumps.jpg"
+      "image": "/images/squat_jumps.png"
     },
     "Skater Jumps": {
       "name": "Skater Jumps",
       "description": "Jump laterally from one foot to the other, mimicking a skating motion.",
       "tip": "Focus on balance and control as you land.",
-      "image": "/images/skater_jumps.jpg"
+      "image": "/images/lateral_jumps.png"
     },
     "Lateral Hops": {
       "name": "Lateral Hops",
       "description": "Hop side to side with both feet together.",
       "tip": "Keep your knees slightly bent as you jump.",
-      "image": "/images/lateral_hops.jpg"
+      "image": "/images/lateral_jumps.png"
     },
     "Tuck Jumps": {
       "name": "Tuck Jumps",
       "description": "Jump up and bring your knees towards your chest.",
       "tip": "Land softly and keep your back straight.",
-      "image": "/images/tuck_jumps.jpg"
+      "image": "/images/tuck_jumps.png"
     },
     "Deadlifts": {
       "name": "Deadlifts",
       "description": "Lift weights from the ground to standing, targeting your lower back and hamstrings.",
       "tip": "Keep your back straight and hinge at your hips.",
-      "image": "/images/deadlifts.jpg"
+      "image": "/images/deadlifts.png"
     },
     "Bicep Curls": {
       "name": "Bicep Curls",
@@ -143,25 +143,25 @@
       "name": "Goblet Squats",
       "description": "Hold a weight close to your chest and perform squats.",
       "tip": "Keep your chest upright and knees behind your toes.",
-      "image": "/images/goblet_squats.jpg"
+      "image": "/animations/squats.gif"
     },
     "Push-ups": {
       "name": "Push-ups",
       "description": "Perform a push-up to strengthen your chest and arms.",
       "tip": "Keep your body in a straight line from head to heels.",
-      "image": "/images/push_ups.jpg"
+      "image": "/animations/plank.gif"
     },
     "Planks": {
       "name": "Planks",
       "description": "Hold a plank position to strengthen your core.",
       "tip": "Keep your back straight and engage your core.",
-      "image": "/images/planks.jpg"
+      "image": "/animations/plank.gif"
     },
     "Wall Sit": {
       "name": "Wall Sit",
       "description": "Sit against a wall with your knees at a 90-degree angle.",
       "tip": "Engage your core and hold the position as long as possible.",
-      "image": "/images/wall_sit.jpg"
+      "image": "/images/wall_sit.png"
     },
     "Superman Hold": {
       "name": "Superman Hold",
@@ -179,7 +179,7 @@
       "name": "Side Lunges",
       "description": "Lunge out to the side, alternating legs.",
       "tip": "Keep your chest upright and knees behind your toes.",
-      "image": "/images/side_lunges.jpg"
+      "image": "/animations/sidelunges.gif"
     },
     "Donkey Kicks": {
       "name": "Donkey Kicks",
@@ -197,13 +197,13 @@
       "name": "Battle Ropes",
       "description": "Swing heavy ropes in various patterns to engage your entire body.",
       "tip": "Use your core to control the ropes.",
-      "image": "/images/battle_ropes.jpg"
+      "image": "/images/battle_ropes.png"
     },
     "Kettlebell Swings": {
       "name": "Kettlebell Swings",
       "description": "Swing a kettlebell between your legs and up to chest height.",
       "tip": "Use your hips to generate power for the swing.",
-      "image": "/images/kettlebell_swings.jpg"
+      "image": "/images/kettlebell_swings.png"
     },
     "Medicine Ball Slams": {
       "name": "Medicine Ball Slams",
@@ -299,7 +299,7 @@
       "name": "Pelvic Floor Exercises",
       "description": "Engage your pelvic floor muscles to strengthen them.",
       "tip": "Focus on squeezing and holding for a few seconds.",
-      "image": "/images/pelvic_floor_exercises.jpg"
+      "image": "/images/glute_bridges.jpg"
     },
     "Postnatal Yoga Twists": {
       "name": "Postnatal Yoga Twists",
