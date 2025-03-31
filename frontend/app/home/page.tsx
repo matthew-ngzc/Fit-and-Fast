@@ -59,13 +59,36 @@ export default function HomePage() {
   const [username, setUsername] = useState("");
   const [workoutsData, setWorkoutsData] = useState<Workout[]>([]);
   const [recommendedWorkoutData, setRecommendedWorkoutData] = useState<{
-    workoutId: string | null;
+    workoutId: number | null;
     title: string | null;
     description: string | null;
     level: string | null;
     category: string | null;
     calories: string | null;
   } | null>(null);
+
+  const handleButtonClick = () => {
+    // Check if recommendedWorkoutData is available and if workoutId is not null
+    if (!recommendedWorkoutData || !recommendedWorkoutData.workoutId || !recommendedWorkoutData.category) {
+      return;
+    }
+  
+    // Access the array of workouts for the category
+    const workoutCategory = workouts[recommendedWorkoutData.category];
+  
+    if (workoutCategory && Array.isArray(workoutCategory)) {
+  
+      // Find the workout within the array using the workoutId
+      const workout = workoutCategory.find(w => w.workoutId === recommendedWorkoutData.workoutId);
+  
+      if (workout) {
+        // If workout is found, store it in localStorage
+        localStorage.setItem("currentWorkout", JSON.stringify(workout));
+      } else {
+      }
+    } else {
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -162,7 +185,6 @@ export default function HomePage() {
         });
 
         setWorkoutsData(response.data);
-        console.log(response.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching workouts:", error);
@@ -253,7 +275,7 @@ export default function HomePage() {
                       {recommendedWorkoutData?.description}
                     </p>
                   </div>
-                  <Button asChild>
+                  <Button asChild onClick={handleButtonClick}>
                     <Link
                       href={
                         recommendedWorkoutData?.workoutId
