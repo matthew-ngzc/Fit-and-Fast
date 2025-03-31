@@ -125,30 +125,21 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     // Fetch the workout data from localStorage
     const storedWorkout = localStorage.getItem("currentWorkout");
-    console.log("Stored workout from localStorage:", storedWorkout);
-
     if (storedWorkout) {
       const workoutData: WorkoutProgramType = JSON.parse(storedWorkout);
-      console.log("Parsed workout data:", workoutData);
       setWorkout(workoutData);
     }
   }, []);
 
   useEffect(() => {
     if (!workout) {
-      console.log("Workout is still not available.");
       return; // Avoid running fetchWorkoutExercises if workout is not set
     }
 
     async function fetchWorkoutExercises() {
       try {
-        console.log("Workout detected:", workout);
 
         if (params.id === "0") {
-          console.log(
-            "AI-generated workout detected. Fetching from local storage..."
-          );
-
           if (!workout) {
             console.error("Workout or workout.exercises is undefined");
             setLoading(false);
@@ -156,19 +147,22 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
           }
 
           // AI-generated exercises logic
-          const aiGeneratedExercises = workout.workoutExercise.map(({ name, duration, rest }: Exercise) => {
-            const workoutDetails = (workoutsData as WorkoutsData).workouts[name];
-            return {
-              name,
-              description: workoutDetails?.description || "No description available",
-              image: workoutDetails?.image || "",
-              duration,
-              rest,
-              tips: workoutDetails?.tip || "No tips available",
-            };
-          });
-
-          console.log("Final AI-generated exercises:", aiGeneratedExercises);
+          const aiGeneratedExercises = workout.workoutExercise.map(
+            ({ name, duration, rest }: Exercise) => {
+              const workoutDetails = (workoutsData as WorkoutsData).workouts[
+                name
+              ];
+              return {
+                name,
+                description:
+                  workoutDetails?.description || "No description available",
+                image: workoutDetails?.image || "",
+                duration,
+                rest,
+                tips: workoutDetails?.tip || "No tips available",
+              };
+            }
+          );
           setExerciseDetails(aiGeneratedExercises);
           return;
         }

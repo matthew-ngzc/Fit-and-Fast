@@ -64,6 +64,10 @@ export default function ChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const saveWorkoutToLocalStorage = (workoutData: WorkoutData): void => {
+    const sanitizedWorkoutData = {
+      ...workoutData,
+      calories: workoutData.calories ?? 250, 
+    };
     localStorage.setItem("workout", JSON.stringify(workoutData));
   };
 
