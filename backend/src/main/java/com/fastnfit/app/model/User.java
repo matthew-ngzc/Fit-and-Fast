@@ -27,4 +27,13 @@ public class User {
     // One-to-many relationship with History
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<History> history;
+
+    // One-to-many relationship with chat history
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ChatHistory> chatHistory;
+
+    // One-to-many relationship with userAchievements
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAchievement> userAchievements;
+
 }

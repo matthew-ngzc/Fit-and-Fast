@@ -18,7 +18,7 @@ public class WorkoutDTO {
     private WorkoutLevel level;
     private Integer calories;
     private Integer durationInMinutes;
-    private String image;
+    private String image = "/images/default.jpg";
     private List<WorkoutExerciseDTO> workoutExercise;
 
 }

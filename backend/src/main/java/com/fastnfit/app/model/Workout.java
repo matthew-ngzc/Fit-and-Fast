@@ -34,7 +34,7 @@ public class Workout {
     
     private Integer calories;
     private Integer durationInMinutes;
-    private String image;
+    private String image = "/images/default.jpg";
     
     // @OneToMany(mappedBy = "workout",fetch=FetchType.LAZY)
     // private List<History> historyWorkoutList;
