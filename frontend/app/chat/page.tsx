@@ -168,9 +168,10 @@ export default function ChatPage() {
         }
 
         const data = await response.json();
+        saveWorkoutToLocalStorage(data);
 
         localStorage.removeItem("workout"); 
-        localStorage.setItem("currentWorkout", JSON.stringify(workoutData));
+        localStorage.setItem("currentWorkout", JSON.stringify(data));
 
         const confirmationMessage: Message = {
           id: Date.now().toString(),
@@ -181,7 +182,7 @@ export default function ChatPage() {
 
         setMessages((prev) => [...prev, confirmationMessage]);
         setTimeout(() => {
-          window.location.href = "/workout/0";
+          window.location.href = `/workout/${data.workoutId}`;
         }, 2000); 
       } catch (error) {
         console.error("Error saving workout:", error);
