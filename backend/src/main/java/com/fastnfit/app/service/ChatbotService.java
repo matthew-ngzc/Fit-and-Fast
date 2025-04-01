@@ -279,7 +279,7 @@ public class ChatbotService {
                     .put("role", "system")
                     .put("content", correctionPrompt));
         newMessages = buildMessages(newMessages, userInput, systemPrompt, history);
-        return callOpenAiApi(messages);
+        return callOpenAiApi(newMessages);
     }
 
     private String callOpenAiApi(JSONArray messages) {
@@ -340,20 +340,93 @@ public class ChatbotService {
         return invalidNames;
     }
 
+    // private boolean looksLikeWorkoutSuggestion(String naturalText) {
+    //     String[] triggerPhrases = {
+    //         "**Main Workout**", "seconds work", "seconds rest", "Cool Down",
+    //         "Here's a quick workout", "Would you like to try this workout?", "warm-up", "routine"
+    //     };
+    
+    //     for (String phrase : triggerPhrases) {
+    //         if (naturalText.toLowerCase().contains(phrase.toLowerCase())) {
+    //             return true;
+    //         }
+    //     }
+    
+    //     return false;
+    // }
+
+    // private boolean looksLikeWorkoutSuggestion(String naturalText) {
+    //     if (naturalText == null || naturalText.isEmpty()) return false;
+    
+    //     // Match only if there's a section with a structured list of workout steps
+    //     String[] strongIndicators = {
+    //         "**Main Workout**",
+    //         "seconds work,",
+    //         "seconds rest",
+    //         "<BEGIN_JSON>", // the most reliable
+    //         "Would you like to try this workout?",
+    //         "Here's a quick workout",
+
+    //     };
+    
+    //     for (String phrase : strongIndicators) {
+    //         if (naturalText.toLowerCase().contains(phrase.toLowerCase())) {
+    //             return true;
+    //         }
+    //     }
+    
+    //     return false;
+    // }
+
+    //using regex for better checking
     private boolean looksLikeWorkoutSuggestion(String naturalText) {
-        String[] triggerPhrases = {
-            "**Main Workout**", "seconds work", "seconds rest", "Cool Down",
-            "Here's a quick workout", "Would you like to try this workout?", "warm-up", "routine"
+        if (naturalText == null || naturalText.isEmpty()) return false;
+    
+        String lowerText = naturalText.toLowerCase();
+        String cleanedText = lowerText.replaceAll("[*_]{1,2}", "");
+
+    
+        // 1. Section headers that signal a workout
+        String[] keywords = {
+            "main workout",  // markdown header
+            "warm-up",
+            "cool down",
+            "would you like to try this workout?",
+            "here's a quick workout",
+            "cool-down"
         };
     
-        for (String phrase : triggerPhrases) {
-            if (naturalText.toLowerCase().contains(phrase.toLowerCase())) {
-                return true;
+        int keywordMatches = 0;
+        for (String keyword : keywords) {
+            if (cleanedText.contains(keyword)) {
+                keywordMatches++;
+                if (keywordMatches >= 2) break;
             }
+        }
+        boolean hasEnoughKeywords = keywordMatches >= 2;
+        // 2. Check for structured workout bullet format
+        boolean hasStructuredFormat = hasMultipleWorkoutBullets(naturalText);
+
+    
+        return hasStructuredFormat || hasEnoughKeywords;
+    }
+
+    private boolean hasMultipleWorkoutBullets(String naturalText) {
+        Pattern bulletLine = Pattern.compile("•\\s+.+\\s-\\s\\d+\\sseconds work,\\s\\d+\\sseconds rest", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = bulletLine.matcher(naturalText);
+    
+        int count = 0;
+        while (matcher.find()) {
+            count++;
+            if (count >= 3) return true; // Minimum threshold
         }
     
         return false;
     }
+    
+    
+    
+    
     
 
     private ChatbotResponseDTO parseResponse(String chatbotReply) throws JsonProcessingException {
