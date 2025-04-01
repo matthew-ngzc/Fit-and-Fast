@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastnfit_Container
+    image: fastnfit:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - OPEN_API_KEY=${OPEN_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - DB_URL=${DB_URL}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+    env_file:
+      - .env
+    volumes:
+      - .:/workspace/app
+    command: ["java", "-cp", "app:app/lib/*", "com.fastnfit.app.WorkoutApplication"]

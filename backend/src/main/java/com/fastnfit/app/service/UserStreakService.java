@@ -69,7 +69,7 @@ public class UserStreakService {
                 if (workedOutYesterday == 0){
                     // Reset streak if missed yesterday
                     currentStreak = 0;
-                }          
+                }
                 if (workedOutToday == 1) {
                     // Increment streak if worked out yesterday or starting a new streak
                     currentStreak = currentStreak + 1;

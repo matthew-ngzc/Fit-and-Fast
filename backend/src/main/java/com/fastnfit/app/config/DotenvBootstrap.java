@@ -21,11 +21,11 @@ public class DotenvBootstrap {
     @PostConstruct
     public void init() {
         try {
-            Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+            Dotenv dotenv = Dotenv.configure()
+                    .load();
             Map<String, Object> envMap = new HashMap<>();
 
             dotenv.entries().forEach(entry -> envMap.put(entry.getKey(), entry.getValue()));
-
             // Add to Spring Boot environment
             environment.getPropertySources().addFirst(new MapPropertySource("dotenvProperties", envMap));
 
