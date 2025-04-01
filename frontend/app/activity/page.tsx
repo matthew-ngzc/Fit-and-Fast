@@ -47,28 +47,15 @@ interface ActivityData {
 }
 
 export default function ActivityPage() {
-  // Set up state variables for today's calories and minutes
   const [todayCalories, setTodayCalories] = useState(0);
   const [todayMinutes, setTodayMinutes] = useState(0);
   const [weeklyData, setWeeklyData] = useState<WeeklyActivity[]>([]);
   const [recentWorkouts, setRecentWorkouts] = useState<WorkoutHistory[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Use useEffect to load data when the component mounts
   useEffect(() => {
     async function loadActivityData() {
       try {
         const token = localStorage.getItem("token");
-
-        if (!token) {
-          setError("No authentication token found. Please log in.");
-          setIsLoading(false);
-          return;
-        }
-
-        setIsLoading(true);
-
         const response = await axios.get<ActivityData>(
           `${config.HISTORY_URL}/activity/overview`,
           {
@@ -92,22 +79,13 @@ export default function ActivityPage() {
         setTodayMinutes(today.durationInMinutes);
         setWeeklyData(validWeeklyData);
         setRecentWorkouts(recentWorkouts);
-
-        console.log(recentWorkouts);
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          setError(
-            error.response?.data?.message ||
-              "An error occurred while fetching activity data"
-          );
           console.error("API error:", error);
         } else {
-          setError("An unexpected error occurred");
           console.error("Unexpected error:", error);
         }
-      } finally {
-        setIsLoading(false);
-      }
+      } 
     }
 
     loadActivityData();

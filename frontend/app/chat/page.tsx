@@ -24,14 +24,6 @@ type Message = {
   workoutId?: string;
 };
 
-type Exercise = {
-  id: string;
-  name: string;
-  sets: number;
-  reps: number;
-  duration?: string;
-};
-
 interface WorkoutExercise {
   name: string;
   duration: number;
@@ -66,7 +58,7 @@ export default function ChatPage() {
   const saveWorkoutToLocalStorage = (workoutData: WorkoutData): void => {
     const sanitizedWorkoutData = {
       ...workoutData,
-      calories: workoutData.calories ?? 250, 
+      calories: workoutData.calories ?? 250,
     };
     localStorage.setItem("workout", JSON.stringify(workoutData));
   };
@@ -97,7 +89,6 @@ export default function ChatPage() {
   const handleSend = async () => {
     if (inputValue.trim() === "" || loading) return;
 
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       content: inputValue,
@@ -143,7 +134,6 @@ export default function ChatPage() {
   };
 
   const handleWorkoutAction = async (accept: boolean, workoutId: string) => {
-    // Remove action buttons from the message
     setMessages(
       messages.map((msg) =>
         msg.workoutId === workoutId ? { ...msg, showActions: false } : msg
@@ -151,7 +141,6 @@ export default function ChatPage() {
     );
 
     if (accept) {
-      // Add user acceptance message
       const userMessage: Message = {
         id: Date.now().toString(),
         content: "I'll try this workout!",
@@ -159,16 +148,12 @@ export default function ChatPage() {
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, userMessage]);
-
-      // Show loading state
       setLoading(true);
 
       try {
         const userId = localStorage.getItem("userId") || "default";
         const token = localStorage.getItem("token") || "";
         const workoutData = JSON.parse(localStorage.getItem("workout") || "{}");
-        console.log("Returning: " + JSON.stringify(workoutData, null, 2));
-        // Make API call to save the workout (you'll need to implement this endpoint)
         const response = await fetch(`${config.BOT_URL}/${userId}/accept`, {
           method: "POST",
           headers: {
@@ -184,10 +169,9 @@ export default function ChatPage() {
 
         const data = await response.json();
 
-        localStorage.removeItem("workout"); // Clear previous workout
+        localStorage.removeItem("workout"); 
         localStorage.setItem("currentWorkout", JSON.stringify(workoutData));
 
-        // Show confirmation message from bot
         const confirmationMessage: Message = {
           id: Date.now().toString(),
           content: `Great! I've added this workout to your routine. Redirecting you to your personalised workout plan...`,
@@ -196,12 +180,9 @@ export default function ChatPage() {
         };
 
         setMessages((prev) => [...prev, confirmationMessage]);
-
-        // Redirect to workout page after a short delay
         setTimeout(() => {
           window.location.href = "/workout/0";
-        }, 2000); // 2 seconds delay before redirection
-
+        }, 2000); 
       } catch (error) {
         console.error("Error saving workout:", error);
         const errorMessage: Message = {
@@ -216,41 +197,9 @@ export default function ChatPage() {
       } finally {
         setLoading(false);
       }
-    } else {
-      // Add rejection message
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        content: "I'd like a different workout.",
-        sender: "user",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, userMessage]);
-
-      // Get bot response for the rejection
-      setLoading(true);
-      try {
-        const botResponse = await getBotResponse(
-          "I'd like a different workout. Can you suggest an alternative?"
-        );
-        setMessages((prev) => [...prev, botResponse]);
-      } catch (error) {
-        console.error("Error getting alternative workout:", error);
-        const feedbackMessage: Message = {
-          id: Date.now().toString(),
-          content:
-            "No problem! Could you tell me what you'd like to change about the workout? Would you prefer something less intense, different exercises, or a different focus area?",
-          sender: "bot",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, feedbackMessage]);
-      } finally {
-        setLoading(false);
-      }
-    }
+    } 
   };
 
-  // Enhanced bot response logic with workout generation
   const getBotResponse = async (message: string): Promise<Message> => {
     try {
       const userId = localStorage.getItem("userId") || "default";
@@ -274,11 +223,9 @@ export default function ChatPage() {
       }
 
       const data = await response.json();
-      console.log("Bot response data:", data);
       const workoutData = data.workout;
       saveWorkoutToLocalStorage(workoutData);
 
-      // Check if response includes a workout
       const showActions = !!data.workout;
       const workoutId = data.workout?.workoutId?.toString() || "";
 
@@ -291,7 +238,6 @@ export default function ChatPage() {
         workoutId,
       };
     } catch (error) {
-      console.error("Error getting bot response:", error);
       return {
         id: Date.now().toString(),
         content:

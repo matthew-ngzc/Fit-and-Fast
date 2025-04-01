@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider> {/* Wrap everything with AuthProvider */}
+        <AuthProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="light"

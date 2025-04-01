@@ -3,7 +3,6 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,16 +12,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { EditIcon } from "lucide-react";
 import { CycleInfo } from "@/components/cycle-info";
 import config from "@/config";
 
@@ -168,35 +157,5 @@ export default function CalendarPage() {
         </section>
       </div>
     </div>
-  );
-}
-
-function Label({
-  htmlFor,
-  children,
-}: {
-  htmlFor: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label
-      htmlFor={htmlFor}
-      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-    >
-      {children}
-    </label>
-  );
-}
-
-function Input({
-  id,
-  ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { id: string }) {
-  return (
-    <input
-      id={id}
-      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-      {...props}
-    />
   );
 }

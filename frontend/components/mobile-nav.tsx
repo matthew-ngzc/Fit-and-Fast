@@ -8,10 +8,8 @@ import { CalendarIcon, HomeIcon, LineChartIcon, UserIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 export function MobileNav() {
-  // Update the pathname check to hide the bottom navigation on workout and chat pages
   const pathname = usePathname()
 
-  // Hide mobile navigation on auth pages, workout pages, and chat page
   if (pathname?.startsWith("/auth") || pathname?.startsWith("/workout") || pathname?.startsWith("/chat")) {
     return null
   }

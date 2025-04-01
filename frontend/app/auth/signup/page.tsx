@@ -21,25 +21,21 @@ export default function SignupPage() {
   const [success, setSuccess] = useState("");
   const router = useRouter();
 
-  // Email regex pattern
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Check for empty fields
     if (!username || !email || !password || !confirmPassword) {
       setError("All fields must be filled out.");
       return;
     }
 
-    // Validate that passwords match
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
-    // Validate email format using regex
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email address");
       return;
@@ -60,7 +56,7 @@ export default function SignupPage() {
         setSuccess("Account created successfully!");
         setError(""); 
         setTimeout(() => {
-          router.replace("/auth/questionnaire"); // Redirect to questionnaire
+          router.replace("/auth/questionnaire"); 
         }, 1000); 
       } 
      

@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function MainNav() {
-  // Update the pathname check to hide the bottom navigation on workout and chat pages
   const pathname = usePathname();
 
-  // Hide web navigation on auth pages, workout pages, and chat page
   if (
     pathname?.startsWith("/auth") ||
     pathname?.startsWith("/workout") ||

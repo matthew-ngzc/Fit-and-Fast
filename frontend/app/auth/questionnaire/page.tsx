@@ -71,13 +71,11 @@ export default function QuestionnairePage() {
     const { name, value } = e.target;
 
     if (isSelect) {
-      // Handle the change for Select components
       setFormData({
         ...formData,
         [name]: value,
       });
     } else {
-      // Handle regular input changes
       setFormData({
         ...formData,
         [name]: value,
@@ -111,8 +109,6 @@ export default function QuestionnairePage() {
         lastPeriodDate: formData.lastPeriodDate,
       };
 
-      console.log("Submitting request:", requestData);
-      console.log(token);
       const response = await fetch(`${config.USER_URL}/questionnaire`, {
         method: "POST",
         headers: {
@@ -151,15 +147,11 @@ export default function QuestionnairePage() {
   };
 
   const isStep3Complete = () => {
-    // Only validate if they opted for cycle-based recommendations
-    if (formData.cycleBasedRecommendations === "yes") {
-      return (
-        formData.cycleLength.trim() !== "" &&
-        formData.periodLength.trim() !== "" &&
-        formData.lastPeriodDate.trim() !== ""
-      );
-    }
-    return true;
+    return (
+      formData.cycleLength.trim() !== "" &&
+      formData.periodLength.trim() !== "" &&
+      formData.lastPeriodDate.trim() !== ""
+    );
   };
 
   const isStep4Complete = () => {
@@ -599,12 +591,6 @@ export default function QuestionnairePage() {
               >
                 Complete
               </Button>
-              {/* <Button
-                className="flex-1 bg-primary hover:bg-primary/90"
-                onClick={() => (window.location.href = "/")}
-              >
-                Complete
-              </Button> */}
             </CardFooter>
           </Card>
         )}

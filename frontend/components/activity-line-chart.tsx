@@ -5,7 +5,6 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ClockIcon, FlameIcon } from "lucide-react"
 
-// Define the structure of the data
 type ActivityData = {
   date: string
   caloriesBurned: number
@@ -20,7 +19,6 @@ export function ActivityLineChart({ weeklyData }: { weeklyData: ActivityData[] }
   useEffect(() => {
     if (weeklyData && weeklyData.length > 0) {
       try {
-        // Format the date before setting it in the state
         const formatted = weeklyData.map((item) => {
           const date = new Date(item.date)
           const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1)

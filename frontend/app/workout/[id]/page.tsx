@@ -123,7 +123,6 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
   }, []);
 
   useEffect(() => {
-    // Fetch the workout data from localStorage
     const storedWorkout = localStorage.getItem("currentWorkout");
     if (storedWorkout) {
       const workoutData: WorkoutProgramType = JSON.parse(storedWorkout);
@@ -133,7 +132,7 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     if (!workout) {
-      return; // Avoid running fetchWorkoutExercises if workout is not set
+      return; 
     }
 
     async function fetchWorkoutExercises() {
@@ -231,32 +230,26 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
     }
   }, [workoutState]);
 
-  // Timer effect for workout
   useEffect(() => {
     if (!isPlaying || !workout) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          // Time's up, switch between exercise and rest
           if (isRest) {
-            // Rest is over, move to next exercise
             const nextExerciseIndex = currentExercise + 1;
             setCurrentExercise(nextExerciseIndex);
             setIsRest(false);
             return 40; // Exercise duration
           } else {
-            // Exercise is over
-            // Check if this is the last exercise
             if (currentExercise >= exerciseDetails.length - 1) {
               // Last exercise completed, end workout
               clearInterval(timer);
               setWorkoutState("completed");
               return 0;
             } else {
-              // Not the last exercise, start rest period
               setIsRest(true);
-              return 20; // Rest duration
+              return 20; 
             }
           }
         }
@@ -280,17 +273,14 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
     if (!workout) return;
 
     if (isRest) {
-      // If in rest, skip to the next exercise
       const nextExerciseIndex = currentExercise + 1;
       setCurrentExercise(nextExerciseIndex);
       setIsRest(false);
       setTimeLeft(40);
     } else if (currentExercise < exerciseDetails.length - 1) {
-      // If not the last exercise, skip to rest
       setIsRest(true);
       setTimeLeft(20);
     } else {
-      // If last exercise, complete workout
       setWorkoutState("completed");
     }
   };
@@ -339,17 +329,13 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
     );
   }
 
-  // Get current exercise data
   const currentExerciseData = exerciseDetails[currentExercise];
-
-  // Get next exercise data (for rest periods)
   const nextExerciseIndex = currentExercise + 1;
   const nextExerciseData =
     nextExerciseIndex < exerciseDetails.length
       ? exerciseDetails[nextExerciseIndex]
       : null;
 
-  // Determine which exercise to display
   const displayExerciseData =
     isRest && nextExerciseData ? nextExerciseData : currentExerciseData;
 
@@ -580,9 +566,6 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
           onFinish={() => (window.location.href = "/home")}
         />
       )}
-
-      {/* When workout is completed, POST request here: /api/history/user/{userId}
-       * Provide all the information required to create a history */}
 
       <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
         <AlertDialogContent>

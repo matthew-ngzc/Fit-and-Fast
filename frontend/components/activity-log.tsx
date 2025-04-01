@@ -1,6 +1,5 @@
 "use client"
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { CalendarIcon, ClockIcon, FlameIcon } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -24,10 +23,9 @@ export function ActivityLog({ recentWorkouts }: { recentWorkouts: WorkoutHistory
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    // If recentWorkouts changes, update activities
     setActivities(recentWorkouts)
     console.log(activities);
-  }, [recentWorkouts]) // Only run when recentWorkouts changes
+  }, [recentWorkouts]) 
 
   if (loading) {
     return <div className="py-4 text-center">Loading activities...</div>

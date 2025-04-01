@@ -898,7 +898,10 @@ export default function ProfilePage() {
                       Manage your period cycle information
                     </CardDescription>
                   </div>
-                  <Dialog open={periodDialogOpen} onOpenChange={setPeriodDialogOpen}>
+                  <Dialog
+                    open={periodDialogOpen}
+                    onOpenChange={setPeriodDialogOpen}
+                  >
                     <DialogTrigger asChild>
                       <Button variant="outline" size="sm">
                         <EditIcon className="h-4 w-4 mr-2" />

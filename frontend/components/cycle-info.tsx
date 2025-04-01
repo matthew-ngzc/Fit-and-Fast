@@ -40,7 +40,6 @@ export function CycleInfo({ cycleData }: CycleInfoProps) {
     );
   }
 
-  // Format date to display in a readable format
   const formatDate = (date: Date) => {
     if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
       return "Unknown date";
@@ -48,16 +47,7 @@ export function CycleInfo({ cycleData }: CycleInfoProps) {
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
-  // Calculate days until next period
   const today = new Date();
-
-  // Determine current phase
-  const isInPeriod =
-    today >= cycleData.lastPeriodStartDate &&
-    today <= cycleData.lastPeriodEndDate;
-  const isInFollicularPhase =
-    today > cycleData.lastPeriodEndDate && today < cycleData.nextPeriodStart;
-
   let phaseColor = "bg-muted";
 
   switch (cycleData.currentPhase) {

@@ -27,7 +27,6 @@ export function WorkoutCompletionScreen({
   onFinish,
 }: WorkoutCompletionScreenProps) {
   useEffect(() => {
-    // Trigger confetti when component mounts
     confetti({
       particleCount: 100,
       spread: 70,
