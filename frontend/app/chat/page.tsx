@@ -67,7 +67,7 @@ export default function ChatPage() {
   const quickQuestions = [
     "Can you lower the difficulty because it's my period?",
     "How can I make the workout more intense?",
-    "Generate a 20-minute workout for me",
+    "Generate a 10-minute workout for me",
   ];
 
   const scrollToBottom = () => {

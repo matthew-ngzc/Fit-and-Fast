@@ -140,6 +140,9 @@ export default function CalendarPage() {
                   modifiersClassNames={{
                     streak: "border-2 border-pink-600",
                   }}
+                  disabled={(date) =>
+                    date.getMonth() !== new Date().getMonth() || date.getFullYear() !== new Date().getFullYear()
+                  }
                 />
               </CardContent>
               <CardFooter className="flex justify-between text-sm text-muted-foreground">

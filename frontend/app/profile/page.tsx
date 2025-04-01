@@ -1007,7 +1007,7 @@ export default function ProfilePage() {
                 <CardHeader>
                   <CardTitle>Account Settings</CardTitle>
                   <CardDescription>
-                    Manage your account preferences
+                    Sign out of your account securely.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
