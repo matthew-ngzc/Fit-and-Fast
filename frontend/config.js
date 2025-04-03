@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_API_URL || "http://3.106.54.221:8080";
+const API_BASE = process.env.REACT_APP_API_URL || "https://d1395qw3d2zwl6.cloudfront.net";
 const config = {
   API_URL: API_BASE,
   AUTH_URL: `${API_BASE}/api/auth`,
