@@ -22,6 +22,7 @@ type Message = {
   timestamp: Date;
   showActions?: boolean;
   workoutId?: string;
+  isLoading?: boolean;
 };
 
 interface WorkoutExercise {
@@ -100,11 +101,33 @@ export default function ChatPage() {
     setInputValue("");
     setLoading(true);
 
+    // Add loading message
+    const loadingMessageId = Date.now().toString() + "-loading";
+    setMessages(prev => [...prev, {
+      id: loadingMessageId,
+      content: "Thinking",
+      sender: "bot",
+      timestamp: new Date(),
+      isLoading: true
+    }]);
+
     try {
       const botResponse = await getBotResponse(inputValue);
-      setMessages((prev) => [...prev, botResponse]);
+      // Replace the loading message with the actual response
+      setMessages(prev => 
+        prev.filter(msg => msg.id !== loadingMessageId).concat(botResponse)
+      );
     } catch (error) {
       console.error("Error in handleSend:", error);
+      // Replace loading message with error message
+      setMessages(prev => 
+        prev.filter(msg => msg.id !== loadingMessageId).concat({
+          id: Date.now().toString(),
+          content: "Sorry, I'm having trouble connecting right now. Please try again later.",
+          sender: "bot",
+          timestamp: new Date(),
+        })
+      );
     } finally {
       setLoading(false);
     }
@@ -123,11 +146,33 @@ export default function ChatPage() {
     setMessages([...messages, userMessage]);
     setLoading(true);
 
+    // Add loading message
+    const loadingMessageId = Date.now().toString() + "-loading";
+    setMessages(prev => [...prev, {
+      id: loadingMessageId,
+      content: "Thinking",
+      sender: "bot",
+      timestamp: new Date(),
+      isLoading: true
+    }]);
+
     try {
       const botResponse = await getBotResponse(question);
-      setMessages((prev) => [...prev, botResponse]);
+      // Replace the loading message with the actual response
+      setMessages(prev => 
+        prev.filter(msg => msg.id !== loadingMessageId).concat(botResponse)
+      );
     } catch (error) {
       console.error("Error in handleQuickQuestion:", error);
+      // Replace loading message with error message
+      setMessages(prev => 
+        prev.filter(msg => msg.id !== loadingMessageId).concat({
+          id: Date.now().toString(),
+          content: "Sorry, I'm having trouble connecting right now. Please try again later.",
+          sender: "bot",
+          timestamp: new Date(),
+        })
+      );
     } finally {
       setLoading(false);
     }
@@ -149,6 +194,16 @@ export default function ChatPage() {
       };
       setMessages((prev) => [...prev, userMessage]);
       setLoading(true);
+
+      // Add loading message
+      const loadingMessageId = Date.now().toString() + "-loading";
+      setMessages(prev => [...prev, {
+        id: loadingMessageId,
+        content: "Processing your workout",
+        sender: "bot",
+        timestamp: new Date(),
+        isLoading: true
+      }]);
 
       try {
         const userId = localStorage.getItem("userId") || "default";
@@ -173,28 +228,30 @@ export default function ChatPage() {
         localStorage.removeItem("workout"); 
         localStorage.setItem("currentWorkout", JSON.stringify(data));
 
-        const confirmationMessage: Message = {
-          id: Date.now().toString(),
-          content: `Great! I've added this workout to your routine. Redirecting you to your personalised workout plan...`,
-          sender: "bot",
-          timestamp: new Date(),
-        };
-
-        setMessages((prev) => [...prev, confirmationMessage]);
+        // Remove loading message
+        setMessages(prev => 
+          prev.filter(msg => msg.id !== loadingMessageId).concat({
+            id: Date.now().toString(),
+            content: `Great! I've added this workout to your routine. Redirecting you to your personalised workout plan...`,
+            sender: "bot",
+            timestamp: new Date(),
+          })
+        );
+        
         setTimeout(() => {
           window.location.href = `/workout/${data.workoutId}`;
         }, 2000); 
       } catch (error) {
         console.error("Error saving workout:", error);
-        const errorMessage: Message = {
-          id: Date.now().toString(),
-          content:
-            "Sorry, there was an error saving your workout. Please try again later.",
-          sender: "bot",
-          timestamp: new Date(),
-        };
-
-        setMessages((prev) => [...prev, errorMessage]);
+        // Replace loading message with error message
+        setMessages(prev => 
+          prev.filter(msg => msg.id !== loadingMessageId).concat({
+            id: Date.now().toString(),
+            content: "Sorry, there was an error saving your workout. Please try again later.",
+            sender: "bot",
+            timestamp: new Date(),
+          })
+        );
       } finally {
         setLoading(false);
       }
@@ -225,7 +282,9 @@ export default function ChatPage() {
 
       const data = await response.json();
       const workoutData = data.workout;
-      saveWorkoutToLocalStorage(workoutData);
+      if (workoutData) {
+        saveWorkoutToLocalStorage(workoutData);
+      }
 
       const showActions = !!data.workout;
       const workoutId = data.workout?.workoutId?.toString() || "";
@@ -248,6 +307,15 @@ export default function ChatPage() {
       };
     }
   };
+
+  // Component for the typing indicator animation
+  const TypingIndicator = () => (
+    <div className="flex space-x-1">
+      <div className="dot-typing"></div>
+      <div className="dot-typing animation-delay-200"></div>
+      <div className="dot-typing animation-delay-400"></div>
+    </div>
+  );
 
   return (
     <div className="container px-4 py-6 md:py-10 max-w-2xl mx-auto flex flex-col h-[calc(100vh-80px)]">
@@ -301,7 +369,20 @@ export default function ChatPage() {
                         {message.sender === "bot" ? "FitBuddy" : "You"}
                       </span>
                     </div>
-                    <p className="whitespace-pre-line">{message.content}</p>
+                    <div className="whitespace-pre-line">
+                      {message.isLoading ? (
+                        <div className="flex items-center">
+                          <span>{message.content}</span>
+                          <span className="ml-1 inline-flex">
+                            <span className="animate-pulse">.</span>
+                            <span className="animate-pulse animation-delay-200">.</span>
+                            <span className="animate-pulse animation-delay-400">.</span>
+                          </span>
+                        </div>
+                      ) : (
+                        message.content
+                      )}
+                    </div>
 
                     {message.showActions && (
                       <div className="flex gap-2 mt-3 justify-end">
@@ -341,7 +422,7 @@ export default function ChatPage() {
           </div>
           <div className="flex w-full gap-2">
             <Input
-              placeholder={loading ? "Thinking..." : "Type your message..."}
+              placeholder={loading ? "Waiting for response..." : "Type your message..."}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => {
@@ -357,6 +438,27 @@ export default function ChatPage() {
           </div>
         </CardFooter>
       </Card>
+
+      {/* Add these CSS styles to your global stylesheet */}
+      <style jsx global>{`
+        @keyframes blink {
+          0% { opacity: 0.2; }
+          50% { opacity: 1; }
+          100% { opacity: 0.2; }
+        }
+        
+        .animation-delay-200 {
+          animation-delay: 0.2s;
+        }
+        
+        .animation-delay-400 {
+          animation-delay: 0.4s;
+        }
+        
+        .animate-pulse {
+          animation: blink 1.4s infinite both;
+        }
+      `}</style>
     </div>
   );
 }
