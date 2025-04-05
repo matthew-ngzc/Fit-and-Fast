@@ -2,7 +2,7 @@ package com.fastnfit.app.enums;
 
 public enum WorkoutGoal {
     GENERAL("general"),
-    WEIGHT_LOSS("weight loss"),
+    WEIGHT_LOSS("weight-loss"),
     STRENGTH_BUILDING("strength"),
     FLEXIBILITY("flexibility"),
     STRESS_RELIEF("stress-relief"),
