@@ -1,25 +1,72 @@
-# Fast-Fit
-Codebase for CS206 Project Fast&amp;Fit, an AI powered fitness app for busy women
+# Fit & Fast
 
-# To run backend
-1. Startup your wampserver, Setup databse in mySQL - create the schema called "fastnfit_app". Set the username and password both to "root". Details for the database can be found in "backend\src\main\resources\application-dev.properties". Set the username and password using this code in the mySQL workbench
-   
-      ALTER USER 'root'@'localhost' IDENTIFIED BY 'root';
-      FLUSH PRIVILEGES;
-   
+**Fit & Fast** is an AI-powered progressive web app (PWA) designed to empower **busy women** to achieve their fitness goals with quick, effective 7-minute workout routines. With a **mobile-first** approach and intelligent personalization features, Fit & Fast makes wellness accessible, adaptable, and sustainable.
 
-3. Store the openai api key in your environment variables. API key can be found in the pinned messages in the telegram group. Can do this by putting it into your OS env variables (only need to set up once), or each time you startup vscode use one of the following commands
-   
-      bash : export OPENAI_API_KEY=your_api_key_here
-      
-      cmd : set OPENAI_API_KEY=your_api_key_here
-      
-      powershell : $env:OPENAI_API_KEY="your_api_key_here"
+## 🚀 Platform
 
-4. mvn spring-boot:run "-Dspring-boot.run.profiles=dev" or ./mvnw spring-boot:run "-Dspring-boot.run.profiles=dev"
+Fit & Fast is built as a **Progressive Web App (PWA)** for a seamless experience across **web and mobile** devices. The PWA design ensures lightweight deployment while delivering responsive, app-like usability.
 
-# To run frontend
+🔗 **Live Site**: [https://fitnfast.vercel.app](https://fitnfast.vercel.app)
+
+---
+
+## ⚙️ Technical Overview
+
+- **Backend**: Java Spring Boot  
+  → Uses Spring Security for authentication and authorization  
+  → Integrated with **ChatGPT 4.0 API** for AI-powered fitness chatbot
+
+- **Frontend**: React  
+  → Developed with rapid prototyping using **v0.dev**
+
+- **Database**:  
+  - **Development**: MySQL  
+  - **Production**: Aiven Cloud
+
+- **Hosting**:  
+  - **Backend**: AWS EC2  
+  - **Frontend**: Vercel
+
+---
+
+## 💪 Key Features
+
+- **Tailored for Women**  
+  - Pre- and post-pregnancy workouts  
+  - Period cycle tracking to adjust intensity  
+  - Focused training for common problem areas
+
+- **AI-Powered Personalization**  
+  - Custom workouts based on user fitness level, time, energy, and preferences
+
+- **Sustainable Fitness**  
+  - Quick 7-minute workouts that easily fit into busy schedules
+
+---
+
+## 🧩 How to Run the Project
+
+### 📦 Backend
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+### 🖼 Frontend
+
+```bash
 npm install --legacy-peer-deps
 npm run dev
+```
 
-To integrate the APIS, call from config.js
+Or check the live site: 🌐 [https://fitnfast.vercel.app](https://fitnfast.vercel.app)
+
+---
+
+## 👥 Team Members
+
+- [Damien](https://github.com/ChewWaiMunDamien)  
+- [Matthew](https://github.com/matthew-ngzc)  
+- [QianYun](https://github.com/q1anyun)
+- [Shiv](https://github.com/shiv-iyer)
+- Champion
