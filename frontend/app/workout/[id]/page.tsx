@@ -177,11 +177,11 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
   const postWorkoutCompletion = async () => {
     try {
       const token = localStorage.getItem("token")
-
+  
       const requestBody = {
         workoutId: workout?.workoutId,
       }
-
+  
       const response = await fetch(`${config.PROGRESS_URL}/complete`, {
         method: "POST",
         headers: {
@@ -190,9 +190,23 @@ export default function WorkoutPage({ params }: { params: { id: string } }) {
         },
         body: JSON.stringify(requestBody),
       })
-
+  
       const data = await response.json()
-      setWorkoutCompletionData(data)
+ 
+      try {
+        const streakResponse = await axios.get(`${config.HOME_URL}/streak`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        setStreak(streakResponse.data.days)
+        
+        setWorkoutCompletionData(data)
+      } catch (error) {
+        console.error("Error fetching updated streak:", error)
+        setWorkoutCompletionData(data)
+      }
+      
     } catch (error) {
       console.error("Error posting workout completion data:", error)
     }
