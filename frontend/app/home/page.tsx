@@ -276,13 +276,23 @@ export default function HomePage() {
             <Card className="md:col-span-2">
               <CardHeader className="pb-2">
                 <CardTitle>Today's Recommendation</CardTitle>
-                <CardDescription>
-                  {cycleData.currentPhase === "Menstrual Phase"
-                    ? "Built to understand your body, even during your period"
-                    : "Based on your workout goals"}
-                </CardDescription>
               </CardHeader>
               <CardContent>
+                {cycleData.currentPhase === "Menstrual Phase" && (
+                  <div className="bg-pink-50 border border-pink-200 rounded-lg p-3 mb-3 flex items-center gap-2">
+                    <div className="bg-pink-100 rounded-full p-1.5">
+                      <Activity className="h-4 w-4 text-pink-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-pink-700">
+                        Menstrual Phase
+                      </p>
+                      <p className="text-xs text-pink-600">
+                        Low impact exercise suggested
+                      </p>
+                    </div>
+                  </div>
+                )}
                 <div className="bg-muted/50 rounded-lg p-4 flex flex-col md:flex-row gap-4 items-center">
                   <div className="bg-pink-100 rounded-full p-3">
                     <HeartIcon className="h-8 w-8 text-primary" />
