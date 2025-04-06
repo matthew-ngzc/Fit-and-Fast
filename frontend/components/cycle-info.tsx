@@ -47,7 +47,6 @@ export function CycleInfo({ cycleData }: CycleInfoProps) {
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
-  const today = new Date();
   let phaseColor = "bg-muted";
 
   switch (cycleData.currentPhase) {

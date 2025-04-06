@@ -58,6 +58,7 @@ export default function HomePage() {
   const [streak, setStreak] = useState<number>(0);
   const [username, setUsername] = useState("");
   const [workoutsData, setWorkoutsData] = useState<Workout[]>([]);
+  const [cycleData, setCycleData] = useState({ currentPhase: "" });
   const [recommendedWorkoutData, setRecommendedWorkoutData] = useState<{
     workoutId: number | null;
     title: string | null;
@@ -67,21 +68,25 @@ export default function HomePage() {
     calories: string | null;
   } | null>(null);
 
-
   const handleButtonClick = () => {
     // Check if recommendedWorkoutData is available and if workoutId is not null
-    if (!recommendedWorkoutData || !recommendedWorkoutData.workoutId || !recommendedWorkoutData.category) {
+    if (
+      !recommendedWorkoutData ||
+      !recommendedWorkoutData.workoutId ||
+      !recommendedWorkoutData.category
+    ) {
       return;
     }
-  
+
     // Access the array of workouts for the category
     const workoutCategory = workouts[recommendedWorkoutData.category];
-  
+
     if (workoutCategory && Array.isArray(workoutCategory)) {
-  
       // Find the workout within the array using the workoutId
-      const workout = workoutCategory.find(w => w.workoutId === recommendedWorkoutData.workoutId);
-  
+      const workout = workoutCategory.find(
+        (w) => w.workoutId === recommendedWorkoutData.workoutId
+      );
+
       if (workout) {
         // If workout is found, store it in localStorage
         localStorage.setItem("currentWorkout", JSON.stringify(workout));
@@ -90,6 +95,25 @@ export default function HomePage() {
     } else {
     }
   };
+
+  useEffect(() => {
+    async function fetchCycleData() {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${config.CALENDAR_URL}/cycle-info`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setCycleData(response.data);
+      } catch (error) {
+        console.error("Error fetching cycle data:", error);
+      }
+    }
+
+    fetchCycleData();
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -253,7 +277,9 @@ export default function HomePage() {
               <CardHeader className="pb-2">
                 <CardTitle>Today's Recommendation</CardTitle>
                 <CardDescription>
-                  Based on your cycle and preferences
+                  {cycleData.currentPhase === "Menstrual Phase"
+                    ? "Built to understand your body, even during your period"
+                    : "Based on your workout goals"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
