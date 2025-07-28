@@ -4,7 +4,7 @@ WORKDIR /workspace/app
 COPY mvnw .
 COPY .mvn .mvn
 COPY pom.xml .
-COPY .env .env
+#COPY .env .env
 COPY src src
 
 # For Windows compatibility
