@@ -12,7 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.fastnfit.app.config.AwsConfig;
+//import com.fastnfit.app.config.AwsConfig;
 import com.fastnfit.app.config.DotenvBootstrap;
 import com.fastnfit.app.config.JwtConfig;
 

@@ -2,7 +2,7 @@ package com.fastnfit.app.UnitTests;
 
 //./mvnw test "-Dtest=ChatbotControllerTest"
 
-import com.fastnfit.app.config.AwsConfig;
+//import com.fastnfit.app.config.AwsConfig;
 import com.fastnfit.app.config.JwtConfig;
 import com.fastnfit.app.controller.ChatbotController;
 import com.fastnfit.app.dto.ChatbotResponseDTO;
@@ -69,8 +69,8 @@ public class ChatbotControllerTest {
     @MockBean
     private JwtService jwtService;
 
-    @MockBean
-    private AwsConfig awsConfig;
+    // @MockBean
+    // private AwsConfig awsConfig;
 
     private UserDetailsDTO mockUserDetails;
 
