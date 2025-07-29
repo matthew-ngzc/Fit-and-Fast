@@ -22,7 +22,7 @@ public class ChatHistory {
 
     private String role;     // "user" or "assistant"
 
-    @Column(name = "content", columnDefinition = "LONGTEXT")
+    @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
     private LocalDateTime timestamp;
