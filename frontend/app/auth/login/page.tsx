@@ -36,6 +36,8 @@ export default function LoginPage() {
       setIsLoading(true);
       setError(""); 
 
+      console.log("Login URL:", `${config.AUTH_URL}/login`);
+
       const response = await axios.post(`${config.AUTH_URL}/login`, {
         email,
         password,

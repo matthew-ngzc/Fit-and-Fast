@@ -1,4 +1,4 @@
-const API_BASE = process.env.REACT_APP_API_URL || "https://d1395qw3d2zwl6.cloudfront.net";
+const API_BASE = process.env.REACT_APP_API_URL || "https://fit-and-fast.onrender.com";
 const config = {
   API_URL: API_BASE,
   AUTH_URL: `${API_BASE}/api/auth`,
