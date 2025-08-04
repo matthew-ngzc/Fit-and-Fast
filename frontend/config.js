@@ -1,4 +1,5 @@
-const API_BASE = process.env.REACT_APP_API_URL || "https://fit-and-fast.onrender.com";
+const API_BASE =
+  process.env.REACT_APP_API_URL || "https://fit-and-fast-u922.onrender.com";
 const config = {
   API_URL: API_BASE,
   AUTH_URL: `${API_BASE}/api/auth`,
@@ -9,7 +10,7 @@ const config = {
   USER_URL: `${API_BASE}/api/users`,
   PROFILE_URL: `${API_BASE}/api/profile`,
   WORKOUT_URL: `${API_BASE}/api/workouts`,
-  PROGRESS_URL: `${API_BASE}/api/workout-progress`
+  PROGRESS_URL: `${API_BASE}/api/workout-progress`,
 };
 
 export default config;
