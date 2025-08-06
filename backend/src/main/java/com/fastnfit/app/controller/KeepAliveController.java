@@ -26,6 +26,7 @@ public class KeepAliveController {
             jdbcTemplate.queryForObject("SELECT 1", Integer.class);
             return new ResponseEntity<>("Neon DB pinged successfully.", headers, HttpStatus.OK);
         } catch (Exception e) {
+            System.err.println("DB keep-alive error: " + e.getMessage());
             return new ResponseEntity<>("Error pinging Neon DB: " + e.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
