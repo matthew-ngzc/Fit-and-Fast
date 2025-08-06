@@ -19,7 +19,7 @@ public class KeepAliveController {
     private JdbcTemplate jdbcTemplate;
 
     @GetMapping
-    public String keepAlive() {
+    public ResponseEntity<String> keepAlive() {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "text/plain; charset=UTF-8");
         try {
