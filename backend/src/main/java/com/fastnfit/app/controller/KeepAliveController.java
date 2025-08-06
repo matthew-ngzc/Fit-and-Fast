@@ -7,6 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 @RestController
 @RequestMapping("/keep-alive")
 public class KeepAliveController {
@@ -16,11 +20,13 @@ public class KeepAliveController {
 
     @GetMapping
     public String keepAlive() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Type", "text/plain; charset=UTF-8");
         try {
             jdbcTemplate.queryForObject("SELECT 1", Integer.class);
-            return "Neon DB pinged successfully.";
+            return new ResponseEntity<>("Neon DB pinged successfully.", headers, HttpStatus.OK);
         } catch (Exception e) {
-            return "Error pinging Neon DB: " + e.getMessage();
+            return new ResponseEntity<>("Error pinging Neon DB: " + e.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     @GetMapping("/check_connection")
