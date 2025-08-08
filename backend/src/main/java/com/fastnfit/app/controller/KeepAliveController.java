@@ -24,11 +24,19 @@ public class KeepAliveController {
         headers.add("Content-Type", "text/plain; charset=UTF-8");
         try {
             jdbcTemplate.queryForObject("SELECT 1", Integer.class);
+            jdbcTemplate.update("INSERT INTO keep_alive_log (ok, message) VALUES (?, ?)",
+                    true, "Neon DB pinged successfully.");
             return new ResponseEntity<>("Neon DB pinged successfully.", headers, HttpStatus.OK);
         } catch (Exception e) {
             System.err.println("DB keep-alive error: " + e.getMessage());
+            jdbcTemplate.update("INSERT INTO keep_alive_log (ok, message) VALUES (?, ?)",
+                                false, truncate(e.getMessage(), 8000));
             return new ResponseEntity<>("Error pinging Neon DB: " + e.getMessage(), headers, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private String truncate(String s, int max) {
+    return (s != null && s.length() > max) ? s.substring(0, max) : s;
     }
     @GetMapping("/check_connection")
     public String checkConnection() {
