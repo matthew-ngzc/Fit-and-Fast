@@ -6,7 +6,7 @@
 
 Fit & Fast is built as a **Progressive Web App (PWA)** for a seamless experience across **web and mobile** devices. The PWA design ensures lightweight deployment while delivering responsive, app-like usability.
 
-🔗 **Live Site**: [https://fitnfast.vercel.app](https://fitnfast.vercel.app)
+🔗 **Live Site**: [https://fitnfast.matthewngg.com](https://fitnfast.matthewngg.com)
 
 ---
 
@@ -59,7 +59,7 @@ npm install --legacy-peer-deps
 npm run dev
 ```
 
-Or check the live site: 🌐 [https://fitnfast.vercel.app](https://fitnfast.vercel.app)
+Or check the live site: 🌐 [https://fitnfast.matthewngg.com](https://fitnfast.matthewngg.com)
 
 ---
 
